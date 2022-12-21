@@ -75,7 +75,7 @@ std::unordered_map<int,int>epochTaskDict = {
 {1691366400,1},
 {1672099200,1}, //2022.12.27
 {1672444800,3}, //2022.12.31
-{1671494400,1}, //dummy
+{1671580800,1}, //dummy
 };
 const String task[] = {"Altpapier-Tonne in Hirrlingen", "Gelber Sack in Hirrlingen", "Häckselgut in Hirrlingen", "Restmüll in Hirrlingen"};
 //         yellow, green, white
@@ -83,20 +83,36 @@ const int color[] = {0x0000FF, 0xFFFF00, 0x00FF00, 0xFFFFFF };
 const int validIndex[] = {0,1,2,3};
 int startTime = 15*60*60; //seconds => 15 Uhr
 int endTime = (24+8)*60*60; //seconds => nächster Tag 8 Uhr morgens
+int taskIdLast = -1;
+int brightness = 0;
+int fadeAmount = 5;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
+int showDuration = 5000; //ms
+unsigned long millisLast = 0;
+
+#define STATE_INIT 0
+#define STATE_SHOW 1
+#define STATE_QUERY 2
+int STATE = STATE_INIT;
 
 #include <FastLED.h>
 #define NUM_LEDS 1
 #define DATA_PIN 4 //D2
+#define BRIGHTNESS          96
+#define FRAMES_PER_SECOND  120
 CRGB leds[NUM_LEDS];
+uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
-
+int nowEpoch = 0;
+int queryIntervall = 60000; //ms => every minute (could be less, however to really turn on LED at intended time...) 
+unsigned long lastQueryMillis = 0;
+ 
 void setup() {
   // Initialize Serial Monitor
   Serial.begin(115200);
-  FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is typical
+  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is typical
    WiFiManager wm; 
 //   wm.resetSettings();
    if(wm.autoConnect("TrashReminder")){
@@ -109,10 +125,42 @@ void setup() {
 }
 
 void loop() {
+  handleState();
+}
+
+void handleState(){
+  unsigned long millisNow = millis();
+  switch (STATE) {
+    case STATE_INIT:                //0 ***********************************************************
+      millisLast = millisNow;
+      STATE = STATE_SHOW;
+      break;
+    case STATE_SHOW:                //1 ***********************************************************
+      rainbowWithGlitter();
+      FastLED.show();  
+      // insert a delay to keep the framerate modest
+      FastLED.delay(1000/FRAMES_PER_SECOND); 
+      // do some periodic updates
+      EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
+      if((millisNow-millisLast) > showDuration){STATE = STATE_QUERY;}
+      break;
+    case STATE_QUERY:               //2 ***********************************************************
+      if(((millisNow-lastQueryMillis) > queryIntervall) || (lastQueryMillis == 0)){
+        nowEpoch = getCurrentTimeEpoch();
+        Serial.println("Received current epoch time: " + String(nowEpoch));
+        lastQueryMillis = millisNow;
+      } 
+      handleLed(nowEpoch); 
+//      testLeds();
+      break;  
+    default:
+      break;
+  }    
+}
+
+int getCurrentTimeEpoch(){
   timeClient.update();
-  int nowEpoch = timeClient.getEpochTime();
-//  handleLed(nowEpoch);
-  testLeds();
+  return(timeClient.getEpochTime());
 }
 
 void handleLed(int nowEpoch){
@@ -123,25 +171,68 @@ void handleLed(int nowEpoch){
 //    Serial.println("now: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch+startTime)+ ", dictEpoch+endTime = " + String(dictEpoch+endTime));
     if((nowEpoch > dictEpoch+startTime) && (nowEpoch < dictEpoch+endTime)){
       taskId = entry.second;
-      if()
     }    
   }
+  setColor(taskId);
+  FastLED.show();
+}
+
+void setBrightness(int taskId){
+  if(taskId != taskIdLast){
+      brightness = 0;
+      taskIdLast = taskId;
+    }
+    leds[0].fadeLightBy(brightness);
+    brightness = brightness + fadeAmount;
+    if(brightness<0){brightness = 0;}
+    if(brightness>255){brightness = 255;}    
+//    Serial.println("Brightness = " + String(brightness) + ", ColorIndex = " + String(taskId));
+    if(brightness <= 0 || brightness >= 255){fadeAmount = -fadeAmount;} 
+    delay(20);   
+}
+
+void setColor(int taskId){
   if(taskId != -1){
-    Serial.println("Event: " + task[taskId] + " => LED = " + String(color[taskId]));
+    // EVENT
+//    Serial.println("Event: " + task[taskId] + " => LED = " + String(color[taskId],HEX));
     leds[0] = color[taskId];
+    setBrightness(taskId);  
   } else {
     Serial.println("No Event");
     leds[0] = CRGB::Black;
   }
-  FastLED.show();
-  delay(60000); // 1 minute
 }
 
+/// DEBUG
 int taskId=0;
+int intervall = 8000;
 void testLeds(){
-  taskId++;
-  if(taskId>3) taskId=0;
-  leds[0] = color[taskId]; 
+  if((millis()-millisLast) > intervall){
+    taskId++;
+    if(taskId>3) taskId=0;
+    millisLast = millis();
+  }
+  setColor(taskId);
   FastLED.show();
-  delay(5000);
+}
+
+/// Splash Screen
+void rainbow() 
+{
+  // FastLED's built-in rainbow generator
+  fill_rainbow( leds, NUM_LEDS, gHue, 7);
+}
+
+void rainbowWithGlitter() 
+{
+  // built-in FastLED rainbow, plus some random sparkly glitter
+  rainbow();
+  addGlitter(80);
+}
+
+void addGlitter( fract8 chanceOfGlitter) 
+{
+  if( random8() < chanceOfGlitter) {
+    leds[ random16(NUM_LEDS) ] += CRGB::White;
+  }
 }
