@@ -113,6 +113,15 @@ int STATE = STATE_INIT;
 CRGB leds[NUM_LEDS];
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 
+//Switch
+#include <Button.h>
+#define REED_PIN 5 //D1
+Button reed(REED_PIN, LOW, BTN_PULLUP, LATCHING);
+
+int acknowledge = 0;
+int triggerEpoch = 0;
+int initialized = 0; //in order to prevent acknowledge to be triggered at the beginning
+
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
@@ -123,6 +132,7 @@ unsigned long lastQueryMillis = 0;
 void setup() {
   // Initialize Serial Monitor
   Serial.begin(115200);
+  reed.attachEdgeDetect(doNothing, setAcknowledge);
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is typical
    WiFiManager wm; 
 //   wm.resetSettings();
@@ -162,6 +172,7 @@ void handleState(){
         lastQueryMillis = millisNow;
       } 
       handleLed(nowEpoch); 
+      handleReed();
 //      testLeds();
       break;  
     default:
@@ -181,11 +192,35 @@ void handleLed(int nowEpoch){
     dictEpoch = entry.first;
 //    Serial.println("now: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch+startTime)+ ", dictEpoch+endTime = " + String(dictEpoch+endTime));
     if((nowEpoch > dictEpoch+startTime) && (nowEpoch < dictEpoch+endTime)){
-      taskId = entry.second;
+      if(dictEpoch != triggerEpoch){
+        acknowledge = 0; //acknowledge only valid for same triggerEpoch
+        Serial.println("Resetting since new trigger!");
+      } 
+      triggerEpoch = dictEpoch;
+      if(!acknowledge){
+        taskId = entry.second;
+      }
     }    
   }
   setColor(taskId);
   FastLED.show();
+}
+
+void handleReed(){
+  reed.update();  
+  initialized = true;
+}
+
+void setAcknowledge(){
+  if(initialized){
+    Serial.println("OFF - Acknowedge!");
+    acknowledge = 1;
+  }  
+}
+
+void doNothing(){
+  Serial.println("ON");
+  true;  
 }
 
 void setBrightness(int taskId){
@@ -209,7 +244,7 @@ void setColor(int taskId){
     leds[0] = color[taskId];
     setBrightness(taskId);  
   } else {
-    Serial.println("No Event");
+//    Serial.println("No Event");
     leds[0] = CRGB::Black;
   }
 }
