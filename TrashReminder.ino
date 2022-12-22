@@ -86,13 +86,14 @@ std::unordered_map<int,int>epochTaskDict = {
 {1691366400,1},
 {1672099200,1}, //2022.12.27
 {1672444800,3}, //2022.12.31
-{1671580800,1}, //dummy
+{1671753600,3}, //dummy
+{1671840000,2}, //dummy
 };
 const String task[] = {"Altpapier-Tonne in Hirrlingen", "Gelber Sack in Hirrlingen", "Häckselgut in Hirrlingen", "Restmüll in Hirrlingen"};
 //         yellow, green, white
 const int color[] = {0x0000FF, 0xFFFF00, 0x00FF00, 0xFFFFFF };
 const int validIndex[] = {0,1,2,3};
-int startTime = 15*60*60; //seconds => 15 Uhr
+int startTime = 11*60*60; //seconds => 15 Uhr
 int endTime = (24+8)*60*60; //seconds => nächster Tag 8 Uhr morgens
 int taskIdLast = -1;
 int brightness = 0;
@@ -104,14 +105,16 @@ unsigned long millisLast = 0;
 #define STATE_SHOW 1
 #define STATE_DISCONNECTED 2
 #define STATE_QUERY 3
+#define STATE_CONFIGURE 4
+
 int STATE = STATE_INIT;
 int STATE_PREVIOUS = -1;
-String stateTbl[] = {"STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY"};
+String stateTbl[] = {"STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY", "STATE_CONFIGURE"};
 
 #include <FastLED.h>
 #define NUM_LEDS 1
 #define DATA_PIN 4 //D2
-#define BRIGHTNESS          96
+#define BRIGHTNESS         254
 #define FRAMES_PER_SECOND  120
 CRGB leds[NUM_LEDS];
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
@@ -120,6 +123,9 @@ uint8_t gHue = 0; // rotating "base color" used by many of the patterns
 #include <Button.h>
 #define REED_PIN 5 //D1
 Button reed(REED_PIN, LOW, BTN_PULLUP, LATCHING);
+int switchCounter = 0;
+int multiClickTimeout = 1000; //ms
+unsigned long lastSwitchMillis = 0;
 
 int acknowledge = 0;
 int triggerEpoch = 0;
@@ -139,7 +145,8 @@ void setup() {
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is typical
   leds[0] = CRGB::Red;
   FastLED.show();
-   WiFiManager wm; 
+  WiFi.hostname("TrashReminder");
+  WiFiManager wm; 
 //   wm.resetSettings();
    if(wm.autoConnect("TrashReminder")){
      Serial.println("Successfully connected.");     
@@ -160,6 +167,8 @@ void handleState(){
   switch (STATE) {
     case STATE_INIT:                //***********************************************************
       millisLast = millisNow;
+      brightness = 0;
+      acknowledge = 0;
       STATE = STATE_SHOW;
       break;
     case STATE_SHOW:                //***********************************************************
@@ -172,9 +181,7 @@ void handleState(){
       if((millisNow-millisLast) > showDuration){STATE = STATE_QUERY;}
       break;
     case STATE_DISCONNECTED:        //***********************************************************
-      leds[0] = CRGB::Red;
-      setBrightness(100);
-      FastLED.show();
+      setFadeColor(CRGB::Red);
       if(WiFi.isConnected()){STATE = STATE_INIT;}
       break;  
     case STATE_QUERY:               //***********************************************************
@@ -187,11 +194,21 @@ void handleState(){
       handleReed();
       handleConnection();
 //      testLeds();
-      break;  
+      break; 
+    case STATE_CONFIGURE:
+      setFadeColor(CRGB::Purple);
+      handleReed();
+      break;       
     default:
       break;
   }   
   STATE_PREVIOUS = STATE; 
+}
+
+void setFadeColor(int color){
+  leds[0] = color;
+  setBrightness(color); //usually index
+  FastLED.show();
 }
 
 void handleConnection(){
@@ -212,7 +229,7 @@ void handleLed(int nowEpoch){
   for (auto entry :epochTaskDict)  {
     dictEpoch = entry.first;
 //    Serial.println("now: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch+startTime)+ ", dictEpoch+endTime = " + String(dictEpoch+endTime));
-    if((nowEpoch > dictEpoch+startTime) && (nowEpoch < dictEpoch+endTime)){
+    if((nowEpoch > dictEpoch-24*60*60+startTime) && (nowEpoch < dictEpoch-24*60*60+endTime)){
       if(dictEpoch != triggerEpoch){
         acknowledge = 0; //acknowledge only valid for same triggerEpoch
         Serial.println("Resetting since new trigger!");
@@ -233,9 +250,22 @@ void handleReed(){
 }
 
 void setAcknowledge(){
+  unsigned long now = millis();
   if(initialized){
     Serial.println("OFF - Acknowedge!");
     acknowledge = 1;
+    //Multi-click detection
+    switchCounter++;
+    if(((now-lastSwitchMillis)>multiClickTimeout) || (lastSwitchMillis == 0)){switchCounter=0;}
+    Serial.println("Counter = " + String(switchCounter));
+    lastSwitchMillis = now;
+    if(switchCounter == 2){
+      if(STATE == STATE_CONFIGURE){
+        STATE = STATE_INIT; //reset
+      } else {
+        STATE = STATE_CONFIGURE;
+      }
+    }
   }  
 }
 
@@ -248,14 +278,14 @@ void setBrightness(int taskId){
   if(taskId != taskIdLast){
       brightness = 0;
       taskIdLast = taskId;
-    }
-    leds[0].fadeLightBy(brightness);
-    brightness = brightness + fadeAmount;
-    if(brightness<0){brightness = 0;}
-    if(brightness>255){brightness = 255;}    
+  }
+  leds[0].fadeLightBy(brightness);
+  brightness = brightness + fadeAmount;
+  if(brightness<0){brightness = 0;}
+  if(brightness>255){brightness = 255;}    
 //    Serial.println("Brightness = " + String(brightness) + ", ColorIndex = " + String(taskId));
-    if(brightness <= 0 || brightness >= 255){fadeAmount = -fadeAmount;} 
-    delay(20);   
+  if(brightness <= 0 || brightness >= 255){fadeAmount = -fadeAmount;} 
+  delay(20);   
 }
 
 void setColor(int taskId){
