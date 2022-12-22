@@ -126,7 +126,7 @@ int colorIdsLast[] = {-1,-1,-1};
 int numberOfColorIds = sizeof(colorIds)/sizeof(colorIds[0]);
 int colorIndex = 0; //used to toggle between multiple colors if required
 
-int startTime = 11*60*60; //seconds => 15 Uhr
+int startTime = 15*60*60; //seconds => 15 Uhr
 int endTime = (24+8)*60*60; //seconds => nächster Tag 8 Uhr morgens
 int taskIdLast = -1;
 int brightness = 255;
