@@ -102,8 +102,11 @@ unsigned long millisLast = 0;
 
 #define STATE_INIT 0
 #define STATE_SHOW 1
-#define STATE_QUERY 2
+#define STATE_DISCONNECTED 2
+#define STATE_QUERY 3
 int STATE = STATE_INIT;
+int STATE_PREVIOUS = -1;
+String stateTbl[] = {"STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY"};
 
 #include <FastLED.h>
 #define NUM_LEDS 1
@@ -134,6 +137,8 @@ void setup() {
   Serial.begin(115200);
   reed.attachEdgeDetect(doNothing, setAcknowledge);
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is typical
+  leds[0] = CRGB::Red;
+  FastLED.show();
    WiFiManager wm; 
 //   wm.resetSettings();
    if(wm.autoConnect("TrashReminder")){
@@ -151,12 +156,13 @@ void loop() {
 
 void handleState(){
   unsigned long millisNow = millis();
+  if(STATE != STATE_PREVIOUS) {Serial.println("STATE = " + stateTbl[STATE]);}
   switch (STATE) {
-    case STATE_INIT:                //0 ***********************************************************
+    case STATE_INIT:                //***********************************************************
       millisLast = millisNow;
       STATE = STATE_SHOW;
       break;
-    case STATE_SHOW:                //1 ***********************************************************
+    case STATE_SHOW:                //***********************************************************
       rainbowWithGlitter();
       FastLED.show();  
       // insert a delay to keep the framerate modest
@@ -165,7 +171,13 @@ void handleState(){
       EVERY_N_MILLISECONDS( 20 ) { gHue++; } // slowly cycle the "base color" through the rainbow
       if((millisNow-millisLast) > showDuration){STATE = STATE_QUERY;}
       break;
-    case STATE_QUERY:               //2 ***********************************************************
+    case STATE_DISCONNECTED:        //***********************************************************
+      leds[0] = CRGB::Red;
+      setBrightness(100);
+      FastLED.show();
+      if(WiFi.isConnected()){STATE = STATE_INIT;}
+      break;  
+    case STATE_QUERY:               //***********************************************************
       if(((millisNow-lastQueryMillis) > queryIntervall) || (lastQueryMillis == 0)){
         nowEpoch = getCurrentTimeEpoch();
         Serial.println("Received current epoch time: " + String(nowEpoch));
@@ -173,11 +185,20 @@ void handleState(){
       } 
       handleLed(nowEpoch); 
       handleReed();
+      handleConnection();
 //      testLeds();
       break;  
     default:
       break;
-  }    
+  }   
+  STATE_PREVIOUS = STATE; 
+}
+
+void handleConnection(){
+  if(!WiFi.isConnected()){
+    Serial.println("Connection lost!");
+    STATE = STATE_DISCONNECTED;
+  } 
 }
 
 int getCurrentTimeEpoch(){
