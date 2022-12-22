@@ -178,7 +178,7 @@ void incrementColorId(){
   }
 }
 
-void setBrightness(boolean reset = false){
+void setBrightness(int blinkSpeed=20, boolean reset=false){
   if(reset){
     brightness = 255;
   } else {
@@ -192,7 +192,7 @@ void setBrightness(boolean reset = false){
   if(brightness>=255){brightness = 255; incrementColorId();}    
 //    Serial.println("Brightness = " + String(brightness) + ", ColorIndex = " + String(taskId));
   if(brightness <= 0 || brightness >= 255){fadeAmount = -fadeAmount;} 
-  delay(20);   
+  delay(blinkSpeed);   
 }
 
 void setTaskColor(){
@@ -209,9 +209,9 @@ void setTaskColor(){
   }
 }
 
-void setColor(int color, boolean fade = true){
+void setColor(int color, boolean fade = true, int blinkSpeed=20){
   leds[0] = color;
-  if(fade){setBrightness();}
+  if(fade){setBrightness(blinkSpeed);}
   FastLED.show();
 }
 
@@ -257,7 +257,7 @@ void handleState(){
       if((millisNow-millisLast) > showDuration){STATE = STATE_QUERY;}
       break;
     case STATE_DISCONNECTED:        //***********************************************************
-      setColor(CRGB::Red);
+      setColor(CRGB::Red, true, 2);
       if(WiFi.isConnected()){STATE = STATE_INIT;}
       break;  
     case STATE_QUERY:               //***********************************************************
