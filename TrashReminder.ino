@@ -16,8 +16,8 @@ Todo:
 #include <credentials.h>
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 
-std::unordered_map<int,int>epochTaskDict = {
-{1685750400,3},
+std::unordered_map<int,String>epochTaskDict = {
+/*{1685750400,3},
 {1686873600,3},
 {1695600000,0},
 {1682035200,3},
@@ -86,8 +86,9 @@ std::unordered_map<int,int>epochTaskDict = {
 {1691366400,1},
 {1672099200,1}, //2022.12.27
 {1672444800,3}, //2022.12.31
-{1671753600,3}, //dummy
-{1671840000,2}, //dummy
+*/
+{1671753600,"3"}, //dummy
+{1671840000,"2,1"}, //dummy
 };
 const String task[] = {"Altpapier-Tonne in Hirrlingen", "Gelber Sack in Hirrlingen", "Häckselgut in Hirrlingen", "Restmüll in Hirrlingen"};
 //         yellow, green, white
@@ -225,7 +226,7 @@ int getCurrentTimeEpoch(){
 
 void handleLed(int nowEpoch){
   int dictEpoch;
-  int taskId = -1;
+  String taskId = "-1";
   for (auto entry :epochTaskDict)  {
     dictEpoch = entry.first;
 //    Serial.println("now: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch+startTime)+ ", dictEpoch+endTime = " + String(dictEpoch+endTime));
@@ -236,6 +237,8 @@ void handleLed(int nowEpoch){
       } 
       triggerEpoch = dictEpoch;
       if(!acknowledge){
+//        for (int i=0; i<sizeof arr/sizeof arr[0]; i++) {
+//        int s = arr[i];
         taskId = entry.second;
       }
     }    
@@ -288,10 +291,11 @@ void setBrightness(int taskId){
   delay(20);   
 }
 
-void setColor(int taskId){
-  if(taskId != -1){
+void setColor(String taskId){
+  if(taskId != "-1"){
     // EVENT
 //    Serial.println("Event: " + task[taskId] + " => LED = " + String(color[taskId],HEX));
+    
     leds[0] = color[taskId];
     setBrightness(taskId);  
   } else {
