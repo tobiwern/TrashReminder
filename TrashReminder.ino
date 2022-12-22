@@ -86,13 +86,13 @@ std::unordered_map<int,int>epochTaskDict = {
 {1691366400,1},
 {1672099200,1}, //2022.12.27
 {1672444800,3}, //2022.12.31
-{1671580800,1}, //dummy
+{1671753600,1}, //dummy
 };
 const String task[] = {"Altpapier-Tonne in Hirrlingen", "Gelber Sack in Hirrlingen", "Häckselgut in Hirrlingen", "Restmüll in Hirrlingen"};
 //         yellow, green, white
 const int color[] = {0x0000FF, 0xFFFF00, 0x00FF00, 0xFFFFFF };
 const int validIndex[] = {0,1,2,3};
-int startTime = 15*60*60; //seconds => 15 Uhr
+int startTime = 11*60*60; //seconds => 15 Uhr
 int endTime = (24+8)*60*60; //seconds => nächster Tag 8 Uhr morgens
 int taskIdLast = -1;
 int brightness = 0;
@@ -211,8 +211,8 @@ void handleLed(int nowEpoch){
   int taskId = -1;
   for (auto entry :epochTaskDict)  {
     dictEpoch = entry.first;
-//    Serial.println("now: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch+startTime)+ ", dictEpoch+endTime = " + String(dictEpoch+endTime));
-    if((nowEpoch > dictEpoch+startTime) && (nowEpoch < dictEpoch+endTime)){
+    Serial.println("now: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch+startTime)+ ", dictEpoch+endTime = " + String(dictEpoch+endTime));
+    if((nowEpoch > dictEpoch-24*60*60+startTime) && (nowEpoch < dictEpoch-24*60*60+endTime)){
       if(dictEpoch != triggerEpoch){
         acknowledge = 0; //acknowledge only valid for same triggerEpoch
         Serial.println("Resetting since new trigger!");
