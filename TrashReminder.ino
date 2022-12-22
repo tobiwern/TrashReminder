@@ -86,14 +86,14 @@ std::unordered_map<int,int>epochTaskDict = {
 {1691366400,1},
 {1672099200,1}, //2022.12.27
 {1672444800,3}, //2022.12.31
-{1671753600,2}, //dummy
+{1671753600,3}, //dummy
 {1671840000,2}, //dummy
 };
 const String task[] = {"Altpapier-Tonne in Hirrlingen", "Gelber Sack in Hirrlingen", "Häckselgut in Hirrlingen", "Restmüll in Hirrlingen"};
 //         yellow, green, white
 const int color[] = {0x0000FF, 0xFFFF00, 0x00FF00, 0xFFFFFF };
 const int validIndex[] = {0,1,2,3};
-int startTime = 15*60*60; //seconds => 15 Uhr
+int startTime = 11*60*60; //seconds => 15 Uhr
 int endTime = (24+8)*60*60; //seconds => nächster Tag 8 Uhr morgens
 int taskIdLast = -1;
 int brightness = 0;
@@ -114,7 +114,7 @@ String stateTbl[] = {"STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QU
 #include <FastLED.h>
 #define NUM_LEDS 1
 #define DATA_PIN 4 //D2
-#define BRIGHTNESS          96
+#define BRIGHTNESS         254
 #define FRAMES_PER_SECOND  120
 CRGB leds[NUM_LEDS];
 uint8_t gHue = 0; // rotating "base color" used by many of the patterns
@@ -167,6 +167,7 @@ void handleState(){
   switch (STATE) {
     case STATE_INIT:                //***********************************************************
       millisLast = millisNow;
+      brightness = 0;
       acknowledge = 0;
       STATE = STATE_SHOW;
       break;
