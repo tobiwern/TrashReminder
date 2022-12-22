@@ -53,14 +53,14 @@ int switchCounter = 0;
 int multiClickTimeout = 1000; //ms
 unsigned long lastSwitchMillis = 0;
 
-int acknowledge = 0;
-int triggerEpoch = 0;
+int acknowledge = 0; //turn off reminder light when the Mülleimer is lupft
+int triggerEpoch = 0; //used to detect if the epochDict is changing => reset acknowledge
 int initialized = 0; //in order to prevent acknowledge to be triggered at the beginning
 
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
-int nowEpoch = 0;
+int nowEpoch = 0; //global since only querying every minute
 int queryIntervall = 60000; //ms => every minute (could be less, however to really turn on LED at intended time...) 
 unsigned long lastQueryMillis = 0;
  
@@ -69,11 +69,11 @@ void setup() {
   Serial.begin(115200);
   reed.attachEdgeDetect(doNothing, setAcknowledge);
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is typical
-  leds[0] = CRGB::Red;
+  leds[0] = CRGB::Red; //in case no successful WiFi connection
   FastLED.show();
   WiFi.hostname("TrashReminder");
   WiFiManager wm; 
-//   wm.resetSettings();
+//  wm.resetSettings();
    if(wm.autoConnect("TrashReminder")){
      Serial.println("Successfully connected.");     
    } else {
@@ -212,19 +212,6 @@ void setTaskColor(){
 void setColor(int color, boolean fade = true){
   leds[0] = color;
   if(fade){setBrightness();}
-  FastLED.show();
-}
-
-/// DEBUG
-int taskId=0;
-int intervall = 8000;
-void testLeds(){
-  if((millis()-millisLast) > intervall){
-    taskId++;
-    if(taskId>3) taskId=0;
-    millisLast = millis();
-  }
-  setTaskColor();
   FastLED.show();
 }
 
