@@ -15,17 +15,16 @@ Todo:
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
 #include "data.h"
 
-int colorIds[] = {-1,-1,-1}; //allow max three tasks on the same day
+int colorIds[]     = {-1,-1,-1}; //allow max three tasks on the same day
 int colorIdsLast[] = {-1,-1,-1};
 int numberOfColorIds = sizeof(colorIds)/sizeof(colorIds[0]);
-int colorIndex = 0; //used to toggle between multiple colors if required
+int colorIndex = 0; //used to toggle between multiple colors for same day tasks
 
 int startTime = 15*60*60; //seconds => 15 Uhr
 int endTime = (24+8)*60*60; //seconds => nächster Tag 8 Uhr morgens
-int taskIdLast = -1;
-int brightness = 255;
-int fadeAmount = 5;  // Set the amount to fade I usually do 5, 10, 15, 20, 25 etc even up to 255.
-int showDuration = 5000; //ms
+int brightness = 255; //highest value since used to fadeBy...
+int fadeAmount = 5;  // Set the amount to fade to 5, 10, 15, 20, 25 etc even up to 255.
+int showDuration = 5000; //ms Splash screen
 unsigned long millisLast = 0;
 
 #define STATE_INIT 0
