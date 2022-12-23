@@ -24,7 +24,7 @@ Wenn der Müll rausgestellt wurde, kann die Erinnerung ausgeschaltet werden inde
 
 Wurde das Mülleimermodell versehentlich angehoben (aber der Müll nicht rausgestellt) kann man den Stecker der Stromversorgung einfach kurz aus- und wieder einstecken. Liegt eine Erinnerung vor und ist man im Erinnerungszeitraum (15 - 8 Uhr) blinkt das Mülleimermodell wieder wie zuvor.  
 
-## Einrichten der `Müll-Erinnerung`
+## Einrichten der Müll-Erinnerung
 Da das aktuelle Datum und Uhrzeit aus dem Internet ermittelt werden, muss die `Müll-Erinnerung` mit dem WLAN verbunden werden.
 
 Wenn die `Müll-Erinnerung` zum ersten mal ans Netzteil angeschlossen wird, leuchetet das Mülleimermodell dauerhaft `rot` um mitzuteilen, dass die einmalige Einrichtung durchgeführt werden muss.
