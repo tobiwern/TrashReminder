@@ -7,13 +7,15 @@ DONE: Touch button to acknowledge
 - Wifi App to configure start and end time (15:00-8:00), what events to show
 DONE: option to have parallel events (e.g. Paper & Bio on the same day => alternate between the different colors sequentially) => https://stackoverflow.com/questions/42701688/using-an-unordered-map-with-arrays-as-keys
 - query API directly instead of hard-coded list
+Helpful:
+Epoch Converter: https://www.epochconverter.com/
 */
 
 #include <ESP8266WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
-#include "data_neuweiler.h"
+#include "data_hirrlingen.h"
 
 int colorIds[]     = {-1,-1,-1}; //allow max three tasks on the same day
 int colorIdsLast[] = {-1,-1,-1};
@@ -99,10 +101,19 @@ int getCurrentTimeEpoch(){
   return(timeClient.getEpochTime());
 }
 
+void resetColorIds(){
+  memset(colorIds, -1, sizeof(colorIds));
+}
+
+void printColorIds(){
+  for (int i=0; i<sizeof colorIds/sizeof colorIds[0]; i++) {
+    Serial.println("colorIds[" + String(i) + "] = " + String(colorIds[i])); 
+  }     
+}
 void handleLed(int nowEpoch){
   int dictEpoch;
-  memset(colorIds, -1, sizeof(colorIds));
-//  String taskId = "-1";
+  resetColorIds();
+//  printColorIds();
   for (auto entry :epochTaskDict)  {
     dictEpoch = entry.first;
 //    Serial.println("now: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch+startTime)+ ", dictEpoch+endTime = " + String(dictEpoch+endTime));
@@ -118,6 +129,7 @@ void handleLed(int nowEpoch){
       }
     }    
   }
+//  printColorIds();
   setTaskColor();
   FastLED.show();
 }
@@ -171,11 +183,13 @@ void doNothing(){
 }
 
 void incrementColorId(){
-  if(colorIds[1]!=-1){
-    colorIndex++;
-//    Serial.println("numberOfColorIds = " + String(numberOfColorIds));
-    if(colorIndex >= numberOfColorIds){colorIndex = 0;}
+  int numberOfTasks = 0;
+  for(int i=0;i<numberOfColorIds;i++){
+    if(colorIds[i] !=-1){numberOfTasks++;}
   }
+  colorIndex++;
+  if(colorIndex >= numberOfTasks){colorIndex = 0;}
+//  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", numberOfColorIds = " + String(numberOfColorIds));
 }
 
 void setBrightness(int blinkSpeed=20, boolean reset=false){
@@ -201,9 +215,7 @@ void setTaskColor(){
     leds[0] = CRGB::Black;
   } else {
     // EVENT
-//    Serial.println("Event: " + task[taskId] + " => LED = " + String(color[taskId],HEX));
-//        for (int i=0; i<sizeof arr/sizeof arr[0]; i++) {
-//        int s = arr[i];    
+//    Serial.println("Event: " + task[taskId] + " => LED = " + String(color[taskId],HEX));  
     leds[0] = color[colorIds[colorIndex]];
     setBrightness();  
   }
@@ -245,6 +257,7 @@ void handleState(){
       brightness = 255;
       colorIndex = 0;
       acknowledge = 0;
+      resetColorIds();
       STATE = STATE_SHOW;
       break;
     case STATE_SHOW:                //***********************************************************
