@@ -99,10 +99,11 @@ std::unordered_map<int,String>epochTaskDict = {
 {1672099200,"1"}, //2022.12.27
 {1672444800,"3"}, //2022.12.31
 {1671753600,"0,2,3"}, //dummy
-{1671840000,"0,2"}, //dummy 2022.12.24 show
+{1671840000,"4,3"}, //dummy
+{1671926400,"4,3"}, //dummy 2022.12.24 show
 };
 //                      0                                1                          2                            3                           4
 const String task[] = {"Altpapier-Tonne in Hirrlingen", "Bioabfall in Hirrlingen", "Gelber Sack in Hirrlingen", "Häckselgut in Hirrlingen", "Restmüll in Hirrlingen"};
-//                   blue,     brown,    yellow,   green,    white
+//                   blue 0    brown 1   yellow 2  green 3   white 4
 const int color[] = {0x0000FF, 0xA52A2A, 0xFFFF00, 0x00FF00, 0xFFFFFF };
 const int validIndex[] = {0,2,3,4};
