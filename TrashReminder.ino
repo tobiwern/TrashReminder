@@ -1,11 +1,11 @@
 /*
 Todo:
-- Touch button to acknowledge
+DONE: Touch button to acknowledge
 - Sleep when there are no events in the next days
 - Contact time server less often and maintain time internally (possible? => can we detect if the device returns from sleep or gets replugged?)
 - Start Wifi only when required, not on start-up
 - Wifi App to configure start and end time (15:00-8:00), what events to show
-- option to have parallel events (e.g. Paper & Bio on the same day => alternate between the different colors sequentially) => https://stackoverflow.com/questions/42701688/using-an-unordered-map-with-arrays-as-keys
+DONE: option to have parallel events (e.g. Paper & Bio on the same day => alternate between the different colors sequentially) => https://stackoverflow.com/questions/42701688/using-an-unordered-map-with-arrays-as-keys
 - query API directly instead of hard-coded list
 */
 
@@ -13,7 +13,7 @@ Todo:
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
-#include "data_hirrlingen.h"
+#include "data_neuweiler.h"
 
 int colorIds[]     = {-1,-1,-1}; //allow max three tasks on the same day
 int colorIdsLast[] = {-1,-1,-1};
