@@ -1,5 +1,7 @@
 # Müll-Erinnerung ("Trash Reminder")
 
+<img src="./pictures/missedGarbageTruck.png" width="400">
+
 **Schon mal vergessen den Mülleimer rauszustellen?**
 
 `Müll-Erinnerung` erinnert Dich daran, indem es eine farbig blinkende Erinnerung anzeigt.
