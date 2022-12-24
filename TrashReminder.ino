@@ -15,7 +15,7 @@ Epoch Converter: https://www.epochconverter.com/
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <WiFiManager.h> // https://github.com/tzapu/WiFiManager
-#include "data_hirrlingen.h"
+#include "data_hirrlingen_bogenschuetz.h"
 
 int colorIds[]     = {-1,-1,-1}; //allow max three tasks on the same day
 int colorIdsLast[] = {-1,-1,-1};
