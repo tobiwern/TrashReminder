@@ -4,8 +4,9 @@ import datetime
 from pytz import UTC # timezone
 
 file = "C:/Users/tobiw/Downloads/Abfuhrkalender-Hirrlingen-2023.ics"
-file = "C:/Users/tobiw/Downloads/allestrassenweilimschoenbuch.ics"
-file = "C:/Users/tobiw/Downloads/allestrassenebhausen.ics"
+#file = "C:/Users/tobiw/Downloads/allestrassenweilimschoenbuch.ics"
+#file = "C:/Users/tobiw/Downloads/allestrassenebhausen.ics"
+#file = "C:/Users/tobiw/Downloads/Abfallkalender Hirrlingen.ics"
 #validEntries = ['Altpapier-Tonne in Hirrlingen', 'Bioabfall in Hirrlingen', 'Gelber Sack in Hirrlingen', 'Häckselgut in Hirrlingen', 'Restmüll in Hirrlingen']
 #validEntries = ['Altpapier-Tonne in Hirrlingen', 'Gelber Sack in Hirrlingen', 'Häckselgut in Hirrlingen', 'Restmüll in Hirrlingen']
 validEntries = []
