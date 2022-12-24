@@ -96,11 +96,10 @@ std::unordered_map<int,String>epochTaskDict = {
 {1677801600,"1"},
 {1685404800,"2"},
 {1691366400,"2"},
-{1672099200,"1"}, //2022.12.27
-{1672444800,"3"}, //2022.12.31
 {1671753600,"0,2,3"}, //dummy
 {1671840000,"4,3"}, //dummy
-{1671926400,"4,3"}, //dummy 2022.12.24 show
+{1671926400,"4,3"}, //dummy 2022.12.25 show
+{1672012800,"4,3"}, //dummy 2022.12.26 show
 };
 //                      0                                1                          2                            3                           4
 const String task[] = {"Altpapier-Tonne in Hirrlingen", "Bioabfall in Hirrlingen", "Gelber Sack in Hirrlingen", "Häckselgut in Hirrlingen", "Restmüll in Hirrlingen"};
