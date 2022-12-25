@@ -21,6 +21,7 @@ int colorIds[]     = {-1,-1,-1}; //allow max three tasks on the same day
 int colorIdsLast[] = {-1,-1,-1};
 int numberOfColorIds = sizeof(colorIds)/sizeof(colorIds[0]);
 int colorIndex = 0; //used to toggle between multiple colors for same day tasks
+int countIndex = 0; //used to detect the number of active tasks (in order to enable multiple data entries with same epochTime)
 
 int startTime = 15*60*60; //seconds => 15 Uhr
 int endTime = (24+8)*60*60; //seconds => nächster Tag 8 Uhr morgens
@@ -103,6 +104,7 @@ int getCurrentTimeEpoch(){
 
 void resetColorIds(){
   memset(colorIds, -1, sizeof(colorIds));
+  countIndex = 0; //gets incremented during set colorIds
 }
 
 void printColorIds(){
@@ -142,12 +144,12 @@ boolean isValidTask(int taskId){
 }
 
 void setColorIds(String taskIds){
-  int start = 0, index = 0, indexFound, taskId; 
+  int start = 0, indexFound, taskId; 
   do{
     indexFound = taskIds.indexOf(",", start); 
     taskId = taskIds.substring(start, indexFound).toInt();
-    if(isValidTask(taskId)){colorIds[index++] = taskId;}
-//    Serial.println("taskId = " + String(taskId) + ", start = " + String(start) + ", indexFound = " + String(indexFound) + ", validTask = " + String(isValidTask(taskId)));
+    if(isValidTask(taskId)){colorIds[countIndex++] = taskId;}
+    Serial.println("taskId = " + String(taskId) + "countIndex = " + String(countIndex) + ", start = " + String(start) + ", indexFound = " + String(indexFound) + ", validTask = " + String(isValidTask(taskId)));
     start=indexFound+1;    
   } while (indexFound != -1);
 }
