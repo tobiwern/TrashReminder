@@ -1,4 +1,5 @@
 //https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/
+//https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html
 
 #include <unordered_map>
 
