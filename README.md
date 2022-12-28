@@ -11,7 +11,7 @@
 Je nach Müllart blinkt das Mülleimermodell in einer unterschiedlichen Farbe:
 - `weiß`: Restmüll
 - `blau`: Papier
-- `grün`: Biomüll
+- `grün`: Biomüll/Häckselgut
 - `gelb`: Gelber Sack oder Wertstofftonne
 
 Wird also zum Beispiel `Restmüll` abgeholt, blinkt das Mülleimermodell `weiß`.

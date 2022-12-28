@@ -7,6 +7,7 @@ DONE: Touch button to acknowledge
 - Wifi App to configure start and end time (15:00-8:00), what events to show
 DONE: option to have parallel events (e.g. Paper & Bio on the same day => alternate between the different colors sequentially) => https://stackoverflow.com/questions/42701688/using-an-unordered-map-with-arrays-as-keys
 - query API directly instead of hard-coded list
+- Add magnets to trash can so it snapps in place
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
 */
@@ -67,7 +68,6 @@ int queryIntervall = 60000; //ms => every minute (could be less, however to real
 unsigned long lastQueryMillis = 0;
  
 void setup() {
-  // Initialize Serial Monitor
   Serial.begin(115200);
   reed.attachEdgeDetect(doNothing, setAcknowledge);
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is typical
@@ -282,7 +282,6 @@ void handleState(){
       handleLed(nowEpoch); 
       handleReed();
       handleConnection();
-//      testLeds();
       break; 
     case STATE_CONFIGURE:
       setColor(CRGB::Purple, false);
