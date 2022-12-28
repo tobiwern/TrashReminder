@@ -79,9 +79,8 @@ std::unordered_map<int,String>epochTaskDict = {
 {1702512000,"1,3"},
 {1702944000,"2"},
 {1703721600,"0"},
-{1671753600,"0,2,3"}, //dummy
-{1671840000,"1,3"}, //dummy 2022.12.24 show
-{1671926400,"1,3"}, //dummy 2022.12.24 show
+{1672099200,"1,3"}, //dummy 2022.12.27 show
+{1672185600,"0"}, //2022.12.28 Bio
 };
 const String task[] = {"Biomüll", "Papier", "Restmüll", "Wertstoffe"};
 //                   0 green   1 blue    2 white   3 yellow
