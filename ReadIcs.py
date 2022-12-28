@@ -5,8 +5,8 @@ from pytz import UTC # timezone
 import re
 
 #files = ["C:/Users/tobiw/Downloads/Abfuhrkalender-Hirrlingen-2023.ics","C:/Users/tobiw/Downloads/Abfuhrkalender-Hirrlingen-2022.ics", "C:/Users/tobiw/Downloads/Abfallkalender Hirrlingen.ics"]
-#files = ["C:/Users/tobiw/Downloads/allestrassenweilimschoenbuch.ics"]
-files = ["C:/Users/tobiw/Downloads/allestrassenebhausen.ics"]
+files = ["C:/Users/tobiw/Downloads/allestrassenweilimschoenbuch.ics"]
+#files = ["C:/Users/tobiw/Downloads/allestrassenebhausen.ics"]
 #validEntries = ['Altpapier-Tonne in Hirrlingen', 'Bioabfall in Hirrlingen', 'Gelber Sack in Hirrlingen', 'Häckselgut in Hirrlingen', 'Restmüll in Hirrlingen']
 #validEntries = ['Altpapier-Tonne in Hirrlingen', 'Gelber Sack in Hirrlingen', 'Häckselgut in Hirrlingen', 'Restmüll in Hirrlingen']
 validEntries = []
@@ -31,6 +31,9 @@ for file in files:
 #print(dateDict)
 
 items = list(sorted(items))
+for file in files:
+    print("//{}".format(file))
+
 print("#include <unordered_map>")
 print("std::unordered_map<int,String>epochTaskDict = {")
 for entry in sorted(dateDict.keys()):
