@@ -4,8 +4,10 @@ import datetime
 from pytz import UTC # timezone
 import re
 
+
 #files = ["C:/Users/tobiw/Downloads/Abfuhrkalender-Hirrlingen-2023.ics","C:/Users/tobiw/Downloads/Abfuhrkalender-Hirrlingen-2022.ics", "C:/Users/tobiw/Downloads/Abfallkalender Hirrlingen.ics"]
-files = ["C:/Users/tobiw/Downloads/allestrassenweilimschoenbuch.ics"]
+#files = ["C:/Users/tobiw/Downloads/allestrassenweilimschoenbuch.ics"]
+files = ["C:/Users/tobiw/Downloads/stuttgart-gruenewaldstr25.ics"]
 #files = ["C:/Users/tobiw/Downloads/allestrassenebhausen.ics"]
 #validEntries = ['Altpapier-Tonne in Hirrlingen', 'Bioabfall in Hirrlingen', 'Gelber Sack in Hirrlingen', 'Häckselgut in Hirrlingen', 'Restmüll in Hirrlingen']
 #validEntries = ['Altpapier-Tonne in Hirrlingen', 'Gelber Sack in Hirrlingen', 'Häckselgut in Hirrlingen', 'Restmüll in Hirrlingen']
@@ -19,9 +21,10 @@ for file in files:
         for component in gcal.walk():
         #   print(component)
             if component.name == "VEVENT":
-                date = str(component.get('dtstart').dt)
-                #print(date)
-                epoche = int((component.get('dtstart').dt-datetime.date(1970,1,1)).total_seconds())
+                date = str(component.get('dtstart').dt)[0:10]
+                tokens = date.split("-")
+             #   epoche = int((component.get('dtstart').dt-datetime.date(1970,1,1)).total_seconds())
+                epoche = int((datetime.date(int(tokens[0]),int(tokens[1]),int(tokens[2]))-datetime.date(1970,1,1)).total_seconds())
                 #print(epoche)
                 #date1 = datetime.date(1970,1,1)
                 item = str(component.get('summary'))
