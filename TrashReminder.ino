@@ -4,10 +4,12 @@ DONE: Touch button to acknowledge
 - Sleep when there are no events in the next days
 - Contact time server less often and maintain time internally (possible? => can we detect if the device returns from sleep or gets replugged?)
 - Start Wifi only when required, not on start-up
-- Wifi App to configure start and end time (15:00-8:00), what events to show
+DONE: Wifi App to configure start and end time (15:00-8:00), what events to show
 DONE: option to have parallel events (e.g. Paper & Bio on the same day => alternate between the different colors sequentially) => https://stackoverflow.com/questions/42701688/using-an-unordered-map-with-arrays-as-keys
 - query API directly instead of hard-coded list
 - Add magnets to trash can so it snapps in place
+- javascript: Translate dateDict filtering with TrashType => writing to LittleFS
+- store default values to EEPROM (start/endHour)
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
 */
