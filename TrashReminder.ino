@@ -12,29 +12,38 @@ DONE: option to have parallel events (e.g. Paper & Bio on the same day => altern
 - store default values to EEPROM (start/endHour)
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
+JSON Validator: https://jsonformatter.curiousconcept.com/#
 */
 
 #include <ESP8266WiFi.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <WiFiManager.h>  // https://github.com/tzapu/WiFiManager
-#include <ESP8266WebServer.h>
-ESP8266WebServer server(80);
+#include <ArduinoJson.h>
+#include <FS.h>
+#include <LittleFS.h>
+
+#include "filesystem.h"
 #include "webpage.h"
 #include "data_neuweiler.h"
+
+//forward function prototypes (so function order does not matter)
+//void setColor(int color, boolean fade, int blinkSpeed);
+
 
 int colorIds[] = { -1, -1, -1 };  //allow max three tasks on the same day
 int colorIdsLast[] = { -1, -1, -1 };
 int numberOfColorIds = sizeof(colorIds) / sizeof(colorIds[0]);
 int colorIndex = 0;  //used to toggle between multiple colors for same day tasks
 
-int startHour = 15;       //am Vortag
+int startHour = 14;       //am Vortag
 int endHour = 8;          //am Abholugstag
 int brightness = 255;     //highest value since used to fadeBy...
 int fadeAmount = 5;       // Set the amount to fade to 5, 10, 15, 20, 25 etc even up to 255.
-int showDuration = 5000;  //ms Splash screen
+int showDuration = 10; //5000;  //ms Splash screen
 unsigned long millisLast = 0;
 
+/// STATE MACHINE
 #define STATE_INIT 0
 #define STATE_SHOW 1
 #define STATE_DISCONNECTED 2
@@ -90,6 +99,8 @@ void setup() {
   //Time Client
   timeClient.begin();
   timeClient.setTimeOffset(3600);  //GMT+1
+  //File System
+  setupFS();
 }
 
 void loop() {
@@ -256,57 +267,7 @@ void addGlitter(fract8 chanceOfGlitter) {
   }
 }
 
-// Server Functions
-void startWebServer() {
-  Serial.println("Starting WebServer...");
-  server.on("/", handleRoot);
-  server.on("/set_start", setStartHour);
-  server.on("/set_end", setEndHour);
-  server.on("/settings", sendSettings);
-  server.onNotFound(notFound);
-  server.begin();
-  Serial.print("IP address: ");
-  Serial.print(WiFi.localIP());
-  Serial.print(", hostName: ");
-  Serial.println(WiFi.getHostname());
-}
-
-void sendSettings() {
-  String value;
-  value = String(startHour) + "," + String(endHour);
-  Serial.println("Sending settings: " + value);
-  server.send(200, "text/plane", value);
-}
-
-void stopWebServer() {
-  Serial.println("Stopping WebServer...");
-  server.stop();
-}
-
-void notFound() {
-  server.send(404, "text/plain", "Not found");
-}
-
-void handleRoot() {
-  String s = webpage;
-  server.send(200, "text/html", s);
-}
-
-void setStartHour() {
-  String hour = server.arg("value");
-  Serial.println("Setting startHour = " + hour);
-  startHour = hour.toInt();
-  setColor(CRGB::White, false);
-  setColor(CRGB::Purple, false);
-}
-
-void setEndHour() {
-  String hour = server.arg("value");
-  Serial.println("Setting endHour = " + hour);
-  endHour = hour.toInt();
-  setColor(CRGB::White, false);
-  setColor(CRGB::Purple, false);
-}
+#include "webserver.h" //separate file for webserver functions
 
 void handleState() {
   unsigned long millisNow = millis();
@@ -360,3 +321,4 @@ void handleState() {
   STATE_PREVIOUS = STATE;
   if (STATE_NEXT != -1) { STATE = STATE_NEXT; }
 }
+

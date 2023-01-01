@@ -30,12 +30,15 @@ const char webpage[] PROGMEM = R"=====(
           border: 2px solid  #4CAF50;
           border-radius: 8px;
           padding: 5px;
-          width: 350px;
+          max-width: 350px;
           margin-left: auto;
           margin-right: auto;
 
         }
-
+        div.output {
+          width: 300px;
+          margin: auto;
+        }
         td.value {
           white-space: nowrap;
           vertical-align: center;
@@ -61,6 +64,12 @@ const char webpage[] PROGMEM = R"=====(
     
         //setInterval(function(){getData();}, 2000);
         */
+        function closeSettings(){
+          var xhttp = new XMLHttpRequest();
+          xhttp.open("GET", "close", true);
+          xhttp.send();
+          window.close(); //close the page
+        }
 
         function requestSettings() {
           var xhttp = new XMLHttpRequest();
@@ -72,10 +81,20 @@ const char webpage[] PROGMEM = R"=====(
               document.getElementById("end").value = tokens[1];
             }
           };
-          xhttp.open("GET", "settings", true);
+          xhttp.open("GET", "request_settings", true);
           xhttp.send();
         }
        
+        function sendSettings(jsonText) {
+          var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+              console.log("Send Completed");
+            }
+          };
+          xhttp.open("GET", "send_settings?value=" + jsonText, true);
+          xhttp.send();
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
     	    enableEventListener('start');
@@ -90,11 +109,16 @@ const char webpage[] PROGMEM = R"=====(
           xhttp.open("GET", "set_" + dropdown+ "?value=" + value, true);
           xhttp.send();          
         }
-        /// ICS/iCAL Processing
+        /// ICS/iCAL Processing ////////////////////////////////////////////////////////////////////
+        var debug = false;
+        var items = [];
+        var dateDict = {};                       //HÄCKSEL
+        var colorDict = { 'PAPIER': '0x0000FF', 'BIO,CKSEL': '0x00FF00', 'GELB,WERT': '0xFFFF00', 'REST': '0xFFFFFF' }
+        var colorDefault = '0xFFC0CB';
+        var colors = [];
         function processFiles() {
-            var dateDict = {};
-            var items = [];
-            console.log(items);
+            items = [];
+            dateDict = {};
             var files = document.getElementById('files').files;
             for (var fileIndex = 0; fileIndex < files.length; fileIndex++) {
                 var file = files[fileIndex];
@@ -106,36 +130,118 @@ const char webpage[] PROGMEM = R"=====(
                         line = lines[i];
                         if (line.search("DTSTART") != -1) {
                             var date = line.split(":")[1];
-                            var epoch = new Date(date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8)).getTime()
+                            dateString = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
+                            var epoch = new Date(dateString).getTime();
                         } else if (line.search("SUMMARY") != -1) {
                             var item = line.split(":")[1];
+                            item = item.replace("\\", "");
+                            item = item.replace("\r", "");
                         } else if (line.search("END:VEVENT") != -1) {
-                            if (!(epoch in dateDict)) { dateDict[epoch] = []; }
-                            var arr = dateDict[epoch];
+                            if (!(epoch in dateDict)) { dateDict[epoch] = { "tasks": [], "date": dateString }; }
+                            var arr = dateDict[epoch]["tasks"];
                             arr.push(item);
-                            dateDict[epoch] = arr;
+                            dateDict[epoch][tasks] = arr;
                             if (!items.includes(item)) {
                                 items.push(item);
-                                genCheckboxes(items);
+                                colors = getColors();
+                                genCheckboxes(items); //executed multiple times, however ok
                             }
                         }
                     }
-                };
+                }; //on load
                 reader.readAsText(file);
             }
         }
 
+        function getValidTaskIds() {
+            var validTaskIds = [];
+            for (var i = 0; i < items.length; i++) {
+                var label = document.getElementById("taskl" + i).innerText;
+                if (document.getElementById("task" + i).checked) {
+                    validTaskIds.push(i);
+                }
+            }
+            return (validTaskIds);
+        }
+
+        function getTaskIds(tasks) {
+            var taskIds = [];
+            for (var i = 0; i < tasks.length; i++) {
+                taskIds.push(items.indexOf(tasks[i]));
+            }
+            return (taskIds);
+        }
+
+        function getColors() {
+            var colors = [];
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                var color = getMatchingColor(item);
+                if (color) {
+                    colors.push(color);
+                } else {
+                    alert("Failed to auto-assign color for entry " + item + ".<br>Assigning default color (pink).");
+                    colors.push(colorDefault);
+                }
+            }
+            return (colors);
+        }
+
+        function getMatchingColor(item) {
+            var keys = Object.keys(colorDict).sort();
+            for (var i = 0; i < keys.length; i++) {
+                var key = keys[i];
+                var entries = key.split(",");
+                for (var j = 0; j < entries.length; j++) {
+                    var entry = entries[j];
+                    if (item.toUpperCase().search(entry) != -1) {
+                        return (colorDict[key]);
+                    }
+                }
+            }
+            return (false);
+        }
+
+        function genJson() {
+            validTaskIds = getValidTaskIds();
+            console.log(validTaskIds);
+            var entries = [];
+            keys = Object.keys(dateDict).sort();
+            for (var i = 0; i < keys.length; i++) {
+                var epoch = keys[i];
+                var tasks = dateDict[epoch]["tasks"];
+                var taskIds = getTaskIds(tasks);
+                var date = dateDict[epoch]["date"];
+                if (debug) {
+                    entries.push('{"' + epoch + '"' + ":" + '{"date":"' + date + '","tasks":["' + tasks.join('","') + '"],"taskIds":[' + taskIds.join(',') + ']}}');
+                } else {
+                    entries.push('{"' + epoch + '"' + ":" + '{"taskIds":[' + taskIds.join(',') + ']}}');
+                }
+            }
+            
+            var jsonText = '{"tasks":["' + items.join('","') + '"],"colors":["' + colors.join('","') + '"],"validTaskIds":[' + validTaskIds.join(',') + '],"epochTasks":[' + entries.join(',') + ']}';
+            console.log(jsonText);
+            const obj = JSON.parse(jsonText);
+            sendSettings(jsonText);
+            document.getElementById("output").innerHTML = jsonText;
+            //            console.log(obj);
+        }
+
         function genCheckboxes(items) {
-            console.log(items);
             var i = 0;
             var text = "<br>Bitte w&auml;hlen Sie die Abfallarten aus, an die Sie erinnert werden wollen:<br>";
-            text += "<table><tr><td class=value>"            
+            text += "<table>"
             for (let i = 0; i < items.length; i++) {
-                text += "<div><input type='checkbox' id='task" + i + "' name=task'" + i + "' checked>";
-                text += "<label for='task" + i + "'>" + items[i] + "</label><div>";
+                text += "<tr>"
+                text += "<td class=value><div><input type='checkbox' id='task" + i + "' name=task'" + i + "' checked>";
+                text += "<label for='task" + i + "' id='taskl" + i + "'>" + items[i] + "</label><div></td>";
+                text += "<td><button style='background-color: " + colors[i].replace("0x","#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
+                text += "</tr>";
             }
-            text += "</td></tr></table>"            
-            document.getElementById("tasks").innerHTML = text
+            text += "</table>";
+            text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button>";
+            text += "<br><br><div id=output></div>";
+            document.getElementById("tasks").innerHTML = text;
         }
       </script>
     </head>  
@@ -190,6 +296,7 @@ const char webpage[] PROGMEM = R"=====(
       <br>
     </div>
     <br>
+    </form>
     <div class=frame>
       <h2>Abfuhrtermine (ICS/ICAL)</h2>
       <table>
@@ -201,10 +308,10 @@ const char webpage[] PROGMEM = R"=====(
     </div>    
     
 
-  </form>
+ 
   <br>
   <div>
-    <button class="button" onclick="send(1)">Erinnerung ausschalten</button>
+    <button class="button" onclick="closeSettings()">Beenden</button>
     <button class="button" onclick="send(0)">Erinnerung einschalten</button>
     <button class="button" onclick="send(2)">Feuerwerk</button>
   </div>
