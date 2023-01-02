@@ -89,43 +89,41 @@ String readFile(const char* fileName) {
   }
   showFSInfo();
   size_t size = file.size();
+  if(size > JSON_MEMORY){
+    Serial.println("File size is too large " + String(size) + ">" + String(JSON_MEMORY));
+    return("");
+  }
   char buf[JSON_MEMORY];
   file.readBytes(buf, size);
   file.close();
   endLittleFS();
   return (String(buf));
 }
-
-void readFile1(const char* fileName) {
-  Serial.printf("INFO: Reading file: %s\n", fileName);
-  File file = LittleFS.open(fileName, "r");
-  if (!file) {
-    Serial.println("INFO: Failed to open file " + String(fileName) + " for reading!");
-    showFSInfo();
-    return;
+/*
+boolean updateVariablesFromFile(const char* fileName) {
+  String jsonText = readFile(fileName);
+  if(jsonText == ""){
+    Serial.println("Failed to read " + fileName);
+    return(false);
   }
-  size_t size = file.size();
-  if (size > JSON_MEMORY) {
-    Serial.println("File size is too large " + String(size) + ">" + String(JSON_MEMORY));
-    return;
-  }
-  std::unique_ptr<char[]> buf(new char[size]);
-  file.readBytes(buf.get(), size);
+//  std::unique_ptr<char[]> buf(new char[size]);
+//  file.readBytes(buf.get(), size);
   StaticJsonDocument<JSON_MEMORY> doc;
-  DeserializationError error = deserializeJson(doc, buf.get());
-  if (error) {
-    Serial.print(F("deserializeJson() failed: "));
-    Serial.println(error.f_str());
-    return;
-  }
-  /*
-  JsonObject obj = doc.as<JsonObject>(); //the root of a JSON object is always a DICT
+  
+//  DeserializationError error = deserializeJson(jsonText.c_str(), buf.get());
+//  if (error) {
+//    Serial.print(F("deserializeJson() failed: "));
+//    Serial.println(error.f_str());
+//    return;
+//  }
 
-  for (JsonPair p : obj) {
-    p.key() // is a JsonString
-    p.value() // is a JsonVariant
-  }
-*/
+//  JsonObject obj = doc.as<JsonObject>(); //the root of a JSON object is always a DICT
+
+//  for (JsonPair p : obj) {
+//    p.key() // is a JsonString
+//    p.value() // is a JsonVariant
+//  }
+
   // get colors ////////////////////////////////
   JsonVariant colorsJson = doc["colors"];
 
@@ -133,7 +131,7 @@ void readFile1(const char* fileName) {
   for (JsonVariant v : array) {
     String colorText = v.as<String>();
     unsigned long int color = strtoul(colorText.c_str(), NULL, 16); //conversion from HEX String => HEX number
-    Serial.println("Color: " + colorText + ", value = " + color);
+    Serial.println("Color: " + colorText + ", value = " + String(color));
   }
 
   Serial.print("Read from file: ");
@@ -142,7 +140,7 @@ void readFile1(const char* fileName) {
   }
   file.close();
 }
-
+*/
 boolean deleteFile(const char* fileName) {
   if (!startLittleFS()) { return (false); }
   Serial.printf("Deleting file: %s\n", fileName);
@@ -150,7 +148,7 @@ boolean deleteFile(const char* fileName) {
   if (!file) {
     Serial.println("WARNING: There is no file " + String(fileName) + ". Nothing to delete!");
     showFSInfo();
-    return (true);
+    return (false);
   }
   if (LittleFS.remove(fileName)) {
     Serial.println("INFO: Sucessfully deleted file " + String(fileName) + ".");
