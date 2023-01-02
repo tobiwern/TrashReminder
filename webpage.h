@@ -1,7 +1,8 @@
 const char webpage[] PROGMEM = R"=====(
 <!DOCTYPE html>
-  <html>
+  <html lang="de">
     <head>
+      <meta charset='utf-8'>
       <style type="text/css">
         .button {
           background-color: #4CAF50;
@@ -93,6 +94,24 @@ const char webpage[] PROGMEM = R"=====(
             }
           };
           xhttp.open("GET", "send_settings?value=" + jsonText, true);
+          xhttp.send();
+        }
+
+        function readSettings() {
+          var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+              document.getElementById("settings").innerHTML = this.responseText;              
+            }
+          };
+          xhttp.open("GET", "read_settings", true);
+          xhttp.send();
+        }
+
+
+        function deleteSettings() {
+          var xhttp = new XMLHttpRequest();
+          xhttp.open("GET", "delete_settings", true);
           xhttp.send();
         }
 
@@ -310,8 +329,11 @@ const char webpage[] PROGMEM = R"=====(
 
  
   <br>
+  <div id='settings'></div>
   <div>
     <button class="button" onclick="closeSettings()">Beenden</button>
+    <button class="button" onclick="readSettings()">Lesen</button>
+    <button class="button" onclick="deleteSettings()">L&ouml;schen</button>
     <button class="button" onclick="send(0)">Erinnerung einschalten</button>
     <button class="button" onclick="send(2)">Feuerwerk</button>
   </div>
