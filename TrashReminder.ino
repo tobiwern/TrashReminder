@@ -50,6 +50,7 @@ unsigned long millisLast = 0;
 int STATE = STATE_INIT;
 int STATE_PREVIOUS = -1;
 int STATE_NEXT = -1;
+int STATE_FOLLOWING = -1;
 String stateTbl[] = { "STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY", "STATE_CONFIGURE" };
 
 #include <FastLED.h>
@@ -289,7 +290,7 @@ void handleState() {
       EVERY_N_MILLISECONDS(20) {
         gHue++;
       }  // slowly cycle the "base color" through the rainbow
-      if ((millisNow - millisLast) > showDuration) { STATE_NEXT = STATE_QUERY; }
+      if ((millisNow - millisLast) > showDuration) { if(STATE_FOLLOWING != -1){STATE_NEXT = STATE_FOLLOWING; STATE_FOLLOWING = -1;} else {STATE_NEXT = STATE_QUERY;}}
       break;
     case STATE_DISCONNECTED:  //***********************************************************
       setColor(CRGB::Red, true, 2);
