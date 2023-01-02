@@ -19,9 +19,6 @@ JSON Validator: https://jsonformatter.curiousconcept.com/#
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <WiFiManager.h>  // https://github.com/tzapu/WiFiManager
-#include <ArduinoJson.h>
-#include <FS.h>
-#include <LittleFS.h>
 
 #include "filesystem.h"
 #include "webpage.h"
@@ -36,7 +33,7 @@ int colorIdsLast[] = { -1, -1, -1 };
 int numberOfColorIds = sizeof(colorIds) / sizeof(colorIds[0]);
 int colorIndex = 0;  //used to toggle between multiple colors for same day tasks
 
-int startHour = 14;       //am Vortag
+int startHour = 15;       //am Vortag
 int endHour = 8;          //am Abholugstag
 int brightness = 255;     //highest value since used to fadeBy...
 int fadeAmount = 5;       // Set the amount to fade to 5, 10, 15, 20, 25 etc even up to 255.
@@ -166,7 +163,7 @@ void setColorIds(String taskIds) {
     indexFound = taskIds.indexOf(",", start);
     taskId = taskIds.substring(start, indexFound).toInt();
     if (isValidTask(taskId)) { colorIds[index++] = taskId; }
-    Serial.println("taskId = " + String(taskId) + ", start = " + String(start) + ", indexFound = " + String(indexFound) + ", validTask = " + String(isValidTask(taskId)));
+//    Serial.println("taskId = " + String(taskId) + ", start = " + String(start) + ", indexFound = " + String(indexFound) + ", validTask = " + String(isValidTask(taskId)));
     start = indexFound + 1;
   } while (indexFound != -1);
 }
@@ -282,6 +279,7 @@ void handleState() {
       colorIndex = 0;
       acknowledge = 0;
       resetColorIds();
+      listDir("/");
       STATE_NEXT = STATE_SHOW;
       break;
     case STATE_SHOW:  //***********************************************************
