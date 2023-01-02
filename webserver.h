@@ -1,5 +1,3 @@
-//Why data is send 10 times???
-
 #include <ESP8266WebServer.h>
 ESP8266WebServer server(80);
 
@@ -7,6 +5,7 @@ ESP8266WebServer server(80);
 
 void readSettings() { //transfering ESP data to the Webpage
   String value = readFile("/data.json");
+  if(value == ""){value = "ERROR: Lesen der Daten fehlgeschlagen.";}
   Serial.println("Received:" + value);
   Serial.println("Sending settings: " + value);
   server.send(200, "text/plane", value);
@@ -34,18 +33,7 @@ void setStartHour() {
   startHour = hour.toInt();
   setColor(CRGB::White, false);
   setColor(CRGB::Purple, false);
-}
-
-void receiveSettings() {
-  String jsonText = server.arg("value");
-  String response = "";
-  Serial.println("Receiving settings in JSON format: " + jsonText);
-  if (writeFile("/data.json", jsonText.c_str())) {
-    response = "Übertagen der Daten war erfolgreich!";
-  } else {
-    response = "ERROR: Übertagen der Daten fehlgeschlagen!";
-  }
-  server.send(200, "text/plane", response);
+  server.send(200, "text/plane", "Neuer Startzeitpunkt übertragen.");
 }
 
 void setEndHour() {
@@ -54,6 +42,19 @@ void setEndHour() {
   endHour = hour.toInt();
   setColor(CRGB::White, false);
   setColor(CRGB::Purple, false);
+  server.send(200, "text/plane", "Neuer Endzeitpunkt übertragen.");
+}
+
+void receiveSettings() {
+  String jsonText = server.arg("value");
+  String response = "";
+  Serial.println("Receiving settings in JSON format: " + jsonText);
+  if (writeFile("/data.json", jsonText.c_str())) {
+    response = "Übertragen der Daten war erfolgreich!";
+  } else {
+    response = "ERROR: Übertragen der Daten fehlgeschlagen!";
+  }
+  server.send(200, "text/plane", response);
 }
 
 void closeSettings() {
@@ -61,10 +62,22 @@ void closeSettings() {
   STATE_NEXT = STATE_INIT;
 }
 
+void fireworks() {
+  Serial.println("Fireworks...");
+  STATE_FOLLOWING = STATE_CONFIGURE;
+  STATE_NEXT = STATE_SHOW;
+  server.send(200, "text/plane", "Feuerwerk!"); //should always respond to prevent resend (10x)
+}
+
 void deleteSettings() {
   Serial.println("Delete Settings.");
-  deleteFile("/data.json");
-  ;
+  String response = "";
+  if(deleteFile("/data.json")) {
+    response = "Löschen der Daten war erfolgreich!";
+  } else {
+    response = "ERROR: Löschen der Daten fehlgeschlagen!";
+  }
+  server.send(200, "text/plane", response);
 }
 
 void startWebServer() {
@@ -77,6 +90,7 @@ void startWebServer() {
   server.on("/read_settings", readSettings);
   server.on("/delete_settings", deleteSettings);
   server.on("/close", closeSettings);
+  server.on("/fireworks", fireworks);  
   server.onNotFound(notFound);
   server.begin();
   Serial.print("IP address: ");
