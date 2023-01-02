@@ -70,6 +70,7 @@ const char webpage[] PROGMEM = R"=====(
           var xhttp = new XMLHttpRequest();
           xhttp.open("GET", "close", true);
           xhttp.send();
+          document.getElementById("body").innerHTML ="<h1>Beendet - Bitte Fenster schließen!</h1>";
           window.close(); //close the page
         }
 
@@ -112,6 +113,7 @@ const char webpage[] PROGMEM = R"=====(
               if(response.search("ERROR") != -1){
                 document.getElementById("message").innerHTML = response;
                 document.getElementById("message").style.color = "red";
+                document.getElementById("settings").innerHTML = "";
               } else {  
                 document.getElementById("settings").innerHTML = response + "<br>";
               }            
@@ -131,6 +133,7 @@ const char webpage[] PROGMEM = R"=====(
                 document.getElementById("message").style.color = "red";
               } else {
                 document.getElementById("message").style.color = "green";
+                document.getElementById("settings").innerHTML = "";
               }
             }
           };
@@ -297,7 +300,7 @@ const char webpage[] PROGMEM = R"=====(
       </script>
     </head>  
 
-   <body onload='requestSettings()')>
+   <body id='body' onload='requestSettings()')>
      <img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/TrashReminder.jpg?raw=true' alt='Trash Reminder' width='400' height='185'>
   <h1>M&uuml;ll-Erinnerung Einstellungen</h1>
   <form name='config'>
