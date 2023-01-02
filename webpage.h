@@ -53,7 +53,19 @@ const char webpage[] PROGMEM = R"=====(
       </style>
       <script>
         //setInterval(function(){getData();}, 2000);
-        
+
+        function fireworks() { 
+          var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+              document.getElementById("message").innerHTML = this.responseText; 
+              setTimeout( function(){document.getElementById("message").innerHTML ="";}, 2000);             
+            }
+          };
+          xhttp.open("GET", "fireworks", true);
+          xhttp.send();
+        } 
+
         function closeSettings(){
           var xhttp = new XMLHttpRequest();
           xhttp.open("GET", "close", true);
@@ -61,7 +73,7 @@ const char webpage[] PROGMEM = R"=====(
           window.close(); //close the page
         }
 
-        function requestSettings() {
+        function requestSettings(){
           var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -80,11 +92,11 @@ const char webpage[] PROGMEM = R"=====(
           xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
               response = this.responseText;
-              document.getElementById("output").innerHTML = response;
+              document.getElementById("message").innerHTML = response;
               if(response.search("ERROR") != -1){
-                document.getElementById("output").style.color = "red";
+                document.getElementById("message").style.color = "red";
               } else {
-                document.getElementById("output").style.color = "green";
+                document.getElementById("message").style.color = "green";
               }
             }
           };
@@ -96,7 +108,13 @@ const char webpage[] PROGMEM = R"=====(
           var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-              document.getElementById("settings").innerHTML = this.responseText;              
+              response = this.responseText;
+              if(response.search("ERROR") != -1){
+                document.getElementById("message").innerHTML = response;
+                document.getElementById("message").style.color = "red";
+              } else {  
+                document.getElementById("settings").innerHTML = response + "<br>";
+              }            
             }
           };
           xhttp.open("GET", "read_settings", true);
@@ -105,6 +123,17 @@ const char webpage[] PROGMEM = R"=====(
 
         function deleteSettings() {
           var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+              response = this.responseText;
+              document.getElementById("message").innerHTML = response;
+              if(response.search("ERROR") != -1){
+                document.getElementById("message").style.color = "red";
+              } else {
+                document.getElementById("message").style.color = "green";
+              }
+            }
+          };
           xhttp.open("GET", "delete_settings", true);
           xhttp.send();
         }
@@ -119,6 +148,14 @@ const char webpage[] PROGMEM = R"=====(
 	      function sendUpdate(dropdown) {
           var value = document.getElementById(dropdown).value;
           var xhttp = new XMLHttpRequest();
+          xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+              response = this.responseText;
+              document.getElementById("messageTime").innerHTML = "<br>" + response;
+              document.getElementById("messageTime").style.color = "green";
+              setTimeout( function(){document.getElementById("messageTime").innerHTML ="";}, 2000);
+            }
+          };
           xhttp.open("GET", "set_" + dropdown+ "?value=" + value, true);
           xhttp.send();          
         }
@@ -255,6 +292,7 @@ const char webpage[] PROGMEM = R"=====(
             text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button>";
             text += "<br><br><div id=output></div>";
             document.getElementById("tasks").innerHTML = text;
+            document.getElementById("message").innerHTML = "";
         }
       </script>
     </head>  
@@ -306,6 +344,7 @@ const char webpage[] PROGMEM = R"=====(
             </select></td>
         </tr>
       </table>
+      <div id='messageTime'></div>
       <br>
     </div>
     <br>
@@ -315,13 +354,11 @@ const char webpage[] PROGMEM = R"=====(
       <table>
         <tr><td><label for="start">W&auml;hlen Sie eine oder mehrere bereits heruntergeladene ICS oder ICAL Dateien ihres Entsorgungsunternehmens aus:</label></td></tr>
         <tr><td><input type="file" name="files" id="files" accept=".ics" onchange="processFiles()" multiple></td></tr>
-        <tr><td><div id='tasks'></div></td></tr>  
+        <tr><td><div id='tasks'></div></td></tr>
+        <tr><td><div id='message'></div></td></tr>          
       </table>
       <br>
     </div>    
-    
-
- 
   <br>
   <div id='settings'></div>
   <div>
@@ -329,7 +366,7 @@ const char webpage[] PROGMEM = R"=====(
     <button class="button" onclick="readSettings()">Lesen</button>
     <button class="button" onclick="deleteSettings()">L&ouml;schen</button>
     <button class="button" onclick="send(0)">Erinnerung einschalten</button>
-    <button class="button" onclick="send(2)">Feuerwerk</button>
+    <button class="button" onclick="fireworks()">Feuerwerk</button>
   </div>
 </body>
   </html>
