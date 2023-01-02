@@ -96,8 +96,6 @@ void setup() {
   //Time Client
   timeClient.begin();
   timeClient.setTimeOffset(3600);  //GMT+1
-  //File System
-  setupFS();
 }
 
 void loop() {
