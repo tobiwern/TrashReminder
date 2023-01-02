@@ -52,19 +52,8 @@ const char webpage[] PROGMEM = R"=====(
         }
       </style>
       <script>
-    /*    function send(led_sts){
-          var xhttp = new XMLHttpRequest();
-          xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-              document.getElementById("state").innerHTML = this.responseText;
-            }
-          };
-          xhttp.open("GET", "led_set?state="+led_sts, true);
-          xhttp.send();
-        }
-    
         //setInterval(function(){getData();}, 2000);
-        */
+        
         function closeSettings(){
           var xhttp = new XMLHttpRequest();
           xhttp.open("GET", "close", true);
@@ -86,18 +75,24 @@ const char webpage[] PROGMEM = R"=====(
           xhttp.send();
         }
        
-        function sendSettings(jsonText) {
+        function sendSettings(jsonText) { //send the jsonText to the ESP to be stored in LittleFS
           var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
-              console.log("Send Completed");
+              response = this.responseText;
+              document.getElementById("output").innerHTML = response;
+              if(response.search("ERROR") != -1){
+                document.getElementById("output").style.color = "red";
+              } else {
+                document.getElementById("output").style.color = "green";
+              }
             }
           };
           xhttp.open("GET", "send_settings?value=" + jsonText, true);
           xhttp.send();
         }
 
-        function readSettings() {
+        function readSettings() { //send the ESP data to the webpage
           var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -107,7 +102,6 @@ const char webpage[] PROGMEM = R"=====(
           xhttp.open("GET", "read_settings", true);
           xhttp.send();
         }
-
 
         function deleteSettings() {
           var xhttp = new XMLHttpRequest();
@@ -240,9 +234,9 @@ const char webpage[] PROGMEM = R"=====(
             
             var jsonText = '{"tasks":["' + items.join('","') + '"],"colors":["' + colors.join('","') + '"],"validTaskIds":[' + validTaskIds.join(',') + '],"epochTasks":[' + entries.join(',') + ']}';
             console.log(jsonText);
-            const obj = JSON.parse(jsonText);
+            const obj = JSON.parse(jsonText); //just to check if valid JSON
             sendSettings(jsonText);
-            document.getElementById("output").innerHTML = jsonText;
+            //document.getElementById("output").innerHTML = jsonText;
             //            console.log(obj);
         }
 
