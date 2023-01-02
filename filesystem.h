@@ -6,39 +6,45 @@
 //https://makesmart.net/arduino-ide-arbeiten-mit-json-objekten-fur-einsteiger/
 //https://arduinojson.org/v6/doc/deserialization/
 
-#define JSON_MEMORY 1024*10
+#define JSON_MEMORY 1024 * 40
 
-void setupFS() {
+boolean startLittleFS() {
   if (!LittleFS.begin()) {
     Serial.println("ERROR: Failed to mount LittleFS.");
-  } else {
-    Serial.println("INFO: Successfully mounted LittleFS.");
+    return (false);
   }
+  Serial.println("INFO: Successfully mounted LittleFS.");
+  return (true);
 }
 
-void writeFile(const char* fileName, const char* message) {
-  Serial.printf("INFO: Writing file: %s\n", fileName);
+void endLittleFS() {
+  LittleFS.end();
+}
+
+boolean writeFile(const char* fileName, const char* message) {
+  if (!startLittleFS()) { return (false); }
   File file = LittleFS.open(fileName, "w");
   if (!file) {
     Serial.println("ERROR: Failed to open file " + String(fileName) + " for writing!");
-    return;
+    return (false);
   }
   if (file.print(message)) {
     Serial.println("INFO: Successfully wrote file " + String(fileName) + "!");
   } else {
     Serial.println("ERROR: Failed to write file " + String(fileName) + "!");
-    return;
+    return (false);
   }
   size_t size = file.size();
   Serial.println("INFO: File size is " + String(size) + ".");
   file.close();
+  endLittleFS();
+  return (true);
 }
 
-void listDir(const char* dirname) {
+boolean listDir(const char* dirname) {
+  if (!startLittleFS()) { return (false); }
   Serial.printf("Listing directory: %s\n", dirname);
-
   Dir root = LittleFS.openDir(dirname);
-
   while (root.next()) {
     File file = root.openFile("r");
     Serial.print(" FILE: ");
@@ -53,9 +59,12 @@ void listDir(const char* dirname) {
     tmstruct = localtime(&lw);
     Serial.printf(", LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
   }
+  endLittleFS();
+  return (true);
 }
 
-void showFSInfo(){
+boolean showFSInfo() {
+  if (!startLittleFS()) { return (false); }
   FSInfo info;
   LittleFS.info(info);
   Serial.println("totalBytes: " + String(info.totalBytes));
@@ -65,34 +74,26 @@ void showFSInfo(){
   Serial.println("maxOpenFiles: " + String(info.maxOpenFiles));
   Serial.println("maxPathLength: " + String(info.maxPathLength));
   listDir("/");
+  endLittleFS();
+  return (true);
 }
 
-//ToDo: mount and unmount for each operation
 String readFile(const char* fileName) {
-//  void readFile(const char* fileName) {
+  //File System
+  if (!startLittleFS()) { return (""); }
   Serial.printf("INFO: Reading file: %s\n", fileName);
   File file = LittleFS.open(fileName, "r");
   if (!file) {
     Serial.println("INFO: Failed to open file " + String(fileName) + " for reading!");
-//    return("");
+    return ("");
   }
   showFSInfo();
   size_t size = file.size();
-  Serial.println("INFO: File size is " + String(size) + ".");
-//  std::unique_ptr<char[]> buf(new char[size]);
-  char buf[JSON_MEMORY*4];
+  char buf[JSON_MEMORY];
   file.readBytes(buf, size);
-//  Serial.println("Received: " + String(buf));
-//  file.readBytes(buf.get(), size);
-
-//  Serial.print("Read from file: ");
-//  while (file.available()) {
-//    Serial.write(file.read());
-//  }
-  
-
   file.close();
-  return(String(buf));
+  endLittleFS();
+  return (String(buf));
 }
 
 void readFile1(const char* fileName) {
@@ -131,11 +132,9 @@ void readFile1(const char* fileName) {
   JsonArray array = colorsJson.as<JsonArray>();
   for (JsonVariant v : array) {
     String colorText = v.as<String>();
-    unsigned long int color = strtoul(colorText.c_str(), NULL, 16);
+    unsigned long int color = strtoul(colorText.c_str(), NULL, 16); //conversion from HEX String => HEX number
     Serial.println("Color: " + colorText + ", value = " + color);
   }
-
-  Serial.println("atoi(0xFFFFFF): " + String(atoi("0xFFFFFF")) + ", String(0xFFFFFF): " + String(0xFFFFFF));
 
   Serial.print("Read from file: ");
   while (file.available()) {
@@ -144,30 +143,34 @@ void readFile1(const char* fileName) {
   file.close();
 }
 
-void deleteFile(const char* fileName) {
+boolean deleteFile(const char* fileName) {
+  if (!startLittleFS()) { return (false); }
   Serial.printf("Deleting file: %s\n", fileName);
   File file = LittleFS.open(fileName, "r");
   if (!file) {
     Serial.println("WARNING: There is no file " + String(fileName) + ". Nothing to delete!");
     showFSInfo();
-    return;
-  }  
+    return (true);
+  }
   if (LittleFS.remove(fileName)) {
     Serial.println("INFO: Sucessfully deleted file " + String(fileName) + ".");
   } else {
     Serial.println("ERROR: Failed to delete file " + String(fileName) + ".");
+    return (false);
   }
+  endLittleFS();
+  return (true);
 }
 
-void renameFile(const char* fileName1, const char* fileName2) {
+boolean renameFile(const char* fileName1, const char* fileName2) {
+  if (!startLittleFS()) { return (false); }
   Serial.printf("Renaming file %s to %s\n", fileName1, fileName2);
   if (LittleFS.rename(fileName1, fileName2)) {
-    Serial.println("File renamed");
+    Serial.println("INFO: File renamed.");
   } else {
-    Serial.println("Rename failed");
+    Serial.println("ERROR: Rename failed.");
+    return (false);
   }
+  endLittleFS();
+  return (true);
 }
-
-
-
-
