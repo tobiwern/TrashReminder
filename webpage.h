@@ -320,10 +320,10 @@ const char webpage[] PROGMEM = R"=====(
               <option value="17">17 Uhr</option>
               <option value="18">18 Uhr</option>
               <option value="19">19 Uhr</option>
-              <option value="19">20 Uhr</option>
-              <option value="19">21 Uhr</option>
-              <option value="19">22 Uhr</option>
-              <option value="19">23 Uhr</option>
+              <option value="20">20 Uhr</option>
+              <option value="21">21 Uhr</option>
+              <option value="22">22 Uhr</option>
+              <option value="23">23 Uhr</option>
             </select></td>
         </tr>
         <tr>
