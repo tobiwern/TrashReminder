@@ -71,7 +71,7 @@ const char webpage[] PROGMEM = R"=====(
           xhttp.open("GET", "close", true);
           xhttp.send();
           document.getElementById("body").innerHTML ="<h1>Beendet - Bitte Fenster schließen!</h1>";
-          window.close(); //close the page
+        //  window.close(); //close the page
         }
 
         function requestSettings(){
