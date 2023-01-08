@@ -7,7 +7,8 @@ import re
 
 #files = ["C:/Users/tobiw/Downloads/Abfuhrkalender-Hirrlingen-2023.ics","C:/Users/tobiw/Downloads/Abfuhrkalender-Hirrlingen-2022.ics", "C:/Users/tobiw/Downloads/Abfallkalender Hirrlingen.ics"]
 #files = ["C:/Users/tobiw/Downloads/allestrassenweilimschoenbuch.ics"]
-files = ["C:/Users/tobiw/Downloads/stuttgart-gruenewaldstr25.ics"]
+#files = ["C:/Users/tobiw/Downloads/stuttgart-gruenewaldstr25.ics"]
+files = ["C:/Users/tobiw/Downloads/panoramastrboeblingen.ics"]
 #files = ["C:/Users/tobiw/Downloads/allestrassenebhausen.ics"]
 #validEntries = ['Altpapier-Tonne in Hirrlingen', 'Bioabfall in Hirrlingen', 'Gelber Sack in Hirrlingen', 'Häckselgut in Hirrlingen', 'Restmüll in Hirrlingen']
 #validEntries = ['Altpapier-Tonne in Hirrlingen', 'Gelber Sack in Hirrlingen', 'Häckselgut in Hirrlingen', 'Restmüll in Hirrlingen']
