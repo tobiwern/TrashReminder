@@ -89,9 +89,9 @@ String readFile(const char* fileName) {
   }
   showFSInfo();
   size_t size = file.size();
-  if(size > JSON_MEMORY){
+  if (size > JSON_MEMORY) {
     Serial.println("File size is too large " + String(size) + ">" + String(JSON_MEMORY));
-    return("");
+    return ("");
   }
   char buf[JSON_MEMORY];
   file.readBytes(buf, size);
@@ -141,6 +141,7 @@ boolean updateVariablesFromFile(const char* fileName) {
   file.close();
 }
 */
+
 boolean deleteFile(const char* fileName) {
   if (!startLittleFS()) { return (false); }
   Serial.printf("Deleting file: %s\n", fileName);
