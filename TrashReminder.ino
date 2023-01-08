@@ -37,7 +37,7 @@ int startHour = 15;       //am Vortag
 int endHour = 8;          //am Abholugstag
 int brightness = 255;     //highest value since used to fadeBy...
 int fadeAmount = 5;       // Set the amount to fade to 5, 10, 15, 20, 25 etc even up to 255.
-int showDuration = 10; //5000;  //ms Splash screen
+int showDuration = 5000;  //ms Splash screen
 unsigned long millisLast = 0;
 
 /// STATE MACHINE
@@ -163,7 +163,7 @@ void setColorIds(String taskIds) {
     indexFound = taskIds.indexOf(",", start);
     taskId = taskIds.substring(start, indexFound).toInt();
     if (isValidTask(taskId)) { colorIds[index++] = taskId; }
-//    Serial.println("taskId = " + String(taskId) + ", start = " + String(start) + ", indexFound = " + String(indexFound) + ", validTask = " + String(isValidTask(taskId)));
+    //    Serial.println("taskId = " + String(taskId) + ", start = " + String(start) + ", indexFound = " + String(indexFound) + ", validTask = " + String(isValidTask(taskId)));
     start = indexFound + 1;
   } while (indexFound != -1);
 }
@@ -264,7 +264,7 @@ void addGlitter(fract8 chanceOfGlitter) {
   }
 }
 
-#include "webserver.h" //separate file for webserver functions
+#include "webserver.h"  //separate file for webserver functions
 
 void handleState() {
   unsigned long millisNow = millis();
@@ -280,6 +280,7 @@ void handleState() {
       acknowledge = 0;
       resetColorIds();
       listDir("/");
+      readStartEndTimes();  //initializes startHour and endHour
       STATE_NEXT = STATE_SHOW;
       break;
     case STATE_SHOW:  //***********************************************************
@@ -291,7 +292,14 @@ void handleState() {
       EVERY_N_MILLISECONDS(20) {
         gHue++;
       }  // slowly cycle the "base color" through the rainbow
-      if ((millisNow - millisLast) > showDuration) { if(STATE_FOLLOWING != -1){STATE_NEXT = STATE_FOLLOWING; STATE_FOLLOWING = -1;} else {STATE_NEXT = STATE_QUERY;}}
+      if ((millisNow - millisLast) > showDuration) {
+        if (STATE_FOLLOWING != -1) {
+          STATE_NEXT = STATE_FOLLOWING;
+          STATE_FOLLOWING = -1;
+        } else {
+          STATE_NEXT = STATE_QUERY;
+        }
+      }
       break;
     case STATE_DISCONNECTED:  //***********************************************************
       setColor(CRGB::Red, true, 2);
@@ -319,4 +327,3 @@ void handleState() {
   STATE_PREVIOUS = STATE;
   if (STATE_NEXT != -1) { STATE = STATE_NEXT; }
 }
-
