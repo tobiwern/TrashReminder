@@ -6,7 +6,7 @@
 //https://makesmart.net/arduino-ide-arbeiten-mit-json-objekten-fur-einsteiger/
 //https://arduinojson.org/v6/doc/deserialization/
 
-#define JSON_MEMORY 1024 * 40
+#define JSON_MEMORY 1024 * 80
 
 boolean startLittleFS() {
   if (!LittleFS.begin()) {
@@ -19,6 +19,7 @@ boolean startLittleFS() {
 
 void endLittleFS() {
   LittleFS.end();
+  Serial.println("INFO: Successfully un-mounted LittleFS.");
 }
 
 boolean writeFile(const char* fileName, const char* message) {
@@ -87,17 +88,10 @@ String readFile(const char* fileName) {
     Serial.println("INFO: Failed to open file " + String(fileName) + " for reading!");
     return ("");
   }
-  showFSInfo();
-  size_t size = file.size();
-  if (size > JSON_MEMORY) {
-    Serial.println("File size is too large " + String(size) + ">" + String(JSON_MEMORY));
-    return ("");
-  }
-  char buf[JSON_MEMORY];
-  file.readBytes(buf, size);
+  String jsonText = file.readString();
   file.close();
   endLittleFS();
-  return (String(buf));
+  return (jsonText);
 }
 /*
 boolean updateVariablesFromFile(const char* fileName) {
