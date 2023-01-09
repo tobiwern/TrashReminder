@@ -44,13 +44,13 @@ const char webpage[] PROGMEM = R"=====(
           white-space: nowrap;
           vertical-align: center;
           text-align: left;
-          padding: 10px;
+          padding-left: 5px;
         }
 
         td.description {
           vertical-align: center;
           text-align: right;
-          padding: 10px;
+          padding-right: 5px;
         }
       </style>
       <script>
@@ -295,7 +295,7 @@ const char webpage[] PROGMEM = R"=====(
 
         function genCheckboxes(items) {
             var i = 0;
-            var text = "<br>Bitte w&auml;hlen Sie die Abfallarten aus, an die Sie erinnert werden wollen:<br>";
+            var text = "<br>Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br>";
             text += "<table>"
             for (let i = 0; i < items.length; i++) {
                 text += "<tr>"
@@ -306,7 +306,7 @@ const char webpage[] PROGMEM = R"=====(
             }
             text += "</table>";
             text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button>";
-            text += "<br><br><div id=output></div>";
+            text += "<br><div id=output></div>";
             document.getElementById("tasks").innerHTML = text;
             document.getElementById("message").innerHTML = "";
             document.getElementById("settings").innerHTML = "";
@@ -326,8 +326,7 @@ const char webpage[] PROGMEM = R"=====(
           <td class=value><select id="start" name="start"></select></td>
         </tr>
         <tr>
-          <td class=description><label class='fancy-input' for="end">Ende der Erinnerung<br>
-             (am Tag der Abholung):</label></td>
+          <td class=description><label class='fancy-input' for="end">Ende der Erinnerung<br>(am Tag der Abholung):</label></td>
           <td class=value><select id="end" name="end"></select></td>
         </tr>
       </table>
