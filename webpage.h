@@ -44,11 +44,13 @@ const char webpage[] PROGMEM = R"=====(
           white-space: nowrap;
           vertical-align: center;
           text-align: left;
+          padding: 10px;
         }
 
         td.description {
           vertical-align: center;
           text-align: right;
+          padding: 10px;
         }
       </style>
       <script>
@@ -62,6 +64,7 @@ const char webpage[] PROGMEM = R"=====(
               setTimeout( function(){document.getElementById("message").innerHTML ="";}, 2000);             
             }
           };
+          document.getElementById("settings").innerHTML = "";
           xhttp.open("GET", "fireworks", true);
           xhttp.send();
         } 
@@ -78,6 +81,16 @@ const char webpage[] PROGMEM = R"=====(
           var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
+              //populate options
+              const dropdowns = ["start", "end"];
+              dropdowns.forEach(function (item){
+                for(var i = 0; i <= 23; i++) {
+                    var el = document.createElement("option");
+                    el.textContent = i + " Uhr";
+                    el.value = i;
+                    document.getElementById(item).appendChild(el);
+                }              
+              });
               value = this.responseText;
               tokens = value.split(",");
               document.getElementById("start").value = tokens[0];
@@ -296,6 +309,7 @@ const char webpage[] PROGMEM = R"=====(
             text += "<br><br><div id=output></div>";
             document.getElementById("tasks").innerHTML = text;
             document.getElementById("message").innerHTML = "";
+            document.getElementById("settings").innerHTML = "";
         }
       </script>
     </head>  
@@ -309,42 +323,12 @@ const char webpage[] PROGMEM = R"=====(
       <table>
         <tr>
           <td class=description><label for="start">Start der Erinnerung<br>(am Vortag der Abholung):</label></td>
-          <td class=value><select id="start" name="start">
-              <option value="10">10 Uhr</option>
-              <option value="11">11 Uhr</option>
-              <option value="12">12 Uhr</option>
-              <option value="13">13 Uhr</option>
-              <option value="14">14 Uhr</option>
-              <option value="15">15 Uhr</option>
-              <option value="16">16 Uhr</option>
-              <option value="17">17 Uhr</option>
-              <option value="18">18 Uhr</option>
-              <option value="19">19 Uhr</option>
-              <option value="20">20 Uhr</option>
-              <option value="21">21 Uhr</option>
-              <option value="22">22 Uhr</option>
-              <option value="23">23 Uhr</option>
-            </select></td>
+          <td class=value><select id="start" name="start"></select></td>
         </tr>
         <tr>
-          <td class=description><label class='fancy-input' for="end">Ende der Erinnerung<br>(am Tag der
-              Abholung):</label></td>
-          <td class=value><select id="end" name="end">
-              <option value="6">6 Uhr</option>
-              <option value="7">7 Uhr</option>
-              <option value="8">8 Uhr</option>
-              <option value="9">9 Uhr</option>
-              <option value="10">10 Uhr</option>
-              <option value="11">11 Uhr</option>
-              <option value="12">12 Uhr</option>
-              <option value="13">13 Uhr</option>
-              <option value="14">14 Uhr</option>
-              <option value="15">15 Uhr</option>
-              <option value="16">16 Uhr</option>
-              <option value="17">17 Uhr</option>
-              <option value="18">18 Uhr</option>
-              <option value="19">19 Uhr</option>
-            </select></td>
+          <td class=description><label class='fancy-input' for="end">Ende der Erinnerung<br>
+             (am Tag der Abholung):</label></td>
+          <td class=value><select id="end" name="end"></select></td>
         </tr>
       </table>
       <div id='messageTime'></div>
