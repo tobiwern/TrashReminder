@@ -97,7 +97,7 @@ void setup() {
   //Time Client
   timeClient.begin();
   timeClient.setTimeOffset(3600);  //GMT+1
-//  deleteFile("/data.json");
+  //  deleteFile("/data.json");
 }
 
 void loop() {
@@ -132,8 +132,8 @@ void handleLed(int nowEpoch) {
   //  printColorIds();
   for (auto entry : epochTaskDict) {
     dictEpoch = entry.first;
-    //    Serial.println("now: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch+startTime)+ ", dictEpoch+endTime = " + String(dictEpoch+endTime));
     if ((nowEpoch > dictEpoch + (startHour - 24) * 60 * 60) && (nowEpoch < dictEpoch + endHour * 60 * 60)) {
+//      Serial.println("nowEpoch: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch + (startHour - 24) * 60 * 60) + ", dictEpoch+endTime = " + String(dictEpoch + endHour * 60 * 60));
       if (dictEpoch != triggerEpoch) {
         acknowledge = 0;  //acknowledge only valid for same triggerEpoch
         colorIndex = 0;
