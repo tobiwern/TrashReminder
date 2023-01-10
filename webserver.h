@@ -1,10 +1,106 @@
+//https://arduinojson.org/v6/api/jsondocument/
+//https://arduinojson.org/v6/doc/deserialization/
+//https://arduinojson.org/v6/assistant/#/step1
+//https://arduinogetstarted.com/reference/serial-readbytes
+//https://makesmart.net/arduino-ide-arbeiten-mit-json-objekten-fur-einsteiger/
+//https://arduinojson.org/v6/how-to/reduce-memory-usage/
+
 #include <ESP8266WebServer.h>
 ESP8266WebServer server(80);
-
+#define JSON_MEMORY 1024 * 32
 // Server Functions
 
-void readSettings() {  //transfering ESP data to the Webpage
-  String value = readFile("/data.json");
+boolean initTasksFromFile(const char* fileName) {
+  /*  
+  jsonData = readFile(dataFile);
+  Serial.println("JsonData: " + jsonData);
+  if (jsonData == "") {
+    Serial.println("Failed to read " + String(fileName));
+    return (false);
+  }
+*/
+  if (!startLittleFS()) { return (""); }
+  Serial.printf("INFO: Reading file: %s\n", fileName);
+  File file = LittleFS.open(fileName, "r");
+  if (!file) {
+    Serial.println("INFO: Failed to open file " + String(fileName) + " for reading!");
+    return ("");
+  }
+  DynamicJsonDocument doc(JSON_MEMORY);  //on heap for large amount of data
+  //  DeserializationError error = deserializeJson(doc, jsonData.c_str());
+  DeserializationError error = deserializeJson(doc, file);
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.f_str());
+    return (false);
+  }
+
+  // get validTasks ////////////////////////////////
+  //JsonVariant validTaskIdsJson = doc["validTaskIds"];
+  //JsonArray validTaskIds = validTaskIdsJson.as<JsonArray>();
+  JsonArray validTaskIds = doc["validTaskIds"];  //Implicit cast
+  numberOfValidTaskIds = 0;
+  for (JsonVariant validTaskId : validTaskIds) {
+    validIndex[numberOfValidTaskIds++] = validTaskId.as<int>();
+    Serial.println("validIndex: " + String(validIndex[numberOfValidTaskIds - 1]));
+  }
+
+  // get tasks ////////////////////////////////
+  JsonArray tasks = doc["tasks"];  //Implicit cast
+  numberOfTaskIds = 0;
+  for (JsonVariant entry : tasks) {
+    task[numberOfTaskIds++] = entry.as<String>();
+    Serial.println("Task: " + task[numberOfTaskIds - 1]);
+  }
+
+  // get colors ////////////////////////////////
+  JsonArray colors = doc["colors"];  //implicit cast to JsonArray!
+  numberOfTaskIds = 0;
+  for (JsonVariant item : colors) {
+    String colorText = item.as<String>();
+    unsigned long int color1 = strtoul(colorText.c_str(), NULL, 16);  //conversion from HEX String => HEX number
+    color[numberOfTaskIds++] = color1;
+    Serial.println("Color: " + colorText + ", value = " + String(color1));
+  }
+
+  JsonArray epochTasks = doc["epochTasks"];  //Implicit cast
+  numberOfEpochs = 0;
+  for (JsonObject obj : epochTasks) {
+    for (JsonPair v : obj) {
+      String epochText = String(v.key().c_str());
+      unsigned long epoch = strtoul(epochText.c_str(), 0, 10);  // is a JsonString
+      String taskIds = v.value().as<String>();                  // is a JsonVariant
+      epochTaskDict[numberOfEpochs++] = { .epoch = epoch, .taskIds = taskIds };
+      Serial.println("epochText: " + String(epochText) + ", epoch: " + String(epoch) + ", taskIds = " + taskIds);
+    }
+  }
+  file.close();
+  endLittleFS();
+  return (true);
+}
+
+//settings
+void initStartEndTimes() {
+  String jsonText = readFile(settingsFile);
+  if (jsonText == "") {
+    Serial.println("ERROR: Lesen der Daten fehlgeschlagen.");
+    return;
+  }
+  Serial.println("Read settings: " + jsonText);
+  StaticJsonDocument<512> doc;
+  DeserializationError error = deserializeJson(doc, jsonText);
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.f_str());
+    return;
+  }
+  startHour = doc["startHour"];
+  endHour = doc["endHour"];
+  Serial.println("Read startHour = " + String(startHour) + ", endHour = " + String(endHour));
+}
+
+void readTasks() {  //transfering ESP data to the Webpage
+  String value = readFile(dataFile);
   if (value == "") { value = "ERROR: Lesen der Daten fehlgeschlagen."; }
   Serial.println("Received:" + value);
   Serial.println("Sending settings: " + value);
@@ -25,26 +121,6 @@ void notFound() {
 void handleRoot() {
   String s = webpage;
   server.send(200, "text/html", s);
-}
-
-//settings
-void readStartEndTimes() {
-  String jsonText = readFile("/settings.json");
-  if (jsonText == "") {
-    Serial.println("ERROR: Lesen der Daten fehlgeschlagen.");
-    return;
-  }
-  Serial.println("Read settings: " + jsonText);
-  StaticJsonDocument<512> doc;
-  DeserializationError error = deserializeJson(doc, jsonText);
-  if (error) {
-    Serial.print(F("deserializeJson() failed: "));
-    Serial.println(error.f_str());
-    return;
-  }
-  startHour = doc["startHour"];
-  endHour = doc["endHour"];
-  Serial.println("Read startHour = " + String(startHour) + ", endHour = " + String(endHour));
 }
 
 void writeStartEndTimes() {
@@ -74,11 +150,11 @@ void setEndHour() {
   writeStartEndTimes();
 }
 
-void receiveSettings() {
+void receiveTasks() {
   String jsonText = server.arg("value");
   String response = "";
   Serial.println("Receiving settings in JSON format: " + jsonText);
-  if (writeFile("/data.json", jsonText.c_str())) {
+  if (writeFile(dataFile, jsonText.c_str())) {
     response = "Übertragen der Daten war erfolgreich!";
   } else {
     response = "ERROR: Übertragen der Daten fehlgeschlagen!";
@@ -99,10 +175,10 @@ void fireworks() {
   server.send(200, "text/plane", "Feuerwerk!");  //should always respond to prevent resend (10x)
 }
 
-void deleteSettings() {
+void deleteTasks() {
   Serial.println("Delete Settings.");
   String response = "";
-  if (deleteFile("/data.json")) {
+  if (deleteFile(dataFile)) {
     response = "Löschen der Daten war erfolgreich!";
   } else {
     response = "ERROR: Löschen der Daten fehlgeschlagen!";
@@ -116,9 +192,9 @@ void startWebServer() {
   server.on("/set_start", setStartHour);
   server.on("/set_end", setEndHour);
   server.on("/request_settings", sendSettings);
-  server.on("/send_settings", receiveSettings);  //webpage => ESP name
-  server.on("/read_settings", readSettings);
-  server.on("/delete_settings", deleteSettings);
+  server.on("/send_settings", receiveTasks);  //webpage => ESP name
+  server.on("/read_settings", readTasks);
+  server.on("/delete_settings", deleteTasks);
   server.on("/close", closeSettings);
   server.on("/fireworks", fireworks);
   server.onNotFound(notFound);
