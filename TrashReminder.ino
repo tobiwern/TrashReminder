@@ -80,6 +80,25 @@ int nowEpoch = 0;            //global since only querying every minute
 int queryIntervall = 60000;  //ms => every minute (could be less, however to really turn on LED at intended time...)
 unsigned long lastQueryMillis = 0;
 
+//data
+String jsonData;
+const char* dataFile = "/data.json";
+const char* settingsFile = "/settings.json";
+int numberOfColors = 0;
+int numberOfValidTaskIds = 0;
+int numberOfTaskIds = 0;
+int numberOfEpochs = 0;
+String task[4];
+int color[4];
+int validIndex[4]; //ToDo 20
+
+typedef struct epochTask {
+    unsigned int epoch;
+    String taskIds;
+} epochTask;
+
+epochTask epochTaskDict[1000];
+
 void setup() {
   Serial.begin(115200);
   reed.attachEdgeDetect(doNothing, setAcknowledge);
@@ -97,7 +116,7 @@ void setup() {
   //Time Client
   timeClient.begin();
   timeClient.setTimeOffset(3600);  //GMT+1
-  //  deleteFile("/data.json");
+  //  deleteFile(dataFile);
 }
 
 void loop() {
@@ -126,12 +145,15 @@ void printColorIds() {
     Serial.println("colorIds[" + String(i) + "] = " + String(colorIds[i]));
   }
 }
+
 void handleLed(int nowEpoch) {
   int dictEpoch;
   resetColorIds();
   //  printColorIds();
-  for (auto entry : epochTaskDict) {
-    dictEpoch = entry.first;
+  for(int i = 0; i < numberOfEpochs; i++){
+  //for (auto entry : epochTaskDict) {
+  //  dictEpoch = entry.first;
+    dictEpoch = epochTaskDict[i].epoch;
     if ((nowEpoch > dictEpoch + (startHour - 24) * 60 * 60) && (nowEpoch < dictEpoch + endHour * 60 * 60)) {
 //      Serial.println("nowEpoch: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch + (startHour - 24) * 60 * 60) + ", dictEpoch+endTime = " + String(dictEpoch + endHour * 60 * 60));
       if (dictEpoch != triggerEpoch) {
@@ -141,7 +163,7 @@ void handleLed(int nowEpoch) {
       }
       triggerEpoch = dictEpoch;
       if (!acknowledge) {
-        setColorIds(entry.second);
+        setColorIds(epochTaskDict[i].taskIds);
       }
     }
   }
@@ -151,7 +173,7 @@ void handleLed(int nowEpoch) {
 }
 
 boolean isValidTask(int taskId) {
-  for (int i = 0; i < sizeof(validIndex) / sizeof(validIndex[0]); i++) {
+  for (int i = 0; i < numberOfValidTaskIds; i++) {
     if (taskId == validIndex[i]) { return (true); }
   }
   return (false);
@@ -280,7 +302,8 @@ void handleState() {
       acknowledge = 0;
       resetColorIds();
       listDir("/");
-      readStartEndTimes();  //initializes startHour and endHour
+      initStartEndTimes();  //initializes startHour and endHour
+      initTasksFromFile(dataFile);
       STATE_NEXT = STATE_SHOW;
       break;
     case STATE_SHOW:  //***********************************************************
