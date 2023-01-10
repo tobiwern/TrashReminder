@@ -6,7 +6,7 @@
 //https://makesmart.net/arduino-ide-arbeiten-mit-json-objekten-fur-einsteiger/
 //https://arduinojson.org/v6/doc/deserialization/
 
-#define JSON_MEMORY 1024 * 80
+
 
 boolean startLittleFS() {
   if (!LittleFS.begin()) {
@@ -93,48 +93,6 @@ String readFile(const char* fileName) {
   endLittleFS();
   return (jsonText);
 }
-/*
-boolean updateVariablesFromFile(const char* fileName) {
-  String jsonText = readFile(fileName);
-  if(jsonText == ""){
-    Serial.println("Failed to read " + fileName);
-    return(false);
-  }
-//  std::unique_ptr<char[]> buf(new char[size]);
-//  file.readBytes(buf.get(), size);
-  StaticJsonDocument<JSON_MEMORY> doc;
-  
-//  DeserializationError error = deserializeJson(jsonText.c_str(), buf.get());
-//  if (error) {
-//    Serial.print(F("deserializeJson() failed: "));
-//    Serial.println(error.f_str());
-//    return;
-//  }
-
-//  JsonObject obj = doc.as<JsonObject>(); //the root of a JSON object is always a DICT
-
-//  for (JsonPair p : obj) {
-//    p.key() // is a JsonString
-//    p.value() // is a JsonVariant
-//  }
-
-  // get colors ////////////////////////////////
-  JsonVariant colorsJson = doc["colors"];
-
-  JsonArray array = colorsJson.as<JsonArray>();
-  for (JsonVariant v : array) {
-    String colorText = v.as<String>();
-    unsigned long int color = strtoul(colorText.c_str(), NULL, 16); //conversion from HEX String => HEX number
-    Serial.println("Color: " + colorText + ", value = " + String(color));
-  }
-
-  Serial.print("Read from file: ");
-  while (file.available()) {
-    Serial.write(file.read());
-  }
-  file.close();
-}
-*/
 
 boolean deleteFile(const char* fileName) {
   if (!startLittleFS()) { return (false); }
