@@ -162,7 +162,7 @@ const char webpage[] PROGMEM = R"=====(
           document.getElementById(dropdown).addEventListener('change', function(){sendUpdate(dropdown);});
         }
 	      function sendUpdate(dropdown) {
-          var value = document.getElementById(dropdown).value;
+          var value = parseInt(document.getElementById(dropdown).value);
           var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -172,6 +172,23 @@ const char webpage[] PROGMEM = R"=====(
               setTimeout( function(){document.getElementById("messageTime").innerHTML ="";}, 2000);
             }
           };
+          if(dropdown == "start"){
+            var endValue = parseInt(document.getElementById("end").value)
+            if(value < endValue){
+              var newValue = endValue+1;
+              alert("Um überlappende Ereignisse an Folgetagen zu vermeiden, sollte der \"Start der Erinnerung\" (" + value + ") nicht vor dem \"Ende der Erinnerung\" (" + endValue + ") liegen!\nSetze \"Start der Erinnerung\" auf minimal zulässigen Wert (" + newValue + ").");
+              value = newValue
+              document.getElementById(dropdown).value = value
+            }
+          } else {
+            var startValue = parseInt(document.getElementById("start").value)
+            if(startValue < value){
+              newValue = startValue-1;
+              alert("Um überlappende Ereignisse an Folgetagen zu vermeiden, sollte der \"Start der Erinnerung\" (" + startValue + ") nicht vor dem \"Ende der Erinnerung\" (" + value + ") liegen!\nSetze \"Ende der Erinnerung\" auf maximal zulässigen Wert (" + newValue + ").");
+              value = newValue;
+              document.getElementById(dropdown).value = value
+            }
+          }
           xhttp.open("GET", "set_" + dropdown+ "?value=" + value, true);
           xhttp.send();          
         }
