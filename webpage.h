@@ -214,7 +214,7 @@ const char webpage[] PROGMEM = R"=====(
                         if (line.search("DTSTART") != -1) {
                             var date = line.split(":")[1];
                             dateString = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
-                            var epoch = new Date(dateString).getTime();
+                            var epoch = new Date(dateString).getTime()/1000; //since ms => s
                         } else if (line.search("SUMMARY") != -1) {
                             var item = line.split(":")[1];
                             item = item.replace("\\", "");
@@ -298,7 +298,7 @@ const char webpage[] PROGMEM = R"=====(
                 if (debug) {
                     entries.push('{"' + epoch + '"' + ":" + '{"date":"' + date + '","tasks":["' + tasks.join('","') + '"],"taskIds":[' + taskIds.join(',') + ']}}');
                 } else {
-                    entries.push('{"' + epoch + '"' + ":" + '{"taskIds":[' + taskIds.join(',') + ']}}');
+                    entries.push('{"' + epoch + '":"' + taskIds.join(',') + '"}');
                 }
             }
             
