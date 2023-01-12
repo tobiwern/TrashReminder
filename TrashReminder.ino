@@ -22,12 +22,12 @@ JSON Validator: https://jsonformatter.curiousconcept.com/#
 
 #include "filesystem.h"
 #include "webpage.h"
-#include "data_neuweiler.h"
+//#include "data_neuweiler.h"
 
 //forward function prototypes (so function order does not matter)
 //void setColor(int color, boolean fade, int blinkSpeed);
 
-const int maxNumberOfTaskIds = 3; //allow max three different tasks per day
+const int maxNumberOfTaskIds = 3;                   //allow max three different tasks per day
 int colorIds[maxNumberOfTaskIds] = { -1, -1, -1 };  //better use memset(colorIds, -1, sizeof(colorIds)); ?
 int colorIdsLast[maxNumberOfTaskIds] = { -1, -1, -1 };
 int colorIndex = 0;  //used to toggle between multiple colors for same day tasks
@@ -82,17 +82,16 @@ unsigned long lastQueryMillis = 0;
 //data
 const char* dataFile = "/data.json";
 const char* settingsFile = "/settings.json";
-int numberOfColors = 0;
-int numberOfValidTaskIds = 0; //global counter 
+int numberOfValidTaskIds = 0;  //global counter
 int numberOfTaskIds = 0;
 int numberOfEpochs = 0;
-String task[4];
-int color[4];
-int validIndex[4];  //ToDo 20
+String task[20];
+int color[20];
+int validTaskId[20];
 
 typedef struct epochTask {
   unsigned int epoch;
-  unsigned char taskIds[maxNumberOfTaskIds];  
+  int taskIds[maxNumberOfTaskIds];
 } epochTask;
 
 epochTask epochTaskDict[100];
@@ -138,8 +137,8 @@ void resetColorIds() {
   memset(colorIds, -1, sizeof(colorIds));
 }
 
-void printColorIds() { //debug
-  for (int i = 0; i < numberOfColors; i++) {
+void printColorIds() {  //debug
+  for (int i = 0; i < maxNumberOfTaskIds; i++) {
     Serial.println("colorIds[" + String(i) + "] = " + String(colorIds[i]));
   }
 }
@@ -165,23 +164,25 @@ void handleLed(int nowEpoch) {
       }
     }
   }
-  //  printColorIds();
+  //printColorIds();
   setTaskColor();
   FastLED.show();
 }
 
 boolean isValidTask(int taskId) {
   for (int i = 0; i < numberOfValidTaskIds; i++) {
-    if (taskId == validIndex[i]) { return (true); }
+    if (taskId == validTaskId[i]) { return (true); }
   }
   return (false);
 }
 
-void setColorIds(unsigned char taskIds[]) {
+void setColorIds(int taskIds[]) {
   int index = 0;
+  //Serial.println("==================");
   for (int i = 0; i < maxNumberOfTaskIds; i++) {
+    //Serial.println("taskId[" + String(i) + "] = " + String(int(taskIds[i])) + ", valid = " + String(isValidTask(taskIds[i])));
     if (taskIds[i] != -1) {
-      if (isValidTask(taskIds[i])) { colorIds[index++] = taskIds[i]; }
+      if (isValidTask(taskIds[i])) { colorIds[index++] = int(taskIds[i]); }
     }
   }
 }
@@ -218,7 +219,7 @@ void doNothing() {
 
 void incrementColorId() {
   int numberOfTasks = 0;
-  for (int i = 0; i < maxNumberOfTaskIds; i++) { //detect how many tasks
+  for (int i = 0; i < maxNumberOfTaskIds; i++) {  //detect how many tasks
     if (colorIds[i] != -1) { numberOfTasks++; }
   }
   colorIndex++;

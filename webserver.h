@@ -37,22 +37,21 @@ boolean initDataFromFile() {
   // get validTasks ////////////////////////////////
   JsonArray validTaskIds = doc["validTaskIds"];  //Implicit cast
   numberOfValidTaskIds = 0;
-  for (JsonVariant validTaskId : validTaskIds) {
-    validIndex[numberOfValidTaskIds++] = validTaskId.as<int>();
-    Serial.println("validIndex: " + String(validIndex[numberOfValidTaskIds - 1]));
+  for (JsonVariant v : validTaskIds) {
+    validTaskId[numberOfValidTaskIds++] = v.as<int>();
+    Serial.println("validTaskId: " + String(validTaskId[numberOfValidTaskIds - 1]));
   }
   // get tasks ////////////////////////////////
   JsonArray tasks = doc["tasks"];  //Implicit cast
   numberOfTaskIds = 0;
-  for (JsonVariant entry : tasks) {
-    task[numberOfTaskIds++] = entry.as<String>();
+  for (String taskText : tasks) { //Implicit cast
+    task[numberOfTaskIds++] = taskText;
     Serial.println("Task: " + task[numberOfTaskIds - 1]);
   }
   // get colors ////////////////////////////////
   JsonArray colors = doc["colors"];  //implicit cast to JsonArray!
   numberOfTaskIds = 0;
-  for (JsonVariant v : colors) {
-    String colorText = v.as<String>();
+  for (String colorText : colors) {
     unsigned long int color1 = strtoul(colorText.c_str(), NULL, 16);  //conversion from HEX String => HEX number
     color[numberOfTaskIds++] = color1;
     Serial.println("Color: " + colorText + ", value = " + String(color1));
@@ -62,12 +61,11 @@ boolean initDataFromFile() {
   numberOfEpochs = 0;
   for (JsonObject obj : epochTasks) {
     for (JsonPair p : obj) {
-      int taskIds[] = { -1, -1, -1 };                         //reset
+      int taskIds[maxNumberOfTaskIds] = { -1, -1, -1 }; //reset
       unsigned long epoch = strtoul(p.key().c_str(), 0, 10);  // is a JsonString
       int counter = 0;
       JsonArray taskIdArray = p.value();  // is a JsonVariant
-      for (JsonVariant v : taskIdArray) {
-        int taskId = v.as<int>();
+      for (int taskId : taskIdArray) {
         taskIds[counter++] = taskId;
       }
       epochTask entry;
