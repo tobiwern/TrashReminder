@@ -11,10 +11,12 @@ ESP8266WebServer server(80);
 #define JSON_MEMORY 1024 * 32
 // Server Functions
 
-void printTaskIds(int taskIds[]) {//debug
+void printTaskIds(int taskIds[]) {  //debug
+  Serial.print("taskIds[] = ");
   for (int i = 0; i < maxNumberOfTaskIds; i++) {
-    Serial.println("taskIds[" + String(i) + "] = " + String(taskIds[i]));
+    if (taskIds[i] != -1) { Serial.print(String(taskIds[i]) + " "); }
   }
+  Serial.println("");
 }
 
 boolean initDataFromFile() {
@@ -39,7 +41,7 @@ boolean initDataFromFile() {
     validIndex[numberOfValidTaskIds++] = validTaskId.as<int>();
     Serial.println("validIndex: " + String(validIndex[numberOfValidTaskIds - 1]));
   }
-    // get tasks ////////////////////////////////
+  // get tasks ////////////////////////////////
   JsonArray tasks = doc["tasks"];  //Implicit cast
   numberOfTaskIds = 0;
   for (JsonVariant entry : tasks) {
@@ -60,20 +62,19 @@ boolean initDataFromFile() {
   numberOfEpochs = 0;
   for (JsonObject obj : epochTasks) {
     for (JsonPair p : obj) {
-      int taskIds[] = { -1, -1, -1 }; //reset
+      int taskIds[] = { -1, -1, -1 };                         //reset
       unsigned long epoch = strtoul(p.key().c_str(), 0, 10);  // is a JsonString
       int counter = 0;
       JsonArray taskIdArray = p.value();  // is a JsonVariant
-      for (JsonVariant v: taskIdArray) {
+      for (JsonVariant v : taskIdArray) {
         int taskId = v.as<int>();
-        Serial.println("taskId = " + String(taskId));
         taskIds[counter++] = taskId;
       }
       epochTask entry;
       entry.epoch = epoch;
       memcpy(entry.taskIds, taskIds, sizeof(entry.taskIds));
-      epochTaskDict[numberOfEpochs++] = entry ; //{ .epoch = epoch, .taskIds = taskIds };
-      Serial.println("epoch: " + String(epoch));
+      epochTaskDict[numberOfEpochs++] = entry;  //{ .epoch = epoch, .taskIds = taskIds };
+      Serial.print("epoch: " + String(epoch) + ", ");
       printTaskIds(taskIds);
     }
   }
