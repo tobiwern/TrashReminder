@@ -298,7 +298,7 @@ const char webpage[] PROGMEM = R"=====(
                 if (debug) {
                     entries.push('{"' + epoch + '"' + ":" + '{"date":"' + date + '","tasks":["' + tasks.join('","') + '"],"taskIds":[' + taskIds.join(',') + ']}}');
                 } else {
-                    entries.push('{"' + epoch + '":"' + taskIds.join(',') + '"}');
+                    entries.push('{"' + epoch + '":[' + taskIds.join(',') + ']}');
                 }
             }
             
