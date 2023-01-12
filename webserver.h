@@ -4,60 +4,53 @@
 //https://arduinogetstarted.com/reference/serial-readbytes
 //https://makesmart.net/arduino-ide-arbeiten-mit-json-objekten-fur-einsteiger/
 //https://arduinojson.org/v6/how-to/reduce-memory-usage/
+//https://github.com/arkhipenko/Dictionary
 
 #include <ESP8266WebServer.h>
 ESP8266WebServer server(80);
 #define JSON_MEMORY 1024 * 32
 // Server Functions
 
-boolean initTasksFromFile(const char* fileName) {
-  /*  
-  jsonData = readFile(dataFile);
-  Serial.println("JsonData: " + jsonData);
-  if (jsonData == "") {
-    Serial.println("Failed to read " + String(fileName));
+void printTaskIds(int taskIds[]) {//debug
+  for (int i = 0; i < maxNumberOfTaskIds; i++) {
+    Serial.println("taskIds[" + String(i) + "] = " + String(taskIds[i]));
+  }
+}
+
+boolean initDataFromFile() {
+  if (!startLittleFS()) { return (""); }
+  Serial.printf("INFO: Reading file: %s\n", dataFile);
+  File file = LittleFS.open(dataFile, "r");
+  if (!file) {
+    Serial.println("INFO: Failed to open file " + String(dataFile) + " for reading!");
     return (false);
   }
-*/
-  if (!startLittleFS()) { return (""); }
-  Serial.printf("INFO: Reading file: %s\n", fileName);
-  File file = LittleFS.open(fileName, "r");
-  if (!file) {
-    Serial.println("INFO: Failed to open file " + String(fileName) + " for reading!");
-    return ("");
-  }
   DynamicJsonDocument doc(JSON_MEMORY);  //on heap for large amount of data
-  //  DeserializationError error = deserializeJson(doc, jsonData.c_str());
   DeserializationError error = deserializeJson(doc, file);
   if (error) {
     Serial.print(F("deserializeJson() failed: "));
     Serial.println(error.f_str());
     return (false);
   }
-
   // get validTasks ////////////////////////////////
-  //JsonVariant validTaskIdsJson = doc["validTaskIds"];
-  //JsonArray validTaskIds = validTaskIdsJson.as<JsonArray>();
   JsonArray validTaskIds = doc["validTaskIds"];  //Implicit cast
   numberOfValidTaskIds = 0;
   for (JsonVariant validTaskId : validTaskIds) {
     validIndex[numberOfValidTaskIds++] = validTaskId.as<int>();
     Serial.println("validIndex: " + String(validIndex[numberOfValidTaskIds - 1]));
   }
-
-  // get tasks ////////////////////////////////
+    // get tasks ////////////////////////////////
   JsonArray tasks = doc["tasks"];  //Implicit cast
   numberOfTaskIds = 0;
   for (JsonVariant entry : tasks) {
     task[numberOfTaskIds++] = entry.as<String>();
     Serial.println("Task: " + task[numberOfTaskIds - 1]);
   }
-
   // get colors ////////////////////////////////
   JsonArray colors = doc["colors"];  //implicit cast to JsonArray!
   numberOfTaskIds = 0;
-  for (JsonVariant item : colors) {
-    String colorText = item.as<String>();
+  for (JsonVariant v : colors) {
+    String colorText = v.as<String>();
     unsigned long int color1 = strtoul(colorText.c_str(), NULL, 16);  //conversion from HEX String => HEX number
     color[numberOfTaskIds++] = color1;
     Serial.println("Color: " + colorText + ", value = " + String(color1));
@@ -66,12 +59,22 @@ boolean initTasksFromFile(const char* fileName) {
   JsonArray epochTasks = doc["epochTasks"];  //Implicit cast
   numberOfEpochs = 0;
   for (JsonObject obj : epochTasks) {
-    for (JsonPair v : obj) {
-      String epochText = String(v.key().c_str());
-      unsigned long epoch = strtoul(epochText.c_str(), 0, 10);  // is a JsonString
-      String taskIds = v.value().as<String>();                  // is a JsonVariant
-      epochTaskDict[numberOfEpochs++] = { .epoch = epoch, .taskIds = taskIds };
-      Serial.println("epochText: " + String(epochText) + ", epoch: " + String(epoch) + ", taskIds = " + taskIds);
+    for (JsonPair p : obj) {
+      int taskIds[] = { -1, -1, -1 }; //reset
+      unsigned long epoch = strtoul(p.key().c_str(), 0, 10);  // is a JsonString
+      int counter = 0;
+      JsonArray taskIdArray = p.value();  // is a JsonVariant
+      for (JsonVariant v: taskIdArray) {
+        int taskId = v.as<int>();
+        Serial.println("taskId = " + String(taskId));
+        taskIds[counter++] = taskId;
+      }
+      epochTask entry;
+      entry.epoch = epoch;
+      memcpy(entry.taskIds, taskIds, sizeof(entry.taskIds));
+      epochTaskDict[numberOfEpochs++] = entry ; //{ .epoch = epoch, .taskIds = taskIds };
+      Serial.println("epoch: " + String(epoch));
+      printTaskIds(taskIds);
     }
   }
   file.close();

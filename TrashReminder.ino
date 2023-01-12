@@ -27,10 +27,9 @@ JSON Validator: https://jsonformatter.curiousconcept.com/#
 //forward function prototypes (so function order does not matter)
 //void setColor(int color, boolean fade, int blinkSpeed);
 
-
-int colorIds[] = { -1, -1, -1 };  //allow max three tasks on the same day
-int colorIdsLast[] = { -1, -1, -1 };
-int numberOfColorIds = sizeof(colorIds) / sizeof(colorIds[0]);
+const int maxNumberOfTaskIds = 3; //allow max three different tasks per day
+int colorIds[maxNumberOfTaskIds] = { -1, -1, -1 };  //better use memset(colorIds, -1, sizeof(colorIds)); ?
+int colorIdsLast[maxNumberOfTaskIds] = { -1, -1, -1 };
 int colorIndex = 0;  //used to toggle between multiple colors for same day tasks
 
 int startHour = 15;       //am Vortag
@@ -81,23 +80,22 @@ int queryIntervall = 60000;  //ms => every minute (could be less, however to rea
 unsigned long lastQueryMillis = 0;
 
 //data
-String jsonData;
 const char* dataFile = "/data.json";
 const char* settingsFile = "/settings.json";
 int numberOfColors = 0;
-int numberOfValidTaskIds = 0;
+int numberOfValidTaskIds = 0; //global counter 
 int numberOfTaskIds = 0;
 int numberOfEpochs = 0;
 String task[4];
 int color[4];
-int validIndex[4]; //ToDo 20
+int validIndex[4];  //ToDo 20
 
 typedef struct epochTask {
-    unsigned int epoch;
-    String taskIds;
+  unsigned int epoch;
+  unsigned char taskIds[maxNumberOfTaskIds];  
 } epochTask;
 
-epochTask epochTaskDict[1000];
+epochTask epochTaskDict[100];
 
 void setup() {
   Serial.begin(115200);
@@ -140,8 +138,8 @@ void resetColorIds() {
   memset(colorIds, -1, sizeof(colorIds));
 }
 
-void printColorIds() {
-  for (int i = 0; i < sizeof colorIds / sizeof colorIds[0]; i++) {
+void printColorIds() { //debug
+  for (int i = 0; i < numberOfColors; i++) {
     Serial.println("colorIds[" + String(i) + "] = " + String(colorIds[i]));
   }
 }
@@ -150,12 +148,12 @@ void handleLed(int nowEpoch) {
   int dictEpoch;
   resetColorIds();
   //  printColorIds();
-  for(int i = 0; i < numberOfEpochs; i++){
-  //for (auto entry : epochTaskDict) {
-  //  dictEpoch = entry.first;
+  for (int i = 0; i < numberOfEpochs; i++) {
+    //for (auto entry : epochTaskDict) {
+    //  dictEpoch = entry.first;
     dictEpoch = epochTaskDict[i].epoch;
     if ((nowEpoch > dictEpoch + (startHour - 24) * 60 * 60) && (nowEpoch < dictEpoch + endHour * 60 * 60)) {
-//      Serial.println("nowEpoch: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch + (startHour - 24) * 60 * 60) + ", dictEpoch+endTime = " + String(dictEpoch + endHour * 60 * 60));
+      //      Serial.println("nowEpoch: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch + (startHour - 24) * 60 * 60) + ", dictEpoch+endTime = " + String(dictEpoch + endHour * 60 * 60));
       if (dictEpoch != triggerEpoch) {
         acknowledge = 0;  //acknowledge only valid for same triggerEpoch
         colorIndex = 0;
@@ -179,15 +177,13 @@ boolean isValidTask(int taskId) {
   return (false);
 }
 
-void setColorIds(String taskIds) {
-  int start = 0, index = 0, indexFound, taskId;
-  do {
-    indexFound = taskIds.indexOf(",", start);
-    taskId = taskIds.substring(start, indexFound).toInt();
-    if (isValidTask(taskId)) { colorIds[index++] = taskId; }
-    //    Serial.println("taskId = " + String(taskId) + ", start = " + String(start) + ", indexFound = " + String(indexFound) + ", validTask = " + String(isValidTask(taskId)));
-    start = indexFound + 1;
-  } while (indexFound != -1);
+void setColorIds(unsigned char taskIds[]) {
+  int index = 0;
+  for (int i = 0; i < maxNumberOfTaskIds; i++) {
+    if (taskIds[i] != -1) {
+      if (isValidTask(taskIds[i])) { colorIds[index++] = taskIds[i]; }
+    }
+  }
 }
 
 void handleReed() {
@@ -222,12 +218,12 @@ void doNothing() {
 
 void incrementColorId() {
   int numberOfTasks = 0;
-  for (int i = 0; i < numberOfColorIds; i++) {
+  for (int i = 0; i < maxNumberOfTaskIds; i++) { //detect how many tasks
     if (colorIds[i] != -1) { numberOfTasks++; }
   }
   colorIndex++;
   if (colorIndex >= numberOfTasks) { colorIndex = 0; }
-  //  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", numberOfColorIds = " + String(numberOfColorIds));
+  //  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", maxNumberOfTaskIds = " + String(maxNumberOfTaskIds));
 }
 
 void setBrightness(int blinkSpeed = 20, boolean reset = false) {
@@ -303,7 +299,7 @@ void handleState() {
       resetColorIds();
       listDir("/");
       initStartEndTimes();  //initializes startHour and endHour
-      initTasksFromFile(dataFile);
+      initDataFromFile();
       STATE_NEXT = STATE_SHOW;
       break;
     case STATE_SHOW:  //***********************************************************
