@@ -325,7 +325,7 @@ const char webpage[] PROGMEM = R"=====(
             text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button>";
             text += "<br><div id=output></div>";
             document.getElementById("tasks").innerHTML = text;
-            document.getElementById("message").innerHTML = "";
+            document.getElementById("message").innerHTML = "Es wurden " + Object.keys(dateDict).length + " Abholtermine in der Datei gefunden.";
             document.getElementById("settings").innerHTML = "";
         }
       </script>

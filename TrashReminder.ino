@@ -94,7 +94,7 @@ typedef struct epochTask {
   int taskIds[maxNumberOfTaskIds];
 } epochTask;
 
-epochTask epochTaskDict[100];
+epochTask epochTaskDict[200];
 
 void setup() {
   Serial.begin(115200);
