@@ -98,7 +98,7 @@ void initStartEndTimes() {
   }
   startHour = doc["startHour"];
   endHour = doc["endHour"];
-  Serial.println("Read startHour = " + String(startHour) + ", endHour = " + String(endHour));
+//  Serial.println("Read startHour = " + String(startHour) + ", endHour = " + String(endHour));
 }
 
 void readTasks() {  //transfering ESP data to the Webpage

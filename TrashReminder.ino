@@ -113,7 +113,7 @@ void setup() {
   //Time Client
   timeClient.begin();
   timeClient.setTimeOffset(3600);  //GMT+1
-  //  deleteFile(dataFile);
+  //deleteFile(dataFile);
 }
 
 void loop() {
