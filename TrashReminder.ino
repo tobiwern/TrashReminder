@@ -193,7 +193,7 @@ void handleReed() {
 void setAcknowledge() {
   unsigned long now = millis();
   if (initialized) {
-    //    Serial.println("OFF - Acknowedge!");
+    Serial.println("OFF - Acknowedge!");
     acknowledge = 1;
     //Multi-click detection
     switchCounter++;

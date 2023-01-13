@@ -134,8 +134,12 @@ const char webpage[] PROGMEM = R"=====(
                 document.getElementById("message").innerHTML = response;
                 document.getElementById("message").style.color = "red";
                 document.getElementById("settings").innerHTML = "";
-              } else {  
-                document.getElementById("settings").innerHTML = response + "<br>";
+              } else {
+                var text = genCheckboxesText(tasks);  
+                document.getElementById("settings").innerHTML = response + "<br>" + text;
+                const obj = JSON.parse(response); 
+                var validTasks = obj["validTaskIds"];
+                var tasks = obj["tasks"];
               }            
             }
           };
@@ -325,21 +329,26 @@ const char webpage[] PROGMEM = R"=====(
             } else {
               text += "der Datei gefunden.</i>";
             }
-            text += "<br><br>Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br>";
-            text += "<table>"
-            for (let i = 0; i < items.length; i++) {
-                text += "<tr>"
-                text += "<td class=value><div><input type='checkbox' id='task" + i + "' name=task'" + i + "' checked>";
-                text += "<label for='task" + i + "' id='taskl" + i + "'>" + items[i] + "</label><div></td>";
-                text += "<td><button style='background-color: " + colors[i].replace("0x","#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
-                text += "</tr>";
-            }
-            text += "</table>";
+            text += "<br><br>" + genCheckboxesText(items);
             text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button>";
             text += "<br><div id=output></div>";
             document.getElementById("tasks").innerHTML = text;
             document.getElementById("message").innerHTML = "";
             document.getElementById("settings").innerHTML = "";
+        }
+
+        function genCheckboxesText(items) {
+          var text = "Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br>";
+          text += "<table>"
+          for (let i = 0; i < items.length; i++) {
+              text += "<tr>"
+              text += "<td class=value><div><input type='checkbox' id='task" + i + "' name=task'" + i + "' checked>";
+              text += "<label for='task" + i + "' id='taskl" + i + "'>" + items[i] + "</label><div></td>";
+              text += "<td><button style='background-color: " + colors[i].replace("0x","#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
+              text += "</tr>";
+          }
+          text += "</table>";
+          return(text);
         }
       </script>
     </head>  

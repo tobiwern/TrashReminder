@@ -8,7 +8,7 @@
 
 #include <ESP8266WebServer.h>
 ESP8266WebServer server(80);
-#define JSON_MEMORY 1024 * 32
+#define JSON_MEMORY 1024 * 30
 // Server Functions
 
 void printTaskIds(int taskIds[]) {  //debug
@@ -64,12 +64,21 @@ boolean initDataFromFile() {
       int taskIds[maxNumberOfTasksPerDay];
       memset(taskIds, -1, sizeof(taskIds));
       unsigned long epoch = strtoul(p.key().c_str(), 0, 10);  // is a JsonString
-      JsonArray taskIdArray = p.value();                      // is a JsonVariant
+      int counter = 0;
+      JsonArray taskIdArray = p.value();  // is a JsonVariant
+      for (int taskId : taskIdArray) {
+        if (counter < maxNumberOfTasksPerDay - 1) {  //prevent running over reserved memory
+          taskIds[counter++] = taskId;     
+        } else {
+          Serial.println("WARNING: Too many taskIds: SKIPPING: " + taskId);
+        }        
+      }
+      //JsonArray taskIdArray = p.value();                      // is a JsonVariant
       copyArray(taskIdArray, taskIds);
       epochTask entry;
       entry.epoch = epoch;
       memcpy(entry.taskIds, taskIds, sizeof(entry.taskIds));
-      if (numberOfEpochs < maxNumberOfEpochs - 1) {  //prevent running over
+      if (numberOfEpochs < maxNumberOfEpochs - 1) {  //prevent running over reserved memory
         epochTaskDict[numberOfEpochs++] = entry;     //{ .epoch = epoch, .taskIds = taskIds };
       } else {
         Serial.println("WARNING: Too many entries: SKIPPING: ");
