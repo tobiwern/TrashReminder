@@ -5,7 +5,7 @@ const char webpage[] PROGMEM = R"=====(
     <head>
       <meta charset='utf-8'>
       <link rel="stylesheet" href="https://tobiwern.github.io/TrashReminder/TrashReminder.css">
-      <script src=" https://tobiwern.github.io/TrashReminder/TrashReminder.js.h"></script> 
+      <script src="https://tobiwern.github.io/TrashReminder/TrashReminder.js"></script> 
     </head>  
 
    <body id='body' onload='requestSettings()')>
