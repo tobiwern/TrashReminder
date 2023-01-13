@@ -4,7 +4,7 @@ const char webpage[] PROGMEM = R"=====(
   <html lang="de">
     <head>
       <meta charset='utf-8'>
-      <link rel="stylesheet" href="https://tobiwern.github.io/TrashReminder/TrashReminder.css.h">
+      <link rel="stylesheet" href="https://tobiwern.github.io/TrashReminder/TrashReminder.css">
       <script src=" https://tobiwern.github.io/TrashReminder/TrashReminder.js.h"></script> 
     </head>  
 
