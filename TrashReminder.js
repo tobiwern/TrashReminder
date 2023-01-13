@@ -79,7 +79,7 @@ function requestTasks() { //send the ESP data to the webpage
                 document.getElementById("settings").innerHTML = "";
             } else {
                 var text = genCheckBoxes(items);
-                document.getElementById("settings").innerHTML = response + "<br>" + text + "<br>";
+                document.getElementById("tasks").innerHTML = response + "<br>" + text + "<br>";
                 const obj = JSON.parse(response);
                 var validTasks = obj["validTaskIds"];
                 var tasks = obj["tasks"];
