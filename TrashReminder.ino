@@ -286,7 +286,7 @@ void addGlitter(fract8 chanceOfGlitter) {
 void handleState() {
   unsigned long millisNow = millis();
   STATE_NEXT = -1;
-  //  Serial.println("STATE = " + stateTbl[STATE] + ", STATE_PREVIOUS = " + stateTbl[STATE_PREVIOUS]);
+ // Serial.println("STATE = " + stateTbl[STATE] + ", STATE_PREVIOUS = " + stateTbl[STATE_PREVIOUS]);
   if (STATE != STATE_PREVIOUS) { Serial.println("STATE = " + stateTbl[STATE]); }
   switch (STATE) {
     case STATE_INIT:  //***********************************************************
@@ -337,8 +337,8 @@ void handleState() {
     case STATE_CONFIGURE:
       if (STATE_PREVIOUS == STATE_QUERY) {
         startWebServer();
-        setColor(CRGB::Purple, false);
       }
+      setColor(CRGB::Purple, false);
       server.handleClient();
       handleReed();
       break;
