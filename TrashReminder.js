@@ -81,7 +81,8 @@ function requestTasks() { //send the ESP data to the webpage
                 const obj = JSON.parse(response);
                 var validTasks = obj["validTaskIds"];
                 var tasks = obj["tasks"];
-                var text = genCheckBoxes(tasks);
+                var colors = obj["colors"];
+                var text = genCheckBoxes(tasks, colors);
                 document.getElementById("tasks").innerHTML = response + "<br>" + text + "<br>";
             }
         }
@@ -273,7 +274,7 @@ function showCheckBoxes(items) {
         text += "der Datei gefunden.</i>";
     }
     text += "<br><br>";
-    text += genCheckBoxes(items);
+    text += genCheckBoxes(items, colors);
     text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button>";
     text += "<br><div id=output></div>";
     document.getElementById("tasks").innerHTML = text;
@@ -281,7 +282,7 @@ function showCheckBoxes(items) {
     document.getElementById("settings").innerHTML = "";
 }
 
-function genCheckBoxes(items) {
+function genCheckBoxes(items, colors) {
     var text = "Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br>";
     text += "<table>"
     for (let i = 0; i < items.length; i++) {
