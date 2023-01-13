@@ -5,7 +5,7 @@ const char webpage[] PROGMEM = R"=====(
     <head>
       <meta charset='utf-8'>
       <link rel="stylesheet" href="https://tobiwern.github.io/TrashReminder/TrashReminder.css">
-      <script src="https://tobiwern.github.io/TrashReminder/TrashReminder.js"></script> 
+      <script src="https://tobiwern.github.io/TrashReminder/TrashReminder.js?random=<?php echo filemtime('https://tobiwern.github.io/TrashReminder/TrashReminder.js'); ?>"></script> 
     </head>  
     <body id='body' onload='requestSettings()')>
     <img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/TrashReminder.jpg?raw=true' alt='Trash Reminder' width='400' height='185'>
