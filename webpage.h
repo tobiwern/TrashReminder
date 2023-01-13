@@ -1,3 +1,4 @@
+//don't add taskId if the number is already in the list (if usr selects two ics files with identical content)
 const char webpage[] PROGMEM = R"=====(
 <!DOCTYPE html>
   <html lang="de">
@@ -31,13 +32,13 @@ const char webpage[] PROGMEM = R"=====(
           border: 2px solid  #4CAF50;
           border-radius: 8px;
           padding: 5px;
-          max-width: 350px;
+          max-width: 400px;
           margin-left: auto;
           margin-right: auto;
 
         }
         div.output {
-          width: 300px;
+          width: 350px;
           margin: auto;
         }
         td.value {
@@ -55,7 +56,9 @@ const char webpage[] PROGMEM = R"=====(
       </style>
       <script>
         //setInterval(function(){getData();}, 2000);
-
+        var maxNumberOfEpochs;
+        var maxNumberOfTasksPerDay;
+        var maxNumberOfTaskIds;
         function fireworks() { 
           var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function() {
@@ -69,11 +72,12 @@ const char webpage[] PROGMEM = R"=====(
           xhttp.send();
         } 
 
-        function closeSettings(){
+        function closeConfig(){
           var xhttp = new XMLHttpRequest();
           xhttp.open("GET", "close", true);
           xhttp.send();
           document.getElementById("body").innerHTML ="<h1>Beendet - Bitte Fenster schließen!</h1>";
+          window.scrollTo(0, 0);
         //  window.close(); //close the page
         }
 
@@ -95,13 +99,16 @@ const char webpage[] PROGMEM = R"=====(
               tokens = value.split(",");
               document.getElementById("start").value = tokens[0];
               document.getElementById("end").value = tokens[1];
+              maxNumberOfEpochs = tokens[2];
+              maxNumberOfTasksPerDay = tokens[3];
+              maxNumberOfTaskIds = tokens[4];
             }
           };
           xhttp.open("GET", "request_settings", true);
           xhttp.send();
         }
        
-        function sendSettings(jsonText) { //send the jsonText to the ESP to be stored in LittleFS
+        function sendData(jsonText) { //send the jsonText to the ESP to be stored in LittleFS
           var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -114,11 +121,11 @@ const char webpage[] PROGMEM = R"=====(
               }
             }
           };
-          xhttp.open("GET", "send_settings?value=" + jsonText, true);
+          xhttp.open("GET", "send_tasks?value=" + jsonText, true);
           xhttp.send();
         }
 
-        function readSettings() { //send the ESP data to the webpage
+        function requestTasks() { //send the ESP data to the webpage
           var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -132,11 +139,11 @@ const char webpage[] PROGMEM = R"=====(
               }            
             }
           };
-          xhttp.open("GET", "read_settings", true);
+          xhttp.open("GET", "request_tasks", true);
           xhttp.send();
         }
 
-        function deleteSettings() {
+        function deleteTasks() {
           var xhttp = new XMLHttpRequest();
           xhttp.onreadystatechange = function() {
             if (this.readyState == 4 && this.status == 200) {
@@ -150,7 +157,7 @@ const char webpage[] PROGMEM = R"=====(
               }
             }
           };
-          xhttp.open("GET", "delete_settings", true);
+          xhttp.open("GET", "delete_tasks", true);
           xhttp.send();
         }
 
@@ -305,14 +312,20 @@ const char webpage[] PROGMEM = R"=====(
             var jsonText = '{"tasks":["' + items.join('","') + '"],"colors":["' + colors.join('","') + '"],"validTaskIds":[' + validTaskIds.join(',') + '],"epochTasks":[' + entries.join(',') + ']}';
             console.log(jsonText);
             const obj = JSON.parse(jsonText); //just to check if valid JSON
-            sendSettings(jsonText);
+            sendData(jsonText);
             //document.getElementById("output").innerHTML = jsonText;
             //            console.log(obj);
         }
 
         function genCheckboxes(items) {
             var i = 0;
-            var text = "<br>Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br>";
+            var text = "<br><i>Es wurden " + Object.keys(dateDict).length + " Abholtermine in ";
+            if(document.getElementById('files').files.length > 1){
+              text += "den Dateien gefunden.</i>";
+            } else {
+              text += "der Datei gefunden.</i>";
+            }
+            text += "<br><br>Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br>";
             text += "<table>"
             for (let i = 0; i < items.length; i++) {
                 text += "<tr>"
@@ -325,7 +338,7 @@ const char webpage[] PROGMEM = R"=====(
             text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button>";
             text += "<br><div id=output></div>";
             document.getElementById("tasks").innerHTML = text;
-            document.getElementById("message").innerHTML = "Es wurden " + Object.keys(dateDict).length + " Abholtermine in der Datei gefunden.";
+            document.getElementById("message").innerHTML = "";
             document.getElementById("settings").innerHTML = "";
         }
       </script>
@@ -365,9 +378,9 @@ const char webpage[] PROGMEM = R"=====(
   <br>
   <div id='settings'></div>
   <div>
-    <button class="button" onclick="closeSettings()">Beenden</button>
-    <button class="button" onclick="readSettings()">Lesen</button>
-    <button class="button" onclick="deleteSettings()">L&ouml;schen</button>
+    <button class="button" onclick="closeConfig()">Beenden</button>
+    <button class="button" onclick="requestTasks()">Lesen</button>
+    <button class="button" onclick="deleteTasks()">L&ouml;schen</button>
     <button class="button" onclick="send(0)">Erinnerung einschalten</button>
     <button class="button" onclick="fireworks()">Feuerwerk</button>
   </div>
