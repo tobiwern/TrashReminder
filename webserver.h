@@ -13,7 +13,7 @@ ESP8266WebServer server(80);
 
 void printTaskIds(int taskIds[]) {  //debug
   Serial.print("taskIds[] = ");
-  for (int i = 0; i < maxNumberOfTaskIds; i++) {
+  for (int i = 0; i < maxNumberOfTasksPerDay; i++) {
     if (taskIds[i] != -1) { Serial.print(String(taskIds[i]) + " "); }
   }
   Serial.println("");
@@ -44,7 +44,7 @@ boolean initDataFromFile() {
   // get tasks ////////////////////////////////
   JsonArray tasks = doc["tasks"];  //Implicit cast
   numberOfTaskIds = 0;
-  for (String taskText : tasks) { //Implicit cast
+  for (String taskText : tasks) {  //Implicit cast
     task[numberOfTaskIds++] = taskText;
     Serial.println("Task: " + task[numberOfTaskIds - 1]);
   }
@@ -61,17 +61,19 @@ boolean initDataFromFile() {
   numberOfEpochs = 0;
   for (JsonObject obj : epochTasks) {
     for (JsonPair p : obj) {
-      int taskIds[maxNumberOfTaskIds] = { -1, -1, -1 }; //reset
+      int taskIds[maxNumberOfTasksPerDay];
+      memset(taskIds, -1, sizeof(taskIds));
       unsigned long epoch = strtoul(p.key().c_str(), 0, 10);  // is a JsonString
-      int counter = 0;
-      JsonArray taskIdArray = p.value();  // is a JsonVariant
-      for (int taskId : taskIdArray) {
-        taskIds[counter++] = taskId;
-      }
+      JsonArray taskIdArray = p.value();                      // is a JsonVariant
+      copyArray(taskIdArray, taskIds);
       epochTask entry;
       entry.epoch = epoch;
       memcpy(entry.taskIds, taskIds, sizeof(entry.taskIds));
-      epochTaskDict[numberOfEpochs++] = entry;  //{ .epoch = epoch, .taskIds = taskIds };
+      if (numberOfEpochs < maxNumberOfEpochs - 1) {  //prevent running over
+        epochTaskDict[numberOfEpochs++] = entry;     //{ .epoch = epoch, .taskIds = taskIds };
+      } else {
+        Serial.println("WARNING: Too many entries: SKIPPING: ");
+      }
       Serial.print("epoch: " + String(epoch) + ", ");
       printTaskIds(taskIds);
     }
@@ -98,20 +100,20 @@ void initStartEndTimes() {
   }
   startHour = doc["startHour"];
   endHour = doc["endHour"];
-//  Serial.println("Read startHour = " + String(startHour) + ", endHour = " + String(endHour));
+  //  Serial.println("Read startHour = " + String(startHour) + ", endHour = " + String(endHour));
 }
 
-void readTasks() {  //transfering ESP data to the Webpage
+void sendTasksToWebpage() {  //transfering ESP data to the Webpage
   String value = readFile(dataFile);
   if (value == "") { value = "ERROR: Lesen der Daten fehlgeschlagen."; }
   Serial.println("Received:" + value);
-  Serial.println("Sending settings: " + value);
+  Serial.println("Sending taks: " + value);
   server.send(200, "text/plane", value);
 }
 
-void sendSettings() {  //transfering start/endHour to the Webpage
+void sendSettingsToWebpage() {  //transferring ESP settings => Webpage
   String value;
-  value = String(startHour) + "," + String(endHour);
+  value = String(startHour) + "," + String(endHour) + "," + maxNumberOfEpochs + "," + maxNumberOfTasksPerDay + "," + maxNumberOfTaskIds;
   Serial.println("Sending settings: " + value);
   server.send(200, "text/plane", value);
 }
@@ -152,7 +154,7 @@ void setEndHour() {
   writeStartEndTimes();
 }
 
-void receiveTasks() {
+void receiveTasksFromWebpage() {
   String jsonText = server.arg("value");
   String response = "";
   Serial.println("Receiving settings in JSON format: " + jsonText);
@@ -193,10 +195,10 @@ void startWebServer() {
   server.on("/", handleRoot);
   server.on("/set_start", setStartHour);
   server.on("/set_end", setEndHour);
-  server.on("/request_settings", sendSettings);
-  server.on("/send_settings", receiveTasks);  //webpage => ESP name
-  server.on("/read_settings", readTasks);
-  server.on("/delete_settings", deleteTasks);
+  server.on("/request_settings", sendSettingsToWebpage);
+  server.on("/send_tasks", receiveTasksFromWebpage);  //webpage => ESP name
+  server.on("/request_tasks", sendTasksToWebpage);    //ESP => webpage
+  server.on("/delete_tasks", deleteTasks);
   server.on("/close", closeSettings);
   server.on("/fireworks", fireworks);
   server.onNotFound(notFound);
