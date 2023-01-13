@@ -4,6 +4,12 @@ const char webpage[] PROGMEM = R"=====(
   <html lang="de">
     <head>
       <meta charset='utf-8'>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Müll Erinnerung</title>
+      <meta name="robots" content="noindex">
+      <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+      <meta http-equiv="Pragma" content="no-cache" />
+      <meta http-equiv="Expires" content="0" />
       <link rel="stylesheet" href="https://tobiwern.github.io/TrashReminder/TrashReminder.css">
       <script src="https://tobiwern.github.io/TrashReminder/TrashReminder.js?random=<?php echo filemtime('https://tobiwern.github.io/TrashReminder/TrashReminder.js'); ?>"></script> 
     </head>  
