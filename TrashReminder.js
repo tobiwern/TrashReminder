@@ -78,11 +78,11 @@ function requestTasks() { //send the ESP data to the webpage
                 document.getElementById("message").style.color = "red";
                 document.getElementById("settings").innerHTML = "";
             } else {
-                var text = genCheckBoxes(items);
-                document.getElementById("tasks").innerHTML = response + "<br>" + text + "<br>";
-                const obj = JSON.parse(response);
                 var validTasks = obj["validTaskIds"];
                 var tasks = obj["tasks"];
+                var text = genCheckBoxes(tasks);
+                document.getElementById("tasks").innerHTML = response + "<br>" + text + "<br>";
+                const obj = JSON.parse(response);
             }
         }
     };
