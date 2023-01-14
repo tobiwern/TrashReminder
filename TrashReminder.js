@@ -88,61 +88,79 @@ function requestTasks() { //send the ESP data to the webpage
 
 function refreshTaskTypesAndDates(response) {
     const jsonObject = JSON.parse(response);
-    refreshTaskTypes(jsonObject);
-    refreshTaskDates(jsonObject);
-//    document.getElementById("tasks").innerHTML = response + "<br>";
+    initDataFromJson(jsonObject)
+    refreshTaskTypes();
+    refreshTaskDates();
+    //    document.getElementById("tasks").innerHTML = response + "<br>";
 }
 
-function refreshTaskTypes(jsonObject) {
-    var validTaskIds = jsonObject["validTaskIds"];
-    var tasks = jsonObject["tasks"];
-    var colors = jsonObject["colors"];
-    var text = "Sie werden an folgende Abfallarten erinnert:<br>";
-    var text = "<table>";
-    for (let i = 0; i < tasks.length; i++) {
-        checked = (validTaskIds.length == 0 || validTaskIds.includes(i)) ? "checked" : "";
+function refreshTaskTypes() {
+    var text = "Sie werden derzeit an folgende Abfallarten erinnert:<br><br>";
+    text += "<table>";
+    for (let i = 0; i < dataTasks.length; i++) {
+        checked = (dataValidTaskIds.length == 0 || dataValidTaskIds.includes(i)) ? "checked" : "";
         text += "<tr>"
-        text += "<td class=value><div><input type='checkbox' id='task" + i + "' name=task'" + i + "'" + checked + ">";
-        text += "<label for='task" + i + "' id='taskl" + i + "'>" + items[i] + "</label><div></td>";
-        text += "<td><button style='background-color: " + colors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
+        text += "<td class='value'><div><input type='checkbox' class='taskType' onChange='refreshTaskDates()' id='taskType" + i + "' name=task" + i + "' " + checked + ">";
+        text += "<label for='taskType" + i + "' id='taskTypel" + i + "'> " + dataTasks[i] + "</label><div></td>";
+        text += "<td><button style='background-color: " + dataColors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
         text += "</tr>";
     }
     text += "</table>";
     document.getElementById("taskTypes").innerHTML = text + "<br>";
 }
 
-function refreshTaskDates(jsonObject) {
-    var epochTasks = jsonObject["epochTasks"];
-    epochTaskDict = {};
-    for(const epochTask of epochTasks){
-//    for (var i = 0; i < epochTasks.length; i++) {
-//        epochTask = epochTasks[i];
-        for (var epoch in epochTask) { //translate into dict
-            epochTaskDict[epoch] = epochTask[epoch];
-        }
-    }
-    var colors = jsonObject["colors"];
-    var tasks = jsonObject["tasks"];
-    var text = Object.keys(epochTaskDict).length + " Abholtermine sind derzeit gespeichert:<br><br>";
-    var epochs = Object.keys(epochTaskDict).sort();
+function refreshTaskDates() {
+    var text = Object.keys(dataEpochTaskDict).length + " Abholtermine sind derzeit gespeichert:<br><br>";
+    var epochs = Object.keys(dataEpochTaskDict).sort();
     text += "<table id=epochTasks>"
     text += "<tr><th>Datum der Abholung</th><th>Müllart</th></tr>"
-    for(const epoch of epochs){
+    const taskTypeCheckBoxes = document.getElementsByClassName("taskType");
+    taskIdEnableValue = [];
+    for (checkBox of taskTypeCheckBoxes) {
+        taskIdEnableValue.push(checkBox.checked);
+    }
+    for (const epoch of epochs) {
         var dateTime = new Date(epoch * 1000);
-        var taskIds = epochTaskDict[epoch];
-        timeStamp = dateTime.toLocaleString("de", { weekday: "long" }) + ", " + ("00" + dateTime.getDate()).slice(-2)  + "." + ("00" + dateTime.toLocaleString("de", { month: "numeric" })).slice(-2) + "." + dateTime.getFullYear();
-        text += "<tr>"
-        text += "<td class=description nowrap>" + timeStamp + "</td>";
-        text += "<td>";
-        for(const taskId of taskIds){
-            text += "<div class=taskType><button style='background-color: " + colors[taskId].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button>";
-            text += " " + tasks[taskId] + "</div>";
+        var taskIds = dataEpochTaskDict[epoch];
+        selectedTaskIds = [];
+        for (const taskId of taskIds) {
+            if (taskIdEnableValue[taskId]) {
+                selectedTaskIds.push(taskId);
+            }
         }
-        text += "</td>";
-        text += "</tr>";
+        if (selectedTaskIds.length >= 1) {
+            timeStamp = dateTime.toLocaleString("de", { weekday: "long" }) + ", " + ("00" + dateTime.getDate()).slice(-2) + "." + ("00" + dateTime.toLocaleString("de", { month: "numeric" })).slice(-2) + "." + dateTime.getFullYear();
+            text += "<tr>"
+            text += "<td class=description nowrap>" + timeStamp + "</td>";
+            text += "<td>";
+            for (const taskId of selectedTaskIds) {
+                text += "<div class=taskType><button style='background-color: " + dataColors[taskId].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button>";
+                text += " " + dataTasks[taskId] + "</div>";
+            }
+            text += "</td>";
+            text += "</tr>";
+        }
     }
     text += "</table>";
     document.getElementById("taskDates").innerHTML = text + "<br>";
+}
+
+//globally defined for form field callbacks
+dataEpochTaskDict = {};
+dataColors = [];
+dataTasks = [];
+dataValidTaskIds = [];
+
+function initDataFromJson(jsonObject){
+    var epochTasks = jsonObject["epochTasks"];
+    for (const epochTask of epochTasks) {
+        for (var epoch in epochTask) { //translate into dict
+            dataEpochTaskDict[epoch] = epochTask[epoch];
+        }
+    }
+    dataColors = jsonObject["colors"];
+    dataTasks = jsonObject["tasks"];
+    dataValidTaskIds = jsonObject["validTaskIds"];
 }
 
 function deleteTasks() {
