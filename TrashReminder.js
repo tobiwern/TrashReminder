@@ -78,18 +78,71 @@ function requestTasks() { //send the ESP data to the webpage
                 document.getElementById("message").style.color = "red";
                 document.getElementById("settings").innerHTML = "";
             } else {
-                const obj = JSON.parse(response);
-                var validTasks = obj["validTaskIds"];
-                var tasks = obj["tasks"];
-                var colors = obj["colors"];
-                var text = genCheckBoxes(tasks, colors);
-                document.getElementById("existingTasks").innerHTML = text + "<br>";
-                document.getElementById("tasks").innerHTML = response + "<br>";
+                refreshTaskTypesAndDates(response);
             }
         }
     };
     xhttp.open("GET", "request_tasks", true);
     xhttp.send();
+}
+
+function refreshTaskTypesAndDates(response) {
+    const jsonObject = JSON.parse(response);
+    refreshTaskTypes(jsonObject);
+    refreshTaskDates(jsonObject);
+//    document.getElementById("tasks").innerHTML = response + "<br>";
+}
+
+function refreshTaskTypes(jsonObject) {
+    var validTaskIds = jsonObject["validTaskIds"];
+    var tasks = jsonObject["tasks"];
+    var colors = jsonObject["colors"];
+    var text = "Sie werden an folgende Abfallarten erinnert:<br>";
+    var text = "<table>";
+    for (let i = 0; i < tasks.length; i++) {
+        checked = (validTaskIds.length == 0 || validTaskIds.includes(i)) ? "checked" : "";
+        text += "<tr>"
+        text += "<td class=value><div><input type='checkbox' id='task" + i + "' name=task'" + i + "'" + checked + ">";
+        text += "<label for='task" + i + "' id='taskl" + i + "'>" + items[i] + "</label><div></td>";
+        text += "<td><button style='background-color: " + colors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
+        text += "</tr>";
+    }
+    text += "</table>";
+    document.getElementById("taskTypes").innerHTML = text + "<br>";
+}
+
+function refreshTaskDates(jsonObject) {
+    var epochTasks = jsonObject["epochTasks"];
+    epochTaskDict = {};
+    for(const epochTask of epochTasks){
+//    for (var i = 0; i < epochTasks.length; i++) {
+//        epochTask = epochTasks[i];
+        for (var epoch in epochTask) { //translate into dict
+            epochTaskDict[epoch] = epochTask[epoch];
+        }
+    }
+    var colors = jsonObject["colors"];
+    var tasks = jsonObject["tasks"];
+    var text = Object.keys(epochTaskDict).length + " Abholtermine sind derzeit gespeichert:<br><br>";
+    var epochs = Object.keys(epochTaskDict).sort();
+    text += "<table id=epochTasks>"
+    text += "<tr><th>Datum der Abholung</th><th>Müllart</th></tr>"
+    for(const epoch of epochs){
+        var dateTime = new Date(epoch * 1000);
+        var taskIds = epochTaskDict[epoch];
+        timeStamp = dateTime.toLocaleString("de", { weekday: "long" }) + ", " + ("00" + dateTime.getDate()).slice(-2)  + "." + ("00" + dateTime.toLocaleString("de", { month: "numeric" })).slice(-2) + "." + dateTime.getFullYear();
+        text += "<tr>"
+        text += "<td class=description nowrap>" + timeStamp + "</td>";
+        text += "<td>";
+        for(const taskId of taskIds){
+            text += "<div class=taskType><button style='background-color: " + colors[taskId].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button>";
+            text += " " + tasks[taskId] + "</div>";
+        }
+        text += "</td>";
+        text += "</tr>";
+    }
+    text += "</table>";
+    document.getElementById("taskDates").innerHTML = text + "<br>";
 }
 
 function deleteTasks() {
@@ -275,6 +328,7 @@ function showCheckBoxes(items) {
         text += "der Datei gefunden.</i>";
     }
     text += "<br><br>";
+    text += "Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br>";
     text += genCheckBoxes(items, colors);
     text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button>";
     text += "<br><div id=output></div>";
@@ -283,12 +337,12 @@ function showCheckBoxes(items) {
     document.getElementById("settings").innerHTML = "";
 }
 
-function genCheckBoxes(items, colors) {
-    var text = "Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br>";
-    text += "<table>"
+function genCheckBoxes(items, colors, validTaskIds = []) {
+    var text = "<table>";
     for (let i = 0; i < items.length; i++) {
+        checked = (validTaskIds.length == 0 || validTaskIds.includes(i)) ? "checked" : "";
         text += "<tr>"
-        text += "<td class=value><div><input type='checkbox' id='task" + i + "' name=task'" + i + "' checked>";
+        text += "<td class=value><div><input type='checkbox' id='task" + i + "' name=task'" + i + "'" + checked + ">";
         text += "<label for='task" + i + "' id='taskl" + i + "'>" + items[i] + "</label><div></td>";
         text += "<td><button style='background-color: " + colors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
         text += "</tr>";

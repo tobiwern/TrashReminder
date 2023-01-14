@@ -29,14 +29,28 @@ const char webpage[] PROGMEM = R"=====(
             <td class=value><select id="end" name="end"></select></td>
           </tr>
         </table>
-        <div id='existingTasks'></div>
         <div id='messageTime'></div>
         <br>
       </div>
       <br>
     </form>
     <div class=frame>
-      <h2>Abfuhrtermine (ICS/ICAL)</h2>
+      <h2>Abfuhrtermine</h2>
+      <h3>Abfallarten</h3>
+      <div id='taskTypes'></div>
+      <h3>Termine</h3>
+      <div id='taskDates'></div>
+      <h3>Neue Abfuhrtermine (ICS/ICAL)</h3>
+      Sie könnnen neue Abfuhrtermine auf die \"Müll-Erinnerung\" laden, falls sich Änderungen ergeben haben oder um diese für ein neues Jahr zu definieren.
+      Hierbei werden die bestehenden Daten <b>überschrieben</b>! 
+      Die Abfuhrdaten werden üblicherweise durch das Abfuhrunternehmen auf einer Webseite im ICS oder ICAL Format angeboten und müssen zuerst heruntergeladen werden.
+      Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
+      Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können
+      <ul>
+        <li><a href='https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/'>https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/</a>
+        <li><a href='https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html'>https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html</a>
+      </ul>
+
       <table>
         <tr><td><label for="start">W&auml;hlen Sie eine oder mehrere bereits heruntergeladene ICS oder ICAL Dateien ihres Entsorgungsunternehmens aus:</label></td></tr>
         <tr><td><input type="file" name="files" id="files" accept=".ics" onchange="processFiles()" multiple></td></tr>
