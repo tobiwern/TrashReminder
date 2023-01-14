@@ -83,7 +83,8 @@ function requestTasks() { //send the ESP data to the webpage
                 var tasks = obj["tasks"];
                 var colors = obj["colors"];
                 var text = genCheckBoxes(tasks, colors);
-                document.getElementById("existingTasks").innerHTML = response + "<br>" + text + "<br>";
+                document.getElementById("existingTasks").innerHTML = text + "<br>";
+                document.getElementById("tasks").innerHTML = response + "<br>";
             }
         }
     };

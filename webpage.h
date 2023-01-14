@@ -29,6 +29,7 @@ const char webpage[] PROGMEM = R"=====(
             <td class=value><select id="end" name="end"></select></td>
           </tr>
         </table>
+        <div id='existingTasks'></div>
         <div id='messageTime'></div>
         <br>
       </div>
