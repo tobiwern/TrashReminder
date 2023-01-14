@@ -107,10 +107,36 @@ function refreshTaskTypes() {
     }
     text += "</table>";
     document.getElementById("taskTypes").innerHTML = text + "<br>";
+    //send updates to ESP
+    const taskTypeCheckBoxes = document.getElementsByClassName("taskType");
+    var validTaskIds = [];
+    for (let i = 0; i < taskTypeCheckBoxes.length; i++) {
+        checkBox = taskTypeCheckBoxes[i];
+        if (checkBox.checked) {
+            validTaskIds.push(i);
+        }
+    }
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            response = this.responseText;
+            if (response.search("ERROR") != -1) {
+                document.getElementById("message").innerHTML = response;
+                document.getElementById("message").style.color = "red";
+                document.getElementById("settings").innerHTML = "";
+            } else {
+                document.getElementById("message").innerHTML = response;
+                document.getElementById("message").style.color = "green";
+            }
+        }
+    };
+    var jsonText = '{"validTaskIds:[' + validTaskIds.join(',') + ']}';
+    xhttp.open("GET", "send_validTaskIds?value=" + jsonText, true);
+    xhttp.send();
 }
 
 function refreshTaskDates() {
-    var text = Object.keys(dataEpochTaskDict).length + " Abholtermine sind derzeit gespeichert:<br><br>";
+    var text = Object.keys(dataEpochTaskDict).length + " Abholtermine sind derzeit verfügbar.<br><br>";
     var epochs = Object.keys(dataEpochTaskDict).sort();
     text += "<table id=epochTasks>"
     text += "<tr><th>Datum der Abholung</th><th>Müllart</th></tr>"
@@ -151,7 +177,7 @@ dataColors = [];
 dataTasks = [];
 dataValidTaskIds = [];
 
-function initDataFromJson(jsonObject){
+function initDataFromJson(jsonObject) {
     var epochTasks = jsonObject["epochTasks"];
     for (const epochTask of epochTasks) {
         for (var epoch in epochTask) { //translate into dict
@@ -346,7 +372,7 @@ function showCheckBoxes(items) {
         text += "der Datei gefunden.</i>";
     }
     text += "<br><br>";
-    text += "Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br>";
+    text += "Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br><br>";
     text += genCheckBoxes(items, colors);
     text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button>";
     text += "<br><div id=output></div>";
@@ -360,8 +386,8 @@ function genCheckBoxes(items, colors, validTaskIds = []) {
     for (let i = 0; i < items.length; i++) {
         checked = (validTaskIds.length == 0 || validTaskIds.includes(i)) ? "checked" : "";
         text += "<tr>"
-        text += "<td class=value><div><input type='checkbox' id='task" + i + "' name=task'" + i + "'" + checked + ">";
-        text += "<label for='task" + i + "' id='taskl" + i + "'>" + items[i] + "</label><div></td>";
+        text += "<td class=value><div><input type='checkbox' id='task" + i + "' name=task" + i + "' " + checked + ">";
+        text += "<label for='task" + i + "' id='taskl" + i + "'> " + items[i] + "</label><div></td>";
         text += "<td><button style='background-color: " + colors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
         text += "</tr>";
     }

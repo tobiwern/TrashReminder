@@ -97,6 +97,11 @@
         }
 
         hr {
-            border: 4px solid #4CAF50;
+            border: 3px solid #4CAF50;
             border-radius: 2px;
-          }
+        }
+
+        p {
+            font-style: italic;
+            text-align: center;
+        }
