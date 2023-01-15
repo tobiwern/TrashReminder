@@ -24,7 +24,7 @@ function closeConfig() {
     //  window.close(); //close the page
 }
 
-function requestSettings() {
+function requestSettingsFromESP() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
@@ -51,17 +51,17 @@ function requestSettings() {
     xhttp.send();
 }
 
-function sendTasks(jsonText) { //send the jsonText to the ESP to be stored in LittleFS
+function sendTasksToESP(jsonText) { //send the jsonText to the ESP to be stored in LittleFS
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState == 4) {
             response = this.responseText;
             document.getElementById("message").innerHTML = response;
-            if (response.search("ERROR") != -1) {
-                document.getElementById("message").style.color = "red";
-            } else {
+            if (this.status == 200) {
                 document.getElementById("message").style.color = "green";
-                requestTasks(); //if storing the values on the ESP was successful => refresh the "current values" on the webpage
+                requestTasksFromESP(); //if storing the values on the ESP was successful => refresh the "current values" on the webpage
+            } else { //500
+                document.getElementById("message").style.color = "red";
             }
         }
     };
@@ -69,17 +69,20 @@ function sendTasks(jsonText) { //send the jsonText to the ESP to be stored in Li
     xhttp.send();
 }
 
-function requestTasks() { //send the ESP data to the webpage
+function requestTasksFromESP() { //send the ESP data to the webpage
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState == 4) {
             response = this.responseText;
-            if (response.search("ERROR") != -1) {
+            if (this.status == 200) {
+                document.getElementById("taskTypes").style.color = "black";
+                refreshTaskTypesAndDates(response);
+            } else { //500
                 document.getElementById("message").innerHTML = response;
                 document.getElementById("message").style.color = "red";
                 document.getElementById("settings").innerHTML = "";
-            } else {
-                refreshTaskTypesAndDates(response);
+                document.getElementById("taskTypes").innerHTML = "Es sind noch keine Abholtermine auf der \"Müll-Erinnerung\" gespeichert!<br>Bitte laden sie wie unten beschrieben die Abfuhrtermine herunter.";
+                document.getElementById("taskTypes").style.color = "red";
             }
         }
     };
@@ -109,7 +112,8 @@ function refreshTaskTypes() {
     }
     text += "</table>";
     document.getElementById("taskTypes").innerHTML = text + "<br>";
-    //send updates to ESP
+
+    // Sending validTaskIds to ESP
     const taskTypeCheckBoxes = document.getElementsByClassName("taskType");
     var validTaskIds = [];
     for (let i = 0; i < taskTypeCheckBoxes.length; i++) {
@@ -120,15 +124,15 @@ function refreshTaskTypes() {
     }
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState == 4) {
             response = this.responseText;
-            if (response.search("ERROR") != -1) {
+            if (this.status == 200) {
+                document.getElementById("message").innerHTML = response;
+                document.getElementById("message").style.color = "green";
+            } else { //500
                 document.getElementById("message").innerHTML = response;
                 document.getElementById("message").style.color = "red";
                 document.getElementById("settings").innerHTML = "";
-            } else {
-                document.getElementById("message").innerHTML = response;
-                document.getElementById("message").style.color = "green";
             }
         }
     };
@@ -194,14 +198,14 @@ function initDataFromJson(jsonObject) {
 function deleteTasks() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState == 4) {
             response = this.responseText;
             document.getElementById("message").innerHTML = response;
-            if (response.search("ERROR") != -1) {
-                document.getElementById("message").style.color = "red";
-            } else {
+            if (this.status == 200) {
                 document.getElementById("message").style.color = "green";
                 document.getElementById("settings").innerHTML = "";
+            } else { //500
+                document.getElementById("message").style.color = "red"; 
             }
         }
     };
@@ -360,7 +364,7 @@ function genJson() {
     var jsonText = '{"tasks":["' + items.join('","') + '"],"colors":["' + colors.join('","') + '"],"validTaskIds":[' + validTaskIds.join(',') + '],"epochTasks":[' + entries.join(',') + ']}';
     console.log(jsonText);
     const obj = JSON.parse(jsonText); //just to check if valid JSON, ToDo: Show if there is an error!
-    sendTasks(jsonText);
+    sendTasksToESP(jsonText);
     //document.getElementById("output").innerHTML = jsonText;
     //            console.log(obj);
 }

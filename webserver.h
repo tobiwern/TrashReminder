@@ -68,10 +68,10 @@ boolean initDataFromFile() {
       JsonArray taskIdArray = p.value();  // is a JsonVariant
       for (int taskId : taskIdArray) {
         if (counter < maxNumberOfTasksPerDay - 1) {  //prevent running over reserved memory
-          taskIds[counter++] = taskId;     
+          taskIds[counter++] = taskId;
         } else {
           Serial.println("WARNING: Too many taskIds: SKIPPING: " + taskId);
-        }        
+        }
       }
       //JsonArray taskIdArray = p.value();                      // is a JsonVariant
       copyArray(taskIdArray, taskIds);
@@ -114,10 +114,14 @@ void initStartEndTimes() {
 
 void sendTasksToWebpage() {  //transfering ESP data to the Webpage
   String value = readFile(dataFile);
-  if (value == "") { value = "ERROR: Lesen der Daten fehlgeschlagen."; }
-  Serial.println("Received:" + value);
-  Serial.println("Sending taks: " + value);
-  server.send(200, "text/plane", value);
+  if (value != "") {
+    Serial.println("Received:" + value);
+    Serial.println("Sending taks: " + value);
+    server.send(200, "text/plane", value);
+  } else {
+    value = "ERROR: Lesen der Daten fehlgeschlagen.";
+    server.send(500, "text/plane", value);
+  }
 }
 
 void sendSettingsToWebpage() {  //transferring ESP settings => Webpage
@@ -169,10 +173,11 @@ void receiveTasksFromWebpage() {
   Serial.println("Receiving settings in JSON format: " + jsonText);
   if (writeFile(dataFile, jsonText.c_str())) {
     response = "Übertragen der Daten war erfolgreich!";
+    server.send(200, "text/plane", response);
   } else {
     response = "ERROR: Übertragen der Daten fehlgeschlagen!";
+    server.send(500, "text/plane", response);
   }
-  server.send(200, "text/plane", response);
 }
 
 void closeSettings() {
@@ -193,10 +198,11 @@ void deleteTasks() {
   String response = "";
   if (deleteFile(dataFile)) {
     response = "Löschen der Daten war erfolgreich!";
+    server.send(200, "text/plane", response);
   } else {
     response = "ERROR: Löschen der Daten fehlgeschlagen!";
+    server.send(500, "text/plane", response);
   }
-  server.send(200, "text/plane", response);
 }
 
 void startWebServer() {
@@ -205,8 +211,8 @@ void startWebServer() {
   server.on("/set_start", setStartHour);
   server.on("/set_end", setEndHour);
   server.on("/request_settings", sendSettingsToWebpage);
-  server.on("/send_tasks", receiveTasksFromWebpage);  //webpage => ESP name
   server.on("/request_tasks", sendTasksToWebpage);    //ESP => webpage
+  server.on("/send_tasks", receiveTasksFromWebpage);  //webpage => ESP name
   server.on("/delete_tasks", deleteTasks);
   server.on("/close", closeSettings);
   server.on("/fireworks", fireworks);

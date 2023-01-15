@@ -13,7 +13,7 @@ const char webpage[] PROGMEM = R"=====(
       <link rel="stylesheet" href="https://tobiwern.github.io/TrashReminder/TrashReminder.css">
       <script src="https://tobiwern.github.io/TrashReminder/TrashReminder.js?random=<?php echo filemtime('https://tobiwern.github.io/TrashReminder/TrashReminder.js'); ?>"></script> 
     </head>  
-    <body id='body' onload='requestSettings();requestTasks();')>
+    <body id='body' onload='requestSettingsFromESP();requestTasksFromESP();')>
     <img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/TrashReminder.jpg?raw=true'
         alt='Trash Reminder' width='400' height='185'>
     <h1>M&uuml;ll-Erinnerung Einstellungen</h1>
