@@ -11,6 +11,10 @@
             font-size: 16px;
         }
 
+        .button:active {
+            background-color: #4caf4fb0;
+        }
+
         body {
             text-align: center;
             font-family: Arial, Helvetica, sans-serif;
