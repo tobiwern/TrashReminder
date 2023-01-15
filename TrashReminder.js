@@ -56,7 +56,7 @@ function sendTasksToESP(jsonText) { //send the jsonText to the ESP to be stored 
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
             if (this.status == 200) {
-                document.getElementById("message").innerHTML = "Übertragen der Daten war erfolgreich!";
+                document.getElementById("message").innerHTML = "Übertragen der Daten war erfolgreich und Abfuhrtermine werden oben angezeigt.";
                 document.getElementById("message").style.color = "green";
                 requestTasksFromESP(); //if storing the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
