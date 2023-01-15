@@ -391,7 +391,7 @@ function showCheckBoxes(items) {
     text += "<br><br>";
     text += "Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br><br>";
     text += genCheckBoxes(items, colors);
-    text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button><br>";
+    text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button><br><br>";
     document.getElementById("tasks").innerHTML = text;
     document.getElementById("message").innerHTML = "";
 }
