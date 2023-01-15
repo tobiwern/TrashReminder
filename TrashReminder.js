@@ -2,11 +2,12 @@
 var maxNumberOfEpochs;
 var maxNumberOfTasksPerDay;
 var maxNumberOfTaskIds;
+var hideDelayDefault = 3;
 function fireworks() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            showMessage("I", "FEUERWERK!", "buttonMessage", 2);
+            showMessage("I", "FEUERWERK!", "buttonMessage", hideDelayDefault);
         }
     };
     xhttp.open("GET", "fireworks", true);
@@ -57,7 +58,7 @@ function sendTasksToESP(jsonText) { //send the jsonText to the ESP to be stored 
                 showMessage("I", "Übertragen der Daten war erfolgreich und Abfuhrtermine werden oben angezeigt.", "message", 5);
                 requestTasksFromESP(); //if storing the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
-                showMessage("E", "ERROR: Übertragen der Daten fehlgeschlagen!", "message", 2);
+                showMessage("E", "ERROR: Übertragen der Daten fehlgeschlagen!", "message", hideDelayDefault);
             }
         }
     };
@@ -74,7 +75,7 @@ function requestTasksFromESP() { //send the ESP data to the webpage
                 refreshTaskTypesAndDates(response);
             } else { //500
                 showMessage("W", "Es sind noch keine Abholtermine auf der \"Müll-Erinnerung\" gespeichert! Bitte laden sie wie nachfolgend beschrieben die Abfuhrtermine herunter.", "taskDates");
-                showMessage("E", "Lesen der Daten fehlgeschlagen!", "buttonMessage", 2);
+                showMessage("E", "Lesen der Daten fehlgeschlagen!", "buttonMessage", hideDelayDefault);
                 document.getElementById("taskTypes").innerHTML = "";
             }
         }
@@ -105,35 +106,6 @@ function refreshTaskTypes() {
     }
     text += "</table>";
     document.getElementById("taskTypes").innerHTML = text + "<br>";
-}
-
-function sendValidTaskTypes() {
-    const taskTypeCheckBoxes = document.getElementsByClassName("taskType");
-    var validTaskIds = [];
-    for (let i = 0; i < taskTypeCheckBoxes.length; i++) {
-        checkBox = taskTypeCheckBoxes[i];
-        if (checkBox.checked) {
-            validTaskIds.push(i);
-        }
-    }
-    if(validTaskIds.length == 0){
-        showMessage("W", "Sie müssen mindestens eine Abfallart auswählen!", "messageTaskTypes", 2);
-        return;
-    }
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4) {
-            response = this.responseText;
-            if (this.status == 200) {
-                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "messageTaskTypes", 2);
-            } else { //500, 404
-                showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "messageTaskTypes", 2);
-            }
-        }
-    };
-    var jsonText = '{"validTaskIds":[' + validTaskIds.join(',') + ']}';
-    xhttp.open("GET", "send_ValidTaskIds?value=" + jsonText, true);
-    xhttp.send();
 }
 
 function refreshTaskDates() { //show TaskDates on Webpage
@@ -172,6 +144,35 @@ function refreshTaskDates() { //show TaskDates on Webpage
     document.getElementById("taskDates").innerHTML = text + "<br>";
 }
 
+function sendValidTaskTypesToESP() {
+    const taskTypeCheckBoxes = document.getElementsByClassName("taskType");
+    var validTaskIds = [];
+    for (let i = 0; i < taskTypeCheckBoxes.length; i++) {
+        checkBox = taskTypeCheckBoxes[i];
+        if (checkBox.checked) {
+            validTaskIds.push(i);
+        }
+    }
+    if(validTaskIds.length == 0){
+        showMessage("W", "Sie müssen mindestens eine Abfallart auswählen!", "messageTaskTypes", hideDelayDefault);
+        return;
+    }
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            response = this.responseText;
+            if (this.status == 200) {
+                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "messageTaskTypes", hideDelayDefault);
+            } else { //500, 404
+                showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "messageTaskTypes", hideDelayDefault);
+            }
+        }
+    };
+    var jsonText = '{"validTaskIds":[' + validTaskIds.join(',') + ']}';
+    xhttp.open("GET", "send_ValidTaskIds?value=" + jsonText, true);
+    xhttp.send();
+}
+
 //globally defined for form field callbacks
 dataEpochTaskDict = {};
 dataColors = [];
@@ -193,17 +194,17 @@ function initDataFromJson(jsonObject) {
 function deleteTasks() {
     const response = confirm("Wollen Sie wirklich alle Abfuhrtermine von der \"Müll-Erinnerung\" löschen?");
     if (!response) {
-        showMessage("I", "Löschen der Daten abgebrochen.", "buttonMessage", 2);
+        showMessage("I", "Löschen der Daten abgebrochen.", "buttonMessage", hideDelayDefault);
         return;
     }
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
             if (this.status == 200) {
-                showMessage("I", "Löschen der Daten war erfolgreich!", "buttonMessage", 2);
+                showMessage("I", "Löschen der Daten war erfolgreich!", "buttonMessage", hideDelayDefault);
                 requestTasksFromESP(); //if deleting the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
-                showMessage("E", "ERROR: Löschen der Daten fehlgeschlagen!", "buttonMessage", 2);
+                showMessage("E", "ERROR: Löschen der Daten fehlgeschlagen!", "buttonMessage", hideDelayDefault);
             }
         }
     };
@@ -239,15 +240,15 @@ document.addEventListener('DOMContentLoaded', function () {
     enableEventListener('end');
 });
 function enableEventListener(dropdown) {
-    document.getElementById(dropdown).addEventListener('change', function () { sendUpdate(dropdown); });
+    document.getElementById(dropdown).addEventListener('change', function () { sendDropDownStateToESP(dropdown); });
 }
-function sendUpdate(dropdown) {
+function sendDropDownStateToESP(dropdown) {
     var value = parseInt(document.getElementById(dropdown).value);
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             response = this.responseText;
-            showMessage("I", response, "messageTime", 2);
+            showMessage("I", response, "messageTime", hideDelayDefault);
         }
     };
     if (dropdown == "start") {
