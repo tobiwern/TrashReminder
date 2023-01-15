@@ -75,7 +75,7 @@ function requestTasksFromESP() { //send the ESP data to the webpage
         if (this.readyState == 4) {
             response = this.responseText;
             if (this.status == 200) {
-                document.getElementById("taskTypes").style.color = "black";
+                document.getElementById("taskDates").style.color = "black";
                 refreshTaskTypesAndDates(response);
             } else { //500
                 document.getElementById("message").innerHTML = response;
