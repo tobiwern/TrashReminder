@@ -50,22 +50,6 @@ function requestSettingsFromESP() {
     xhttp.send();
 }
 
-function sendTasksToESP(jsonText) { //send the jsonText to the ESP to be stored in LittleFS
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4) {
-            if (this.status == 200) {
-                showMessage("I", "Übertragen der Daten war erfolgreich und Abfuhrtermine werden oben angezeigt.", "message", 5);
-                requestTasksFromESP(); //if storing the values on the ESP was successful => refresh the "current values" on the webpage
-            } else { //500
-                showMessage("E", "ERROR: Übertragen der Daten fehlgeschlagen!", "message", gHideDelayDefault);
-            }
-        }
-    };
-    xhttp.open("GET", "send_tasks?value=" + jsonText, true);
-    xhttp.send();
-}
-
 function requestTasksFromESP(show = true) { //send the ESP data to the webpage
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
@@ -82,6 +66,121 @@ function requestTasksFromESP(show = true) { //send the ESP data to the webpage
     };
     xhttp.open("GET", "request_tasks", true);
     xhttp.send();
+}
+
+function sendTasksToESP(jsonText) { //send the jsonText to the ESP to be stored in LittleFS
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                showMessage("I", "Übertragen der Daten war erfolgreich und Abfuhrtermine werden oben angezeigt.", "message", 5);
+                requestTasksFromESP(); //if storing the values on the ESP was successful => refresh the "current values" on the webpage
+            } else { //500
+                showMessage("E", "ERROR: Übertragen der Daten fehlgeschlagen!", "message", gHideDelayDefault);
+            }
+        }
+    };
+    xhttp.open("GET", "send_tasks?value=" + jsonText, true);
+    xhttp.send();
+}
+
+function sendValidTaskTypesToESP() {
+    const taskTypeCheckBoxes = document.getElementsByClassName("taskType");
+    var validTaskIds = [];
+    for (let i = 0; i < taskTypeCheckBoxes.length; i++) {
+        checkBox = taskTypeCheckBoxes[i];
+        if (checkBox.checked) {
+            validTaskIds.push(i);
+        }
+    }
+    if (validTaskIds.length == 0) {
+        showMessage("W", "Sie müssen mindestens eine Abfallart auswählen!", "messageTaskTypes");
+        return;
+    }
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            response = this.responseText;
+            if (this.status == 200) {
+                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "messageTaskTypes", gHideDelayDefault);
+            } else { //500, 404
+                showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "messageTaskTypes", gHideDelayDefault);
+            }
+        }
+    };
+    var jsonText = '{"validTaskIds":[' + validTaskIds.join(',') + ']}';
+    xhttp.open("GET", "send_ValidTaskIds?value=" + jsonText, true);
+    xhttp.send();
+}
+
+function sendDropDownStateToESP(dropdown) {
+    var value = parseInt(document.getElementById(dropdown).value);
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+            response = this.responseText;
+            showMessage("I", response, "messageTime", gHideDelayDefault);
+        }
+    };
+    if (dropdown == "start") {
+        var endValue = parseInt(document.getElementById("end").value)
+        if (value < endValue) {
+            var newValue = endValue + 1;
+            alert("Um überlappende Ereignisse an Folgetagen zu vermeiden, sollte der \"Start der Erinnerung\" (" + value + ") nicht vor dem \"Ende der Erinnerung\" (" + endValue + ") liegen!\nSetze \"Start der Erinnerung\" auf minimal zulässigen Wert (" + newValue + ").");
+            value = newValue
+            document.getElementById(dropdown).value = value
+        }
+    } else {
+        var startValue = parseInt(document.getElementById("start").value)
+        if (startValue < value) {
+            newValue = startValue - 1;
+            alert("Um überlappende Ereignisse an Folgetagen zu vermeiden, sollte der \"Start der Erinnerung\" (" + startValue + ") nicht vor dem \"Ende der Erinnerung\" (" + value + ") liegen!\nSetze \"Ende der Erinnerung\" auf maximal zulässigen Wert (" + newValue + ").");
+            value = newValue;
+            document.getElementById(dropdown).value = value
+        }
+    }
+    xhttp.open("GET", "set_" + dropdown + "?value=" + value, true);
+    xhttp.send();
+}
+
+function deleteTasksOnESP() {
+    const response = confirm("Wollen Sie wirklich alle Abfuhrtermine von der \"Müll-Erinnerung\" löschen?");
+    if (!response) {
+        showMessage("I", "Löschen der Daten abgebrochen.", "buttonMessage", gHideDelayDefault);
+        return;
+    }
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                showMessage("I", "Löschen der Daten war erfolgreich!", "buttonMessage", gHideDelayDefault);
+                requestTasksFromESP(false); //if deleting the values on the ESP was successful => refresh the "current values" on the webpage
+            } else { //500
+                showMessage("E", "ERROR: Löschen der Daten fehlgeschlagen!", "buttonMessage", gHideDelayDefault);
+            }
+        }
+    };
+    xhttp.open("GET", "delete_tasks", true);
+    xhttp.send();
+}
+
+/// WebPage Refresh Functions for CURRENT Data on ESP
+//globally defined for form field callbacks
+var gDataEpochTaskDict = {};
+var gDataColors = [];
+var gDataTasks = [];
+var gDataValidTaskIds = [];
+
+function initDataFromJson(jsonObject) {
+    var epochTasks = jsonObject["epochTasks"];
+    for (const epochTask of epochTasks) {
+        for (var epoch in epochTask) { //translate into dict
+            gDataEpochTaskDict[epoch] = epochTask[epoch];
+        }
+    }
+    gDataColors = jsonObject["colors"];
+    gDataTasks = jsonObject["tasks"];
+    gDataValidTaskIds = jsonObject["validTaskIds"];
 }
 
 function refreshTaskTypesAndDates(response) {
@@ -106,16 +205,6 @@ function refreshTaskTypes() {
     }
     text += "</table>";
     document.getElementById("taskTypes").innerHTML = text + "<br>";
-}
-
-function epochToDateString(epoch, dateType = "long") {
-    var dateTime = new Date(epoch * 1000);
-    var timeStamp = "";
-    if (dateType == "long") {
-        timeStamp += dateTime.toLocaleString("de", { weekday: "long" }) + ", ";
-    }
-    timeStamp += ("00" + dateTime.getDate()).slice(-2) + "." + ("00" + dateTime.toLocaleString("de", { month: "numeric" })).slice(-2) + "." + dateTime.getFullYear();
-    return (timeStamp);
 }
 
 function refreshTaskDates() { //show TaskDates on Webpage
@@ -153,132 +242,12 @@ function refreshTaskDates() { //show TaskDates on Webpage
     document.getElementById("taskDates").innerHTML = text + "<br>";
 }
 
-function sendValidTaskTypesToESP() {
-    const taskTypeCheckBoxes = document.getElementsByClassName("taskType");
-    var validTaskIds = [];
-    for (let i = 0; i < taskTypeCheckBoxes.length; i++) {
-        checkBox = taskTypeCheckBoxes[i];
-        if (checkBox.checked) {
-            validTaskIds.push(i);
-        }
-    }
-    if (validTaskIds.length == 0) {
-        showMessage("W", "Sie müssen mindestens eine Abfallart auswählen!", "messageTaskTypes");
-        return;
-    }
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4) {
-            response = this.responseText;
-            if (this.status == 200) {
-                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "messageTaskTypes", gHideDelayDefault);
-            } else { //500, 404
-                showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "messageTaskTypes", gHideDelayDefault);
-            }
-        }
-    };
-    var jsonText = '{"validTaskIds":[' + validTaskIds.join(',') + ']}';
-    xhttp.open("GET", "send_ValidTaskIds?value=" + jsonText, true);
-    xhttp.send();
-}
-
-//globally defined for form field callbacks
-var gDataEpochTaskDict = {};
-var gDataColors = [];
-var gDataTasks = [];
-var gDataValidTaskIds = [];
-
-function initDataFromJson(jsonObject) {
-    var epochTasks = jsonObject["epochTasks"];
-    for (const epochTask of epochTasks) {
-        for (var epoch in epochTask) { //translate into dict
-            gDataEpochTaskDict[epoch] = epochTask[epoch];
-        }
-    }
-    gDataColors = jsonObject["colors"];
-    gDataTasks = jsonObject["tasks"];
-    gDataValidTaskIds = jsonObject["validTaskIds"];
-}
-
-function deleteTasksOnESP() {
-    const response = confirm("Wollen Sie wirklich alle Abfuhrtermine von der \"Müll-Erinnerung\" löschen?");
-    if (!response) {
-        showMessage("I", "Löschen der Daten abgebrochen.", "buttonMessage", gHideDelayDefault);
-        return;
-    }
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4) {
-            if (this.status == 200) {
-                showMessage("I", "Löschen der Daten war erfolgreich!", "buttonMessage", gHideDelayDefault);
-                requestTasksFromESP(false); //if deleting the values on the ESP was successful => refresh the "current values" on the webpage
-            } else { //500
-                showMessage("E", "ERROR: Löschen der Daten fehlgeschlagen!", "buttonMessage", gHideDelayDefault);
-            }
-        }
-    };
-    xhttp.open("GET", "delete_tasks", true);
-    xhttp.send();
-}
-
-function showMessage(msgType, message, receiver = "buttonMessage", hideDelayInSec = 0) {
-    document.getElementById(receiver).innerHTML = message + "<br><br>";
-    switch (msgType) {
-        case "D":
-            document.getElementById(receiver).style.color = "orange";
-            break;
-        case "W":
-            document.getElementById(receiver).style.color = "orange";
-            break;
-        case "E":
-            document.getElementById(receiver).style.color = "red";
-            break;
-        case "I":
-            document.getElementById(receiver).style.color = "green";
-            break;
-        default:
-            document.getElementById(receiver).style.color = "black";
-    }
-    if (hideDelayInSec != 0) {
-        setTimeout(function () { document.getElementById(receiver).innerHTML = ""; }, hideDelayInSec * 1000);
-    }
-}
-
 document.addEventListener('DOMContentLoaded', function () {
     enableEventListener('start');
     enableEventListener('end');
 });
 function enableEventListener(dropdown) {
     document.getElementById(dropdown).addEventListener('change', function () { sendDropDownStateToESP(dropdown); });
-}
-function sendDropDownStateToESP(dropdown) {
-    var value = parseInt(document.getElementById(dropdown).value);
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-            response = this.responseText;
-            showMessage("I", response, "messageTime", gHideDelayDefault);
-        }
-    };
-    if (dropdown == "start") {
-        var endValue = parseInt(document.getElementById("end").value)
-        if (value < endValue) {
-            var newValue = endValue + 1;
-            alert("Um überlappende Ereignisse an Folgetagen zu vermeiden, sollte der \"Start der Erinnerung\" (" + value + ") nicht vor dem \"Ende der Erinnerung\" (" + endValue + ") liegen!\nSetze \"Start der Erinnerung\" auf minimal zulässigen Wert (" + newValue + ").");
-            value = newValue
-            document.getElementById(dropdown).value = value
-        }
-    } else {
-        var startValue = parseInt(document.getElementById("start").value)
-        if (startValue < value) {
-            newValue = startValue - 1;
-            alert("Um überlappende Ereignisse an Folgetagen zu vermeiden, sollte der \"Start der Erinnerung\" (" + startValue + ") nicht vor dem \"Ende der Erinnerung\" (" + value + ") liegen!\nSetze \"Ende der Erinnerung\" auf maximal zulässigen Wert (" + newValue + ").");
-            value = newValue;
-            document.getElementById(dropdown).value = value
-        }
-    }
-    xhttp.open("GET", "set_" + dropdown + "?value=" + value, true);
-    xhttp.send();
 }
 /// ICS/iCAL Processing ////////////////////////////////////////////////////////////////////
 var gDebug = false;
@@ -451,4 +420,38 @@ function genCheckBoxes(tasks, colors, validTaskIds = []) {
 
 function send(number) {//debug
     showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
+}
+
+/// Utility Functions
+function epochToDateString(epoch, dateType = "long") {
+    var dateTime = new Date(epoch * 1000);
+    var timeStamp = "";
+    if (dateType == "long") {
+        timeStamp += dateTime.toLocaleString("de", { weekday: "long" }) + ", ";
+    }
+    timeStamp += ("00" + dateTime.getDate()).slice(-2) + "." + ("00" + dateTime.toLocaleString("de", { month: "numeric" })).slice(-2) + "." + dateTime.getFullYear();
+    return (timeStamp);
+}
+
+function showMessage(msgType, message, receiver = "buttonMessage", hideDelayInSec = 0) {
+    document.getElementById(receiver).innerHTML = message + "<br><br>";
+    switch (msgType) {
+        case "D":
+            document.getElementById(receiver).style.color = "orange";
+            break;
+        case "W":
+            document.getElementById(receiver).style.color = "orange";
+            break;
+        case "E":
+            document.getElementById(receiver).style.color = "red";
+            break;
+        case "I":
+            document.getElementById(receiver).style.color = "green";
+            break;
+        default:
+            document.getElementById(receiver).style.color = "black";
+    }
+    if (hideDelayInSec != 0) {
+        setTimeout(function () { document.getElementById(receiver).innerHTML = ""; }, hideDelayInSec * 1000);
+    }
 }
