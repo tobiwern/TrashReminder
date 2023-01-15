@@ -66,7 +66,7 @@ function sendTasksToESP(jsonText) { //send the jsonText to the ESP to be stored 
     xhttp.send();
 }
 
-function requestTasksFromESP() { //send the ESP data to the webpage
+function requestTasksFromESP(show = true) { //send the ESP data to the webpage
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
@@ -75,7 +75,7 @@ function requestTasksFromESP() { //send the ESP data to the webpage
                 refreshTaskTypesAndDates(response);
             } else { //500
                 showMessage("W", "Es sind noch keine Abholtermine auf der \"Müll-Erinnerung\" gespeichert! Bitte laden sie wie nachfolgend beschrieben die Abfuhrtermine herunter.", "taskDates");
-                showMessage("E", "Lesen der Daten fehlgeschlagen!", "buttonMessage", hideDelayDefault);
+                if (show) { showMessage("E", "Lesen der Daten fehlgeschlagen!", "buttonMessage", hideDelayDefault); }
                 document.getElementById("taskTypes").innerHTML = "";
             }
         }
@@ -153,7 +153,7 @@ function sendValidTaskTypesToESP() {
             validTaskIds.push(i);
         }
     }
-    if(validTaskIds.length == 0){
+    if (validTaskIds.length == 0) {
         showMessage("W", "Sie müssen mindestens eine Abfallart auswählen!", "messageTaskTypes");
         return;
     }
@@ -191,7 +191,7 @@ function initDataFromJson(jsonObject) {
     dataValidTaskIds = jsonObject["validTaskIds"];
 }
 
-function deleteTasks() {
+function deleteTasksOnESP() {
     const response = confirm("Wollen Sie wirklich alle Abfuhrtermine von der \"Müll-Erinnerung\" löschen?");
     if (!response) {
         showMessage("I", "Löschen der Daten abgebrochen.", "buttonMessage", hideDelayDefault);
@@ -202,7 +202,7 @@ function deleteTasks() {
         if (this.readyState == 4) {
             if (this.status == 200) {
                 showMessage("I", "Löschen der Daten war erfolgreich!", "buttonMessage", hideDelayDefault);
-                requestTasksFromESP(); //if deleting the values on the ESP was successful => refresh the "current values" on the webpage
+                requestTasksFromESP(false); //if deleting the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
                 showMessage("E", "ERROR: Löschen der Daten fehlgeschlagen!", "buttonMessage", hideDelayDefault);
             }
