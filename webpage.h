@@ -58,8 +58,7 @@ const char webpage[] PROGMEM = R"=====(
       <hr>
       <table>
           <tr>
-              <td><label for="start">Wählen Sie eine oder mehrere bereits heruntergeladene ICS oder ICAL Dateien
-                      ihres Entsorgungsunternehmens aus:</label><br><br></td>
+              <td><label for="start">Wählen Sie eine oder mehrere bereits heruntergeladene ICS oder ICAL Dateien ihres Entsorgungsunternehmens aus:</label><br><br></td>
           </tr>
           <tr>
               <td><input type="file" name="files" id="files" accept=".ics" onchange="processFiles()" multiple></td>
@@ -75,7 +74,6 @@ const char webpage[] PROGMEM = R"=====(
               </td>
           </tr>
       </table>
-      <br>
       </div>
       <br>
       <div class=frame>
