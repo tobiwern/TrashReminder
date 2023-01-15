@@ -154,7 +154,7 @@ void setStartHour() {
   startHour = hour.toInt();
   setColor(CRGB::White, false);
   setColor(CRGB::Purple, false);
-  server.send(200, "text/plane", "Neuer Startzeitpunkt übertragen.");
+  server.send(200, "text/plane", "Neuer Startzeitpunkt gespeichert.");
   writeStartEndTimes();
 }
 
@@ -164,7 +164,7 @@ void setEndHour() {
   endHour = hour.toInt();
   setColor(CRGB::White, false);
   setColor(CRGB::Purple, false);
-  server.send(200, "text/plane", "Neuer Endzeitpunkt übertragen.");
+  server.send(200, "text/plane", "Neuer Endzeitpunkt gespeichert.");
   writeStartEndTimes();
 }
 

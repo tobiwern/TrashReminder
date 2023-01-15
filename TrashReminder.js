@@ -71,8 +71,8 @@ function requestTasksFromESP(show = true) { //send the ESP data to the webpage
 function sendTasksToESP(jsonText, currentData = false) { //send the jsonText to the ESP to be stored in LittleFS
     if(currentData){
         receiver = "messageTaskTypes";
-        message = "Übertragen der Daten war erfolgreich.";
-        hideDelay = 3;
+        message = "Neue Auswahl gespeichert.";
+        hideDelay = 2;
     } else {
         receiver = "message";
         message = "Übertragen der Daten war erfolgreich und Abfuhrtermine werden oben angezeigt.";
