@@ -119,7 +119,7 @@ void sendTasksToWebpage() {  //transfering ESP data to the Webpage
     Serial.println("Sending taks: " + value);
     server.send(200, "text/plane", value);
   } else {
-    value = "ERROR: Lesen der Daten fehlgeschlagen.";
+    value = "ERROR";
     server.send(500, "text/plane", value);
   }
 }
@@ -169,14 +169,11 @@ void setEndHour() {
 
 void receiveTasksFromWebpage() {
   String jsonText = server.arg("value");
-  String response = "";
   Serial.println("Receiving settings in JSON format: " + jsonText);
   if (writeFile(dataFile, jsonText.c_str())) {
-    response = "Übertragen der Daten war erfolgreich!";
-    server.send(200, "text/plane", response);
+    server.send(200, "text/plane", "OK");
   } else {
-    response = "ERROR: Übertragen der Daten fehlgeschlagen!";
-    server.send(500, "text/plane", response);
+    server.send(500, "text/plane", "ERROR");
   }
 }
 

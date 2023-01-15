@@ -55,12 +55,12 @@ function sendTasksToESP(jsonText) { //send the jsonText to the ESP to be stored 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
-            response = this.responseText;
-            document.getElementById("message").innerHTML = response;
             if (this.status == 200) {
+                document.getElementById("message").innerHTML = "Übertragen der Daten war erfolgreich!";
                 document.getElementById("message").style.color = "green";
                 requestTasksFromESP(); //if storing the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
+                document.getElementById("message").innerHTML = "ERROR: Übertragen der Daten fehlgeschlagen!"
                 document.getElementById("message").style.color = "red";
             }
         }
@@ -125,12 +125,12 @@ function refreshTaskTypes() {
         if (this.readyState == 4) {
             response = this.responseText;
             if (this.status == 200) {
-                document.getElementById("message").innerHTML = response;
-                document.getElementById("message").style.color = "green";
+//                document.getElementById("message").innerHTML = response;
+//                document.getElementById("message").style.color = "green";
             } else { //500
-                document.getElementById("message").innerHTML = response;
-                document.getElementById("message").style.color = "red";
-                document.getElementById("settings").innerHTML = "";
+//                document.getElementById("message").innerHTML = response;
+//                document.getElementById("message").style.color = "red";
+//                document.getElementById("settings").innerHTML = "";
             }
         }
     };
@@ -202,6 +202,7 @@ function deleteTasks() {
             if (this.status == 200) {
                 document.getElementById("message").style.color = "green";
                 document.getElementById("settings").innerHTML = "";
+                requestTasksFromESP(); //if deleting the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
                 document.getElementById("message").style.color = "red"; 
             }
