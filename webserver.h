@@ -243,7 +243,7 @@ void startWebServer() {
   server.on("/delete_tasks", deleteTasks);
   server.on("/close", closeSettings);
   server.on("/fireworks", fireworks);
-  server.on("/update_ValidTaskIds", receiveFromWebpage_ValidTaskIds);
+  server.on("/send_ValidTaskIds", receiveFromWebpage_ValidTaskIds);
   server.onNotFound(notFound);
   server.begin();
   Serial.print("IP address: ");
