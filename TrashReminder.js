@@ -68,15 +68,24 @@ function requestTasksFromESP(show = true) { //send the ESP data to the webpage
     xhttp.send();
 }
 
-function sendTasksToESP(jsonText) { //send the jsonText to the ESP to be stored in LittleFS
+function sendTasksToESP(jsonText, currentData = false) { //send the jsonText to the ESP to be stored in LittleFS
+    if(currentData){
+        receiver = "messageTaskTypes";
+        message = "Übertragen der Daten war erfolgreich.";
+        hideDelay = 3;
+    } else {
+        receiver = "message";
+        message = "Übertragen der Daten war erfolgreich und Abfuhrtermine werden oben angezeigt.";
+        hideDelay = 5;
+    }
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
             if (this.status == 200) {
-                showMessage("I", "Übertragen der Daten war erfolgreich und Abfuhrtermine werden oben angezeigt.", "message", 5);
+                showMessage("I", message, receiver, hideDelay);
                 requestTasksFromESP(); //if storing the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
-                showMessage("E", "ERROR: Übertragen der Daten fehlgeschlagen!", "message", gHideDelayDefault);
+                showMessage("E", "ERROR: Übertragen der Daten fehlgeschlagen!", receiver, gHideDelayDefault);
             }
         }
     };
