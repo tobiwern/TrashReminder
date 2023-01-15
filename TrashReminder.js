@@ -1,13 +1,13 @@
 //setInterval(function(){getData();}, 2000);
-var maxNumberOfEpochs;
-var maxNumberOfTasksPerDay;
-var maxNumberOfTaskIds;
-var hideDelayDefault = 3;
+var gMaxNumberOfEpochs;
+var gMaxNumberOfTasksPerDay;
+var gMaxNumberOfTaskIds;
+var gHideDelayDefault = 3;
 function fireworks() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            showMessage("I", "FEUERWERK!", "buttonMessage", hideDelayDefault);
+            showMessage("I", "FEUERWERK!", "buttonMessage", gHideDelayDefault);
         }
     };
     xhttp.open("GET", "fireworks", true);
@@ -41,9 +41,9 @@ function requestSettingsFromESP() {
             tokens = value.split(",");
             document.getElementById("start").value = tokens[0];
             document.getElementById("end").value = tokens[1];
-            maxNumberOfEpochs = tokens[2];
-            maxNumberOfTasksPerDay = tokens[3];
-            maxNumberOfTaskIds = tokens[4];
+            gMaxNumberOfEpochs = tokens[2];
+            gMaxNumberOfTasksPerDay = tokens[3]; //tasks per day
+            gMaxNumberOfTaskIds = tokens[4]; //different tasks
         }
     };
     xhttp.open("GET", "request_settings", true);
@@ -58,7 +58,7 @@ function sendTasksToESP(jsonText) { //send the jsonText to the ESP to be stored 
                 showMessage("I", "Übertragen der Daten war erfolgreich und Abfuhrtermine werden oben angezeigt.", "message", 5);
                 requestTasksFromESP(); //if storing the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
-                showMessage("E", "ERROR: Übertragen der Daten fehlgeschlagen!", "message", hideDelayDefault);
+                showMessage("E", "ERROR: Übertragen der Daten fehlgeschlagen!", "message", gHideDelayDefault);
             }
         }
     };
@@ -75,7 +75,7 @@ function requestTasksFromESP(show = true) { //send the ESP data to the webpage
                 refreshTaskTypesAndDates(response);
             } else { //500
                 showMessage("W", "Es sind noch keine Abholtermine auf der \"Müll-Erinnerung\" gespeichert! Bitte laden sie wie nachfolgend beschrieben die Abfuhrtermine herunter.", "taskDates");
-                if (show) { showMessage("E", "Lesen der Daten fehlgeschlagen!", "buttonMessage", hideDelayDefault); }
+                if (show) { showMessage("E", "Lesen der Daten fehlgeschlagen!", "buttonMessage", gHideDelayDefault); }
                 document.getElementById("taskTypes").innerHTML = "";
             }
         }
@@ -87,7 +87,7 @@ function requestTasksFromESP(show = true) { //send the ESP data to the webpage
 function refreshTaskTypesAndDates(response) {
     const jsonObject = JSON.parse(response);
     document.getElementById("taskDates").style.color = "black";
-    dataEpochTaskDict = {}; //reset
+    gDataEpochTaskDict = {}; //reset
     initDataFromJson(jsonObject)
     refreshTaskTypes();
     refreshTaskDates();
@@ -96,21 +96,31 @@ function refreshTaskTypesAndDates(response) {
 function refreshTaskTypes() {
     var text = "Sie werden derzeit an folgende Abfallarten erinnert:<br><br>";
     text += "<table>";
-    for (let i = 0; i < dataTasks.length; i++) {
-        checked = (dataValidTaskIds.length == 0 || dataValidTaskIds.includes(i)) ? "checked" : "";
+    for (let i = 0; i < gDataTasks.length; i++) {
+        checked = (gDataValidTaskIds.length == 0 || gDataValidTaskIds.includes(i)) ? "checked" : "";
         text += "<tr>"
         text += "<td class='value'><div><input type='checkbox' class='taskType' onChange='refreshTaskDates();sendValidTaskTypes();' id='taskType" + i + "' name=task" + i + "' " + checked + ">";
-        text += "<label for='taskType" + i + "' id='taskTypel" + i + "'> " + dataTasks[i] + "</label><div></td>";
-        text += "<td><button style='background-color: " + dataColors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
+        text += "<label for='taskType" + i + "' id='taskTypel" + i + "'> " + gDataTasks[i] + "</label><div></td>";
+        text += "<td><button style='background-color: " + gDataColors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
         text += "</tr>";
     }
     text += "</table>";
     document.getElementById("taskTypes").innerHTML = text + "<br>";
 }
 
+function epochToDateString(epoch, dateType = "long") {
+    var dateTime = new Date(epoch * 1000);
+    var timeStamp = "";
+    if (dateType == "long") {
+        timeStamp += dateTime.toLocaleString("de", { weekday: "long" }) + ", ";
+    }
+    timeStamp += ("00" + dateTime.getDate()).slice(-2) + "." + ("00" + dateTime.toLocaleString("de", { month: "numeric" })).slice(-2) + "." + dateTime.getFullYear();
+    return (timeStamp);
+}
+
 function refreshTaskDates() { //show TaskDates on Webpage
-    var text = Object.keys(dataEpochTaskDict).length + " Abholtermine sind derzeit verfügbar.<br><br>";
-    var epochs = Object.keys(dataEpochTaskDict).sort();
+    var text = Object.keys(gDataEpochTaskDict).length + " Abholtermine sind derzeit verfügbar.<br><br>";
+    var epochs = Object.keys(gDataEpochTaskDict).sort();
     text += "<table id=epochTasks>"
     text += "<tr><th>Datum der Abholung</th><th>Müllart</th></tr>"
     const taskTypeCheckBoxes = document.getElementsByClassName("taskType");
@@ -120,7 +130,7 @@ function refreshTaskDates() { //show TaskDates on Webpage
     }
     for (const epoch of epochs) {
         var dateTime = new Date(epoch * 1000);
-        var taskIds = dataEpochTaskDict[epoch];
+        var taskIds = gDataEpochTaskDict[epoch];
         selectedTaskIds = [];
         for (const taskId of taskIds) {
             if (taskIdEnableValue[taskId]) {
@@ -128,13 +138,12 @@ function refreshTaskDates() { //show TaskDates on Webpage
             }
         }
         if (selectedTaskIds.length >= 1) {
-            timeStamp = dateTime.toLocaleString("de", { weekday: "long" }) + ", " + ("00" + dateTime.getDate()).slice(-2) + "." + ("00" + dateTime.toLocaleString("de", { month: "numeric" })).slice(-2) + "." + dateTime.getFullYear();
             text += "<tr>"
-            text += "<td class=description nowrap>" + timeStamp + "</td>";
+            text += "<td class=description nowrap>" + epochToDateString(epoch) + "</td>";
             text += "<td>";
             for (const taskId of selectedTaskIds) {
-                text += "<div class=taskType><button style='background-color: " + dataColors[taskId].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button>";
-                text += " " + dataTasks[taskId] + "</div>";
+                text += "<div class=taskType><button style='background-color: " + gDataColors[taskId].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button>";
+                text += " " + gDataTasks[taskId] + "</div>";
             }
             text += "</td>";
             text += "</tr>";
@@ -162,9 +171,9 @@ function sendValidTaskTypesToESP() {
         if (this.readyState == 4) {
             response = this.responseText;
             if (this.status == 200) {
-                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "messageTaskTypes", hideDelayDefault);
+                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "messageTaskTypes", gHideDelayDefault);
             } else { //500, 404
-                showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "messageTaskTypes", hideDelayDefault);
+                showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "messageTaskTypes", gHideDelayDefault);
             }
         }
     };
@@ -174,37 +183,37 @@ function sendValidTaskTypesToESP() {
 }
 
 //globally defined for form field callbacks
-dataEpochTaskDict = {};
-dataColors = [];
-dataTasks = [];
-dataValidTaskIds = [];
+var gDataEpochTaskDict = {};
+var gDataColors = [];
+var gDataTasks = [];
+var gDataValidTaskIds = [];
 
 function initDataFromJson(jsonObject) {
     var epochTasks = jsonObject["epochTasks"];
     for (const epochTask of epochTasks) {
         for (var epoch in epochTask) { //translate into dict
-            dataEpochTaskDict[epoch] = epochTask[epoch];
+            gDataEpochTaskDict[epoch] = epochTask[epoch];
         }
     }
-    dataColors = jsonObject["colors"];
-    dataTasks = jsonObject["tasks"];
-    dataValidTaskIds = jsonObject["validTaskIds"];
+    gDataColors = jsonObject["colors"];
+    gDataTasks = jsonObject["tasks"];
+    gDataValidTaskIds = jsonObject["validTaskIds"];
 }
 
 function deleteTasksOnESP() {
     const response = confirm("Wollen Sie wirklich alle Abfuhrtermine von der \"Müll-Erinnerung\" löschen?");
     if (!response) {
-        showMessage("I", "Löschen der Daten abgebrochen.", "buttonMessage", hideDelayDefault);
+        showMessage("I", "Löschen der Daten abgebrochen.", "buttonMessage", gHideDelayDefault);
         return;
     }
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
             if (this.status == 200) {
-                showMessage("I", "Löschen der Daten war erfolgreich!", "buttonMessage", hideDelayDefault);
+                showMessage("I", "Löschen der Daten war erfolgreich!", "buttonMessage", gHideDelayDefault);
                 requestTasksFromESP(false); //if deleting the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
-                showMessage("E", "ERROR: Löschen der Daten fehlgeschlagen!", "buttonMessage", hideDelayDefault);
+                showMessage("E", "ERROR: Löschen der Daten fehlgeschlagen!", "buttonMessage", gHideDelayDefault);
             }
         }
     };
@@ -248,7 +257,7 @@ function sendDropDownStateToESP(dropdown) {
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             response = this.responseText;
-            showMessage("I", response, "messageTime", hideDelayDefault);
+            showMessage("I", response, "messageTime", gHideDelayDefault);
         }
     };
     if (dropdown == "start") {
@@ -272,15 +281,15 @@ function sendDropDownStateToESP(dropdown) {
     xhttp.send();
 }
 /// ICS/iCAL Processing ////////////////////////////////////////////////////////////////////
-var debug = false;
-var items = [];
-var dateDict = {};                       //HÄCKSEL
-var colorDict = { 'PAPIER': '0x0000FF', 'BIO,CKSEL': '0x00FF00', 'GELB,WERT': '0xFFFF00', 'REST': '0xFFFFFF' }
-var colorDefault = '0xFFC0CB';
-var colors = [];
+var gDebug = false;
+var gTasks = [];
+var gEpochTaskDict = {};                       //HÄCKSEL
+var gColorDict = { 'PAPIER': '0x0000FF', 'BIO,CKSEL': '0x00FF00', 'GELB,WERT': '0xFFFF00', 'REST': '0xFFFFFF' }
+var gColorDefault = '0xFFC0CB';
+var gColors = [];
 function processFiles() {
-    items = [];
-    dateDict = {};
+    gTasks = [];
+    gEpochTaskDict = {};
     var files = document.getElementById('files').files;
     for (var fileIndex = 0; fileIndex < files.length; fileIndex++) {
         var file = files[fileIndex];
@@ -295,21 +304,22 @@ function processFiles() {
                     dateString = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
                     var epoch = new Date(dateString).getTime() / 1000; //since ms => s
                 } else if (line.search("SUMMARY") != -1) {
-                    var item = line.split(":")[1];
-                    item = item.replace("\\", "");
-                    item = item.replace("\r", "");
+                    var task = line.split(":")[1];
+                    task = task.replace("\\", "");
+                    task = task.replace("\r", "");
                 } else if (line.search("END:VEVENT") != -1) {
-                    if (!(epoch in dateDict)) { dateDict[epoch] = { "tasks": [], "date": dateString }; }
-                    var arr = dateDict[epoch]["tasks"];
-                    arr.push(item);
-                    dateDict[epoch][tasks] = arr;
-                    if (!items.includes(item)) {
-                        items.push(item);
-                        colors = getColors();
-                        showCheckBoxes(items); //executed multiple times, however ok
+                    if (!(epoch in gEpochTaskDict)) { gEpochTaskDict[epoch] = { "tasks": [], "date": dateString }; }
+                    var arr = gEpochTaskDict[epoch]["tasks"];
+                    arr.push(task);
+                    gEpochTaskDict[epoch][tasks] = arr;
+                    if (!gTasks.includes(task)) {
+                        gTasks.push(task);
+                        gColors = getColors();
+                        showCheckBoxes(gTasks); //executed multiple times, however ok
                     }
                 }
             }
+            checkMaxNumberOfEntries();
         }; //on load
         reader.readAsText(file);
     }
@@ -317,7 +327,7 @@ function processFiles() {
 
 function getValidTaskIds() {
     var validTaskIds = [];
-    for (var i = 0; i < items.length; i++) {
+    for (var i = 0; i < gTasks.length; i++) {
         var label = document.getElementById("taskl" + i).innerText;
         if (document.getElementById("task" + i).checked) {
             validTaskIds.push(i);
@@ -329,35 +339,35 @@ function getValidTaskIds() {
 function getTaskIds(tasks) {
     var taskIds = [];
     for (var i = 0; i < tasks.length; i++) {
-        taskIds.push(items.indexOf(tasks[i]));
+        taskIds.push(gTasks.indexOf(tasks[i]));
     }
     return (taskIds);
 }
 
 function getColors() {
     var colors = [];
-    for (var i = 0; i < items.length; i++) {
-        var item = items[i];
+    for (var i = 0; i < gTasks.length; i++) {
+        var item = gTasks[i];
         var color = getMatchingColor(item);
         if (color) {
             colors.push(color);
         } else {
             alert("Failed to auto-assign color for entry " + item + ".<br>Assigning default color (pink).");
-            colors.push(colorDefault);
+            colors.push(gColorDefault);
         }
     }
     return (colors);
 }
 
 function getMatchingColor(item) {
-    var keys = Object.keys(colorDict).sort();
+    var keys = Object.keys(gColorDict).sort();
     for (var i = 0; i < keys.length; i++) {
         var key = keys[i];
         var entries = key.split(",");
         for (var j = 0; j < entries.length; j++) {
             var entry = entries[j];
             if (item.toUpperCase().search(entry) != -1) {
-                return (colorDict[key]);
+                return (gColorDict[key]);
             }
         }
     }
@@ -368,23 +378,20 @@ function genJson() {
     validTaskIds = getValidTaskIds();
     console.log(validTaskIds);
     var entries = [];
-    keys = Object.keys(dateDict).sort();
-    if(keys.length > maxNumberOfEpochs){
-        showMessage("W", "Es werden maximal " + maxNumberOfEpochs + " Abholtermine unterstützt! Die darüber hinausgehenden Einträge werden nicht verarbeitet. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
-    }
+    var keys = Object.keys(gEpochTaskDict);
     for (var i = 0; i < keys.length; i++) {
         var epoch = keys[i];
-        var tasks = dateDict[epoch]["tasks"];
+        var tasks = gEpochTaskDict[epoch]["tasks"];
         var taskIds = getTaskIds(tasks);
-        var date = dateDict[epoch]["date"];
-        if (debug) {
+        var date = gEpochTaskDict[epoch]["date"];
+        if (gDebug) {
             entries.push('{"' + epoch + '"' + ":" + '{"date":"' + date + '","tasks":["' + tasks.join('","') + '"],"taskIds":[' + taskIds.join(',') + ']}}');
         } else {
             entries.push('{"' + epoch + '":[' + taskIds.join(',') + ']}');
         }
     }
 
-    var jsonText = '{"tasks":["' + items.join('","') + '"],"colors":["' + colors.join('","') + '"],"validTaskIds":[' + validTaskIds.join(',') + '],"epochTasks":[' + entries.join(',') + ']}';
+    var jsonText = '{"tasks":["' + gTasks.join('","') + '"],"colors":["' + gColors.join('","') + '"],"validTaskIds":[' + validTaskIds.join(',') + '],"epochTasks":[' + entries.join(',') + ']}';
     console.log(jsonText);
     try {
         const obj = JSON.parse(jsonText); //just to check if valid JSON, ToDo: Show if there is an error!
@@ -395,9 +402,31 @@ function genJson() {
     sendTasksToESP(jsonText);
 }
 
+function checkMaxNumberOfEntries() {
+    var text = "";
+    if (gTasks.length > gMaxNumberOfTaskIds) {
+        text += "Anzahl der Abfallarten ist " + gTasks.length + ". Es werden maximal " + gMaxNumberOfTaskIds + " <b>unterschiedliche Abfallarten</b> unterstützt!<br>";
+    }
+    var epochs = Object.keys(gEpochTaskDict);
+    if (epochs.length > gMaxNumberOfEpochs) {
+        text += "Anzahl der Abholtermine ist " + epochs.length + ". Es werden maximal " + gMaxNumberOfEpochs + " <b>Abholtermine</b> unterstützt!<br>";
+    }
+    for (const epoch of epochs) {
+        var tasks = gEpochTaskDict[epoch]["tasks"];
+        var taskIds = getTaskIds(tasks);
+        if (taskIds.length > gMaxNumberOfTasksPerDay) {
+            text += "Anzahl der Abfallarten pro Tag am " + epochToDateString(epoch, "short") + " ist " + taskIds.length + ". Es werden maximal " + gMaxNumberOfTasksPerDay + " unterschiedliche <b>Abfallarten pro Tag</b> unterstützt!<br>";
+        }
+    }
+    if (text != "") {
+        text += "Die darüber hinausgehenden Einträge werden nicht verarbeitet.<br>Bitte öffnen Sie ein <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>GitHub Issue</a>!";
+        showMessage("W", text, "message");
+    }
+}
+
 function showCheckBoxes(items) {
     var i = 0;
-    var text = "<i>Es wurden " + Object.keys(dateDict).length + " Abholtermine in ";
+    var text = "<i>Es wurden " + Object.keys(gEpochTaskDict).length + " Abholtermine in ";
     if (document.getElementById('files').files.length > 1) {
         text += "den Dateien gefunden.</i>";
     } else {
@@ -405,7 +434,7 @@ function showCheckBoxes(items) {
     }
     text += "<br><br>";
     text += "Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br><br>";
-    text += genCheckBoxes(items, colors);
+    text += genCheckBoxes(items, gColors);
     text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button><br><br>";
     document.getElementById("tasks").innerHTML = text;
     document.getElementById("message").innerHTML = "";
@@ -425,6 +454,6 @@ function genCheckBoxes(items, colors, validTaskIds = []) {
     return (text);
 }
 
-function send(number){//debug
+function send(number) {//debug
     showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
 }
