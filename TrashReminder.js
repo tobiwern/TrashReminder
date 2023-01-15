@@ -125,12 +125,12 @@ function refreshTaskTypes() {
         if (this.readyState == 4) {
             response = this.responseText;
             if (this.status == 200) {
-//                document.getElementById("message").innerHTML = response;
-//                document.getElementById("message").style.color = "green";
+                //                document.getElementById("message").innerHTML = response;
+                //                document.getElementById("message").style.color = "green";
             } else { //500
-//                document.getElementById("message").innerHTML = response;
-//                document.getElementById("message").style.color = "red";
-//                document.getElementById("settings").innerHTML = "";
+                //                document.getElementById("message").innerHTML = response;
+                //                document.getElementById("message").style.color = "red";
+                //                document.getElementById("settings").innerHTML = "";
             }
         }
     };
@@ -194,22 +194,45 @@ function initDataFromJson(jsonObject) {
 }
 
 function deleteTasks() {
+    const response = confirm("Wollen Sie wirklich alle Abfuhrtermine von der \"Müll-Erinnerung\" löschen");
+    if (!response) {
+        showMessage("I", "Löschen der Daten abgebrochen!");
+        return ();
+    }
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
             response = this.responseText;
-            document.getElementById("message").innerHTML = response;
             if (this.status == 200) {
-                document.getElementById("message").style.color = "green";
-                document.getElementById("settings").innerHTML = "";
+                showMessage("I", "Löschen der Daten war erfolgreich!");
                 requestTasksFromESP(); //if deleting the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
-                document.getElementById("message").style.color = "red"; 
+                showMessage("E", "ERROR: Löschen der Daten fehlgeschlagen!");
             }
         }
     };
     xhttp.open("GET", "delete_tasks", true);
     xhttp.send();
+}
+
+function showMessage(msgType, message, receiver = "buttonMessage") {
+    document.getElementById(receiver).innerHTML = message;
+    switch (msgType) {
+        case "D":
+            document.getElementById(receiver).style.color = "orange";
+            break;
+        case "W":
+            document.getElementById(receiver).style.color = "orange";
+            break;
+        case "E":
+            document.getElementById(receiver).style.color = "red";
+            break;
+        case "I":
+            document.getElementById(receiver).style.color = "green";
+            break;
+        default:
+            document.getElementById(receiver).style.color = "black";
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function () {

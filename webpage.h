@@ -47,7 +47,7 @@ const char webpage[] PROGMEM = R"=====(
       <p>Falls sich Änderungen an den Abfuhrterminen ergeben haben oder Termine für das nächste Jahr gespeichert werden sollen, könnnen neue Abfuhrtermine auf die "Müll-Erinnerung" geladen werden. Hierbei werden die bestehenden Daten <b>überschrieben</b>!</p>
       <p>Die Abfuhrdaten werden üblicherweise durch das Entsorgungsunternehmen auf einer Webseite im ICS oder ICAL Format
       angeboten und müssen zuerst heruntergeladen werden.</p>
-      <p>Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können
+      <p>Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können:
       <ul>
           <li><a href='https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/' target='_blank'>https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/</a></li>
           <li><a href='https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html'  target='_blank'>https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html</a></li>
@@ -83,7 +83,7 @@ const char webpage[] PROGMEM = R"=====(
           Mehr Infos zur "Müll-Erinnerung gibt es unter <a href='https://tobiwern.github.io/TrashReminder/' target='_blank'>https://tobiwern.github.io/TrashReminder/</a>
           <br><br>
       </div>
-      <div id='settings'></div>
+      <div id='buttonMessage'></div>
       <br>
       <div>
         <button class="button" onclick="closeConfig()">Beenden</button>

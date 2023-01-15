@@ -192,13 +192,10 @@ void fireworks() {
 
 void deleteTasks() {
   Serial.println("Delete Settings.");
-  String response = "";
   if (deleteFile(dataFile)) {
-    response = "Löschen der Daten war erfolgreich!";
-    server.send(200, "text/plane", response);
+    server.send(200, "text/plane", "OK");
   } else {
-    response = "ERROR: Löschen der Daten fehlgeschlagen!";
-    server.send(500, "text/plane", response);
+    server.send(500, "text/plane", "ERROR");
   }
 }
 
