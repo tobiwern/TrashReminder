@@ -184,16 +184,18 @@ function initDataFromJson(jsonObject) {
 }
 
 function refreshTaskTypesAndDates(response) {
-    try {
-        const jsonObject = JSON.parse(response);
+    let jsonObject = JSON.parse(response);
+/*    try {
+        let jsonObject = JSON.parse(response);
     } catch (e) {
-        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "messageTaskTypes");
+        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>GitHub Issue</a>.<br>ERROR: " + e, "messageTaskTypes");
         document.getElementById("taskDates").innerHTML = response;
         return;
     }
+*/    
     document.getElementById("taskDates").style.color = "black";
     gDataEpochTaskDict = {}; //reset
-    initDataFromJson(jsonObject)
+    initDataFromJson(jsonObject);
     refreshTaskTypes();
     refreshTaskDates();
 }
