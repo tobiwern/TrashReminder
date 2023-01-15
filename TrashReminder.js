@@ -370,7 +370,7 @@ function genJson() {
     var entries = [];
     keys = Object.keys(dateDict).sort();
     if(keys.length > maxNumberOfEpochs){
-        showMessage("W", "Es werden maximal " + maxNumberOfEpochs + " Abholtermine unterstützt! Die darüber hinausgehenden Einträge werden nicht verarbeitet. Bitte öffnen Sie ein GitHub issue unter <a href='https://github.com/tobiwern/TrashReminder/issues'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
+        showMessage("W", "Es werden maximal " + maxNumberOfEpochs + " Abholtermine unterstützt! Die darüber hinausgehenden Einträge werden nicht verarbeitet. Bitte öffnen Sie ein GitHub issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
     }
     for (var i = 0; i < keys.length; i++) {
         var epoch = keys[i];
@@ -389,7 +389,7 @@ function genJson() {
     try {
         const obj = JSON.parse(jsonText); //just to check if valid JSON, ToDo: Show if there is an error!
     } catch (e) {
-        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub issue unter <a href='https://github.com/tobiwern/TrashReminder/issues'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
+        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
         return;
     }
     sendTasksToESP(jsonText);
@@ -426,5 +426,5 @@ function genCheckBoxes(items, colors, validTaskIds = []) {
 }
 
 function send(number){//debug
-    showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub issue unter <a href='https://github.com/tobiwern/TrashReminder/issues'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
+    showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
 }
