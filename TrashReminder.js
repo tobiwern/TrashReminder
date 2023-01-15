@@ -189,7 +189,7 @@ function deleteTasks() {
     const response = confirm("Wollen Sie wirklich alle Abfuhrtermine von der \"Müll-Erinnerung\" löschen");
     if (!response) {
         showMessage("I", "Löschen der Daten abgebrochen!", "buttonMessage", true);
-        return ();
+        return;
     }
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
