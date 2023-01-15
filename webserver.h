@@ -132,6 +132,7 @@ void sendSettingsToWebpage() {  //transferring ESP settings => Webpage
 }
 
 void notFound() {
+  Serial.println("Not found");
   server.send(404, "text/plain", "Not found");
 }
 
@@ -167,9 +168,41 @@ void setEndHour() {
   writeStartEndTimes();
 }
 
-void receiveTasksFromWebpage() {
+void receiveFromWebpage_Tasks() {
   String jsonText = server.arg("value");
   Serial.println("Receiving settings in JSON format: " + jsonText);
+  if (writeFile(dataFile, jsonText.c_str())) {
+    server.send(200, "text/plane", "OK");
+  } else {
+    server.send(500, "text/plane", "ERROR");
+  }
+}
+
+boolean receiveFromWebpage_ValidTaskIds() {
+  String jsonText = server.arg("value");
+  Serial.println("Receiving settings in JSON format: " + jsonText);
+  return(false);
+
+  if (!startLittleFS()) { return (""); }
+  Serial.printf("INFO: Reading file: %s\n", dataFile);
+  File file = LittleFS.open(dataFile, "r");
+  if (!file) {
+    Serial.println("INFO: Failed to open file " + String(dataFile) + " for reading!");
+    return (false);
+  }
+  DynamicJsonDocument doc(JSON_MEMORY);  //on heap for large amount of data
+  DeserializationError error = deserializeJson(doc, file);
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.f_str());
+    return (false);
+  }
+  doc["validTaskIds"] = jsonText;
+  
+  serializeJson(doc, file);
+  file.close();
+  endLittleFS();
+  
   if (writeFile(dataFile, jsonText.c_str())) {
     server.send(200, "text/plane", "OK");
   } else {
@@ -186,7 +219,7 @@ void fireworks() {
   Serial.println("Fireworks...");
   STATE_FOLLOWING = STATE_CONFIGURE;
   STATE_NEXT = STATE_SHOW;
-  millisLast = millis();                         //to reset show timer
+  millisLast = millis();                 //to reset show timer
   server.send(200, "text/plane", "OK");  //should always respond to prevent resend (10x)
 }
 
@@ -206,10 +239,11 @@ void startWebServer() {
   server.on("/set_end", setEndHour);
   server.on("/request_settings", sendSettingsToWebpage);
   server.on("/request_tasks", sendTasksToWebpage);    //ESP => webpage
-  server.on("/send_tasks", receiveTasksFromWebpage);  //webpage => ESP name
+  server.on("/send_tasks", receiveFromWebpage_Tasks);  //webpage => ESP name
   server.on("/delete_tasks", deleteTasks);
   server.on("/close", closeSettings);
   server.on("/fireworks", fireworks);
+  server.on("/update_ValidTaskIds", receiveFromWebpage_ValidTaskIds);
   server.onNotFound(notFound);
   server.begin();
   Serial.print("IP address: ");
