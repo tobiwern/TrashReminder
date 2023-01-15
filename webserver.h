@@ -209,9 +209,9 @@ boolean receiveFromWebpage_ValidTaskIds() {
     server.send(500, "text/plane", "ERROR");
     return (false);
   }
-  doc["validTaskIds"] = validTaskIds;
+  doc["validTaskIds"] = validTaskIds; //update with new data
 
-  serializeJson(doc, file);
+  serializeJson(doc, file); //save back to data.json
   file.close();
   endLittleFS();
 

@@ -187,7 +187,7 @@ function refreshTaskTypesAndDates(response) {
     try {
         const jsonObject = JSON.parse(response);
     } catch (e) {
-        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
+        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "messageTaskTypes");
         document.getElementById("taskDates").innerHTML = response;
         return;
     }
