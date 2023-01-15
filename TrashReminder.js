@@ -74,6 +74,7 @@ function requestTasksFromESP() { //send the ESP data to the webpage
                 refreshTaskTypesAndDates(response);
             } else { //500
                 showMessage("W", "Es sind noch keine Abholtermine auf der \"Müll-Erinnerung\" gespeichert! Bitte laden sie wie nachfolgend beschrieben die Abfuhrtermine herunter.", "taskDates");
+                showMessage("E", "Lesen der Daten fehlgeschlagen!", "buttonMessage", 2);
                 document.getElementById("taskTypes").innerHTML = "";
             }
         }
@@ -189,7 +190,7 @@ function initDataFromJson(jsonObject) {
 function deleteTasks() {
     const response = confirm("Wollen Sie wirklich alle Abfuhrtermine von der \"Müll-Erinnerung\" löschen?");
     if (!response) {
-        showMessage("I", "Löschen der Daten abgebrochen!", "buttonMessage", 2);
+        showMessage("I", "Löschen der Daten abgebrochen.", "buttonMessage", 2);
         return;
     }
     var xhttp = new XMLHttpRequest();
