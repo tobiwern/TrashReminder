@@ -9,7 +9,6 @@ function fireworks() {
             showMessage("I", "FEUERWERK!", "buttonMessage", true);
         }
     };
-    document.getElementById("settings").innerHTML = "";
     xhttp.open("GET", "fireworks", true);
     xhttp.send();
 }
@@ -398,7 +397,6 @@ function showCheckBoxes(items) {
     text += "<br><div id=output></div>";
     document.getElementById("tasks").innerHTML = text;
     document.getElementById("message").innerHTML = "";
-    document.getElementById("settings").innerHTML = "";
 }
 
 function genCheckBoxes(items, colors, validTaskIds = []) {
