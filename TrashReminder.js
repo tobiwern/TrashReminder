@@ -97,20 +97,8 @@ function sendValidTaskTypesToESP() {
         showMessage("W", "Sie müssen mindestens eine Abfallart auswählen!", "messageTaskTypes");
         return;
     }
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function () {
-        if (this.readyState == 4) {
-            response = this.responseText;
-            if (this.status == 200) {
-                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "messageTaskTypes", 2);
-            } else { //500, 404
-                showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "messageTaskTypes", gHideDelayDefault);
-            }
-        }
-    };
-    var jsonText = '{"validTaskIds":[' + validTaskIds.join(',') + ']}';
-    xhttp.open("GET", "send_ValidTaskIds?value=" + jsonText, true);
-    xhttp.send();
+    gDataValidTaskIds = validTaskIds; //update in global Setup
+    sendDataToESP();
 }
 
 function sendDropDownStateToESP(dropdown) {
@@ -183,16 +171,34 @@ function initDataFromJson(jsonObject) {
     gDataValidTaskIds = jsonObject["validTaskIds"];
 }
 
-function refreshTaskTypesAndDates(response) {
-    let jsonObject = JSON.parse(response);
-/*    try {
-        let jsonObject = JSON.parse(response);
+function sendDataToESP() { //send currently set data to ESP
+    var entries = [];
+    var epochs = Object.keys(gDataEpochTaskDict);
+    for (epoch of epochs) {
+        taskIds = gDataEpochTaskDict[epoch];
+        entries.push('{"' + epoch + '":[' + taskIds.join(',') + ']}');
+    }
+    var jsonText = '{"tasks":["' + gDataTasks.join('","') + '"],"colors":["' + gDataColors.join('","') + '"],"validTaskIds":[' + gDataValidTaskIds.join(',') + '],"epochTasks":[' + entries.join(',') + ']}';
+    console.log(jsonText);
+    try {
+        const obj = JSON.parse(jsonText); //just to check if valid JSON, ToDo: Show if there is an error!
     } catch (e) {
-        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>GitHub Issue</a>.<br>ERROR: " + e, "messageTaskTypes");
-        document.getElementById("taskDates").innerHTML = response;
+        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
         return;
     }
-*/    
+    sendTasksToESP(jsonText);
+}
+
+function refreshTaskTypesAndDates(response) {
+    const jsonObject = JSON.parse(response);
+    /*    try {
+            let jsonObject = JSON.parse(response);
+        } catch (e) {
+            showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>GitHub Issue</a>.<br>ERROR: " + e, "messageTaskTypes");
+            document.getElementById("taskDates").innerHTML = response;
+            return;
+        }
+    */
     document.getElementById("taskDates").style.color = "black";
     gDataEpochTaskDict = {}; //reset
     initDataFromJson(jsonObject);
