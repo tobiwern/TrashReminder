@@ -89,6 +89,7 @@ function requestTasks() { //send the ESP data to the webpage
 
 function refreshTaskTypesAndDates(response) {
     const jsonObject = JSON.parse(response);
+    dataEpochTaskDict = {}; //reset
     initDataFromJson(jsonObject)
     refreshTaskTypes();
     refreshTaskDates();
