@@ -187,7 +187,7 @@ void fireworks() {
   STATE_FOLLOWING = STATE_CONFIGURE;
   STATE_NEXT = STATE_SHOW;
   millisLast = millis();                         //to reset show timer
-  server.send(200, "text/plane", "Feuerwerk!");  //should always respond to prevent resend (10x)
+  server.send(200, "text/plane", "OK");  //should always respond to prevent resend (10x)
 }
 
 void deleteTasks() {
