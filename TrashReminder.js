@@ -184,7 +184,13 @@ function initDataFromJson(jsonObject) {
 }
 
 function refreshTaskTypesAndDates(response) {
-    const jsonObject = JSON.parse(response);
+    try {
+        const jsonObject = JSON.parse(response);
+    } catch (e) {
+        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
+        document.getElementById("taskDates").innerHTML = response;
+        return;
+    }
     document.getElementById("taskDates").style.color = "black";
     gDataEpochTaskDict = {}; //reset
     initDataFromJson(jsonObject)
