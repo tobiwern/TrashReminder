@@ -181,6 +181,7 @@ void receiveFromWebpage_Tasks() {
 boolean receiveFromWebpage_ValidTaskIds() {
   String jsonText = server.arg("value");
   Serial.println("Receiving settings in JSON format: " + jsonText);
+  server.send(200, "text/plane", "OK");
   return(false);
 
   if (!startLittleFS()) { return (""); }

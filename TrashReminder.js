@@ -97,15 +97,16 @@ function refreshTaskTypes() {
     for (let i = 0; i < dataTasks.length; i++) {
         checked = (dataValidTaskIds.length == 0 || dataValidTaskIds.includes(i)) ? "checked" : "";
         text += "<tr>"
-        text += "<td class='value'><div><input type='checkbox' class='taskType' onChange='refreshTaskDates()' id='taskType" + i + "' name=task" + i + "' " + checked + ">";
+        text += "<td class='value'><div><input type='checkbox' class='taskType' onChange='refreshTaskDates();sendValidTaskTypes();' id='taskType" + i + "' name=task" + i + "' " + checked + ">";
         text += "<label for='taskType" + i + "' id='taskTypel" + i + "'> " + dataTasks[i] + "</label><div></td>";
         text += "<td><button style='background-color: " + dataColors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
         text += "</tr>";
     }
     text += "</table>";
     document.getElementById("taskTypes").innerHTML = text + "<br>";
+}
 
-    // Sending validTaskIds to ESP
+function sendValidTaskTypes() {
     const taskTypeCheckBoxes = document.getElementsByClassName("taskType");
     var validTaskIds = [];
     for (let i = 0; i < taskTypeCheckBoxes.length; i++) {
@@ -223,8 +224,8 @@ function showMessage(msgType, message, receiver = "buttonMessage", hideDelayInSe
         default:
             document.getElementById(receiver).style.color = "black";
     }
-    if(hideDelayInSec != 0){
-        setTimeout(function () { document.getElementById(receiver).innerHTML = ""; }, hideDelayInSec*1000);
+    if (hideDelayInSec != 0) {
+        setTimeout(function () { document.getElementById(receiver).innerHTML = ""; }, hideDelayInSec * 1000);
     }
 }
 
@@ -241,7 +242,7 @@ function sendUpdate(dropdown) {
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             response = this.responseText;
-            showMessage("I", response,"messageTime", 2);
+            showMessage("I", response, "messageTime", 2);
         }
     };
     if (dropdown == "start") {
