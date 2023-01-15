@@ -195,7 +195,7 @@ boolean receiveFromWebpage_ValidTaskIds() {
   //Open old document
   if (!startLittleFS()) { return (false); }
   Serial.printf("INFO: Reading file: %s\n", dataFile);
-  File file = LittleFS.open(dataFile, "r+");  // Open for reading and writing. The file is created if it does not exist, otherwise it is truncated.
+  File file = LittleFS.open(dataFile, "r");  
   if (!file) {
     Serial.println("INFO: Failed to open file " + String(dataFile) + " for reading!");
     server.send(500, "text/plane", "ERROR");
@@ -210,6 +210,14 @@ boolean receiveFromWebpage_ValidTaskIds() {
     return (false);
   }
   doc["validTaskIds"] = validTaskIds; //update with new data
+  file.close();
+  
+  file = LittleFS.open(dataFile, "w");  
+  if (!file) {
+    Serial.println("INFO: Failed to open file " + String(dataFile) + " for writing!");
+    server.send(500, "text/plane", "ERROR");
+    return (false);
+  }
 
   serializeJson(doc, file); //save back to data.json
   file.close();
