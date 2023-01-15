@@ -119,9 +119,9 @@ function refreshTaskTypes() {
         if (this.readyState == 4) {
             response = this.responseText;
             if (this.status == 200) {
-//                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "message", 2);
-            } else { //500
-//                showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "message", 2);
+                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "messageTaskTypes", 2);
+            } else { //500, 404
+                showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "messageTaskTypes", 2);
             }
         }
     };

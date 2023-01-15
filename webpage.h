@@ -39,6 +39,7 @@ const char webpage[] PROGMEM = R"=====(
       <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/truck.svg?raw=true'> Abfuhrtermine</div></h2>
       <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/trash.svg?raw=true'> Abfallarten</div></h3>
       <div id='taskTypes'></div>
+      <div id='messageTaskTypes'></div>
       <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/watch.svg?raw=true'> Termine</div></h3>
       <div id='taskDates'></div>
       <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/download.svg?raw=true'> Neue Abfuhrtermine (ICS/ICAL)</div></h3>
