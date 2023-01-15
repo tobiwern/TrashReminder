@@ -81,8 +81,8 @@ function requestTasksFromESP() { //send the ESP data to the webpage
                 document.getElementById("message").innerHTML = response;
                 document.getElementById("message").style.color = "red";
                 document.getElementById("settings").innerHTML = "";
-                document.getElementById("taskTypes").innerHTML = "Es sind noch keine Abholtermine auf der \"Müll-Erinnerung\" gespeichert!<br>Bitte laden sie wie unten beschrieben die Abfuhrtermine herunter.";
-                document.getElementById("taskTypes").style.color = "red";
+                document.getElementById("taskDates").innerHTML = "Es sind noch keine Abholtermine auf der \"Müll-Erinnerung\" gespeichert!<br>Bitte laden sie wie unten beschrieben die Abfuhrtermine herunter.";
+                document.getElementById("taskDates").style.color = "red";
             }
         }
     };
