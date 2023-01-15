@@ -181,34 +181,42 @@ void receiveFromWebpage_Tasks() {
 boolean receiveFromWebpage_ValidTaskIds() {
   String jsonText = server.arg("value");
   Serial.println("Receiving settings in JSON format: " + jsonText);
-  server.send(200, "text/plane", "OK");
-  return(false);
+  //First translate validTaskIds into JsonArray
+  StaticJsonDocument<128> doc1;
+  DeserializationError error1 = deserializeJson(doc1, jsonText);
+  if (error1) {
+    Serial.print(F("A: deserializeJson() failed: "));
+    Serial.println(error1.f_str());
+    server.send(500, "text/plane", "ERROR");
+    return (false);
+  }
+  JsonArray validTaskIds = doc1["validTaskIds"];
 
-  if (!startLittleFS()) { return (""); }
+  //Open old document
+  if (!startLittleFS()) { return (false); }
   Serial.printf("INFO: Reading file: %s\n", dataFile);
-  File file = LittleFS.open(dataFile, "r");
+  File file = LittleFS.open(dataFile, "r+");  // Open for reading and writing. The file is created if it does not exist, otherwise it is truncated.
   if (!file) {
     Serial.println("INFO: Failed to open file " + String(dataFile) + " for reading!");
+    server.send(500, "text/plane", "ERROR");
     return (false);
   }
   DynamicJsonDocument doc(JSON_MEMORY);  //on heap for large amount of data
   DeserializationError error = deserializeJson(doc, file);
   if (error) {
-    Serial.print(F("deserializeJson() failed: "));
+    Serial.print(F("B: deserializeJson() failed: "));
     Serial.println(error.f_str());
+    server.send(500, "text/plane", "ERROR");
     return (false);
   }
-  doc["validTaskIds"] = jsonText;
-  
+  doc["validTaskIds"] = validTaskIds;
+
   serializeJson(doc, file);
   file.close();
   endLittleFS();
-  
-  if (writeFile(dataFile, jsonText.c_str())) {
-    server.send(200, "text/plane", "OK");
-  } else {
-    server.send(500, "text/plane", "ERROR");
-  }
+
+  server.send(200, "text/plane", "OK");
+  return (true);
 }
 
 void closeSettings() {
@@ -239,7 +247,7 @@ void startWebServer() {
   server.on("/set_start", setStartHour);
   server.on("/set_end", setEndHour);
   server.on("/request_settings", sendSettingsToWebpage);
-  server.on("/request_tasks", sendTasksToWebpage);    //ESP => webpage
+  server.on("/request_tasks", sendTasksToWebpage);     //ESP => webpage
   server.on("/send_tasks", receiveFromWebpage_Tasks);  //webpage => ESP name
   server.on("/delete_tasks", deleteTasks);
   server.on("/close", closeSettings);
