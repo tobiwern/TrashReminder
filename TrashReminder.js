@@ -102,7 +102,7 @@ function sendValidTaskTypesToESP() {
         if (this.readyState == 4) {
             response = this.responseText;
             if (this.status == 200) {
-                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "messageTaskTypes", gHideDelayDefault);
+                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "messageTaskTypes", 2);
             } else { //500, 404
                 showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "messageTaskTypes", gHideDelayDefault);
             }
@@ -283,10 +283,10 @@ function processFiles() {
                     if (!gTasks.includes(task)) {
                         gTasks.push(task);
                         gColors = getColors();
-                        showCheckBoxes(gTasks); //executed multiple times, however ok
                     }
                 }
             }
+            showCheckBoxes(gTasks); //executed multiple times, however ok
             checkMaxNumberOfEntries();
         }; //on load
         reader.readAsText(file);
