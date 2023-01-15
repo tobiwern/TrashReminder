@@ -154,7 +154,7 @@ function sendValidTaskTypesToESP() {
         }
     }
     if(validTaskIds.length == 0){
-        showMessage("W", "Sie müssen mindestens eine Abfallart auswählen!", "messageTaskTypes", hideDelayDefault);
+        showMessage("W", "Sie müssen mindestens eine Abfallart auswählen!", "messageTaskTypes");
         return;
     }
     var xhttp = new XMLHttpRequest();
