@@ -206,7 +206,7 @@ function deleteTasks() {
 }
 
 function showMessage(msgType, message, receiver = "buttonMessage", hideDelayInSec = 0) {
-    document.getElementById(receiver).innerHTML = message + "<br>";
+    document.getElementById(receiver).innerHTML = message + "<br><br>";
     switch (msgType) {
         case "D":
             document.getElementById(receiver).style.color = "orange";
