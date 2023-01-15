@@ -186,7 +186,7 @@ function initDataFromJson(jsonObject) {
 }
 
 function deleteTasks() {
-    const response = confirm("Wollen Sie wirklich alle Abfuhrtermine von der \"Müll-Erinnerung\" löschen");
+    const response = confirm("Wollen Sie wirklich alle Abfuhrtermine von der \"Müll-Erinnerung\" löschen?");
     if (!response) {
         showMessage("I", "Löschen der Daten abgebrochen!", "buttonMessage", true);
         return;
@@ -194,7 +194,6 @@ function deleteTasks() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
-            response = this.responseText;
             if (this.status == 200) {
                 showMessage("I", "Löschen der Daten war erfolgreich!");
                 requestTasksFromESP(); //if deleting the values on the ESP was successful => refresh the "current values" on the webpage
