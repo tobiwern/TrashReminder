@@ -382,7 +382,7 @@ function genJson() {
 
 function showCheckBoxes(items) {
     var i = 0;
-    var text = "<br><i>Es wurden " + Object.keys(dateDict).length + " Abholtermine in ";
+    var text = "<i>Es wurden " + Object.keys(dateDict).length + " Abholtermine in ";
     if (document.getElementById('files').files.length > 1) {
         text += "den Dateien gefunden.</i>";
     } else {

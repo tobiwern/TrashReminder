@@ -22,13 +22,11 @@ const char webpage[] PROGMEM = R"=====(
             <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/clock.svg?raw=true'> Zeitpunkt der Erinnerung</div></h2>
             <table>
                 <tr>
-                    <td class=description><label for="start">Start der Erinnerung<br>(am Vortag der Abholung):</label>
-                    </td>
+                    <td class=description><label for="start">Start der Erinnerung<br>(am Vortag der Abholung):</label></td>
                     <td class=value><select id="start" name="start"></select></td>
                 </tr>
                 <tr>
-                    <td class=description><label class='fancy-input' for="end">Ende der Erinnerung<br>(am Tag der
-                            Abholung):</label></td>
+                    <td class=description><label class='fancy-input' for="end">Ende der Erinnerung<br>(am Tag der Abholung):</label></td>
                     <td class=value><select id="end" name="end"></select></td>
                 </tr>
             </table>
@@ -61,7 +59,7 @@ const char webpage[] PROGMEM = R"=====(
               <td><label for="start">Wählen Sie eine oder mehrere bereits heruntergeladene ICS oder ICAL Dateien ihres Entsorgungsunternehmens aus:</label><br><br></td>
           </tr>
           <tr>
-              <td><input type="file" name="files" id="files" accept=".ics" onchange="processFiles()" multiple></td>
+              <td><input type="file" name="files" id="files" accept=".ics" onchange="processFiles()" multiple></td><br>
           </tr>
           <tr>
               <td>
