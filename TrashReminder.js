@@ -126,7 +126,7 @@ function refreshTaskTypes() {
         }
     };
     var jsonText = '{"validTaskIds":[' + validTaskIds.join(',') + ']}';
-    xhttp.open("GET", "send_validTaskIds?value=" + jsonText, true);
+    xhttp.open("GET", "send_ValidTaskIds?value=" + jsonText, true);
     xhttp.send();
 }
 
