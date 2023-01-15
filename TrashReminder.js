@@ -98,7 +98,7 @@ function sendValidTaskTypesToESP() {
         return;
     }
     gDataValidTaskIds = validTaskIds; //update in global Setup
-    sendDataToESP();
+    sendDataToESP(); //send updated data
 }
 
 function sendDropDownStateToESP(dropdown) {
