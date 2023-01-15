@@ -98,7 +98,7 @@ function sendValidTaskTypesToESP() {
         return;
     }
     gDataValidTaskIds = validTaskIds; //update in global Setup
-    sendDataToESP(); //send updated data
+    sendCurrentDataToESP(); //send updated data
 }
 
 function sendDropDownStateToESP(dropdown) {
@@ -171,7 +171,7 @@ function initDataFromJson(jsonObject) {
     gDataValidTaskIds = jsonObject["validTaskIds"];
 }
 
-function sendDataToESP() { //send currently set data to ESP
+function sendCurrentDataToESP() { //send currently set data to ESP
     var entries = [];
     var epochs = Object.keys(gDataEpochTaskDict);
     for (epoch of epochs) {
