@@ -41,7 +41,7 @@ function requestSettingsFromESP() {
             tokens = value.split(",");
             document.getElementById("start").value = tokens[0];
             document.getElementById("end").value = tokens[1];
-            maxNumberOfEpochs = tokens[2];
+            maxNumberOfEpochs = 20 //tokens[2];
             maxNumberOfTasksPerDay = tokens[3];
             maxNumberOfTaskIds = tokens[4];
         }
@@ -369,6 +369,9 @@ function genJson() {
     console.log(validTaskIds);
     var entries = [];
     keys = Object.keys(dateDict).sort();
+    if(keys.length > maxNumberOfEpochs){
+        showMessage("W", "Es werden maximal " + maxNumberOfEpochs + " Abholtermine unterstützt! Die darüber hinausgehenden Einträge werden nicht verarbeitet. Bitte öffnen Sie ein GitHub issue unter <a href='https://github.com/tobiwern/TrashReminder/issues'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
+    }
     for (var i = 0; i < keys.length; i++) {
         var epoch = keys[i];
         var tasks = dateDict[epoch]["tasks"];
@@ -383,7 +386,12 @@ function genJson() {
 
     var jsonText = '{"tasks":["' + items.join('","') + '"],"colors":["' + colors.join('","') + '"],"validTaskIds":[' + validTaskIds.join(',') + '],"epochTasks":[' + entries.join(',') + ']}';
     console.log(jsonText);
-    const obj = JSON.parse(jsonText); //just to check if valid JSON, ToDo: Show if there is an error!
+    try {
+        const obj = JSON.parse(jsonText); //just to check if valid JSON, ToDo: Show if there is an error!
+    } catch (e) {
+        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub issue unter <a href='https://github.com/tobiwern/TrashReminder/issues'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
+        return;
+    }
     sendTasksToESP(jsonText);
 }
 
@@ -415,4 +423,8 @@ function genCheckBoxes(items, colors, validTaskIds = []) {
     }
     text += "</table>";
     return (text);
+}
+
+function send(number){//debug
+    showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub issue unter <a href='https://github.com/tobiwern/TrashReminder/issues'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
 }
