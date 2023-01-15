@@ -378,8 +378,6 @@ function genJson() {
     console.log(jsonText);
     const obj = JSON.parse(jsonText); //just to check if valid JSON, ToDo: Show if there is an error!
     sendTasksToESP(jsonText);
-    //document.getElementById("output").innerHTML = jsonText;
-    //            console.log(obj);
 }
 
 function showCheckBoxes(items) {
@@ -393,8 +391,7 @@ function showCheckBoxes(items) {
     text += "<br><br>";
     text += "Bitte w&auml;hlen Sie die Abfallarten aus,<br>an die Sie erinnert werden wollen:<br><br>";
     text += genCheckBoxes(items, colors);
-    text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button>";
-    text += "<br><div id=output></div>";
+    text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button><br>";
     document.getElementById("tasks").innerHTML = text;
     document.getElementById("message").innerHTML = "";
 }
