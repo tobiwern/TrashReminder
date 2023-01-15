@@ -51,7 +51,7 @@ function requestSettings() {
     xhttp.send();
 }
 
-function sendData(jsonText) { //send the jsonText to the ESP to be stored in LittleFS
+function sendTasks(jsonText) { //send the jsonText to the ESP to be stored in LittleFS
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
@@ -61,6 +61,7 @@ function sendData(jsonText) { //send the jsonText to the ESP to be stored in Lit
                 document.getElementById("message").style.color = "red";
             } else {
                 document.getElementById("message").style.color = "green";
+                requestTasks(); //if storing the values on the ESP was successful => refresh the "current values" on the webpage
             }
         }
     };
@@ -135,7 +136,7 @@ function refreshTaskTypes() {
     xhttp.send();
 }
 
-function refreshTaskDates() {
+function refreshTaskDates() { //show TaskDates on Webpage
     var text = Object.keys(dataEpochTaskDict).length + " Abholtermine sind derzeit verfügbar.<br><br>";
     var epochs = Object.keys(dataEpochTaskDict).sort();
     text += "<table id=epochTasks>"
@@ -357,8 +358,8 @@ function genJson() {
 
     var jsonText = '{"tasks":["' + items.join('","') + '"],"colors":["' + colors.join('","') + '"],"validTaskIds":[' + validTaskIds.join(',') + '],"epochTasks":[' + entries.join(',') + ']}';
     console.log(jsonText);
-    const obj = JSON.parse(jsonText); //just to check if valid JSON
-    sendData(jsonText);
+    const obj = JSON.parse(jsonText); //just to check if valid JSON, ToDo: Show if there is an error!
+    sendTasks(jsonText);
     //document.getElementById("output").innerHTML = jsonText;
     //            console.log(obj);
 }

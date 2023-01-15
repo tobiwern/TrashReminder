@@ -13,61 +13,85 @@ const char webpage[] PROGMEM = R"=====(
       <link rel="stylesheet" href="https://tobiwern.github.io/TrashReminder/TrashReminder.css">
       <script src="https://tobiwern.github.io/TrashReminder/TrashReminder.js?random=<?php echo filemtime('https://tobiwern.github.io/TrashReminder/TrashReminder.js'); ?>"></script> 
     </head>  
-    <body id='body' onload='requestSettings()')>
-    <img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/TrashReminder.jpg?raw=true' alt='Trash Reminder' width='400' height='185'>
+    <body id='body' onload='requestSettings();requestTasks();')>
+    <img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/TrashReminder.jpg?raw=true'
+        alt='Trash Reminder' width='400' height='185'>
     <h1>M&uuml;ll-Erinnerung Einstellungen</h1>
     <form name='config'>
-      <div class=frame>
-        <h2>Zeitpunkt der Erinnerung</h2>
-        <table>
-          <tr>
-            <td class=description><label for="start">Start der Erinnerung<br>(am Vortag der Abholung):</label></td>
-            <td class=value><select id="start" name="start"></select></td>
-          </tr>
-          <tr>
-            <td class=description><label class='fancy-input' for="end">Ende der Erinnerung<br>(am Tag der Abholung):</label></td>
-            <td class=value><select id="end" name="end"></select></td>
-          </tr>
-        </table>
-        <div id='messageTime'></div>
+        <div class=frame>
+            <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/clock.svg?raw=true'> Zeitpunkt der Erinnerung</div></h2>
+            <table>
+                <tr>
+                    <td class=description><label for="start">Start der Erinnerung<br>(am Vortag der Abholung):</label>
+                    </td>
+                    <td class=value><select id="start" name="start"></select></td>
+                </tr>
+                <tr>
+                    <td class=description><label class='fancy-input' for="end">Ende der Erinnerung<br>(am Tag der
+                            Abholung):</label></td>
+                    <td class=value><select id="end" name="end"></select></td>
+                </tr>
+            </table>
+            <div id='messageTime'></div>
+            <br>
+        </div>
         <br>
-      </div>
-      <br>
     </form>
     <div class=frame>
-      <h2>Abfuhrtermine</h2>
-      <h3>Abfallarten</h3>
+      <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/truck.svg?raw=true'> Abfuhrtermine</div></h2>
+      <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/trash.svg?raw=true'> Abfallarten</div></h3>
       <div id='taskTypes'></div>
-      <h3>Termine</h3>
+      <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/watch.svg?raw=true'> Termine</div></h3>
       <div id='taskDates'></div>
-      <h3>Neue Abfuhrtermine (ICS/ICAL)</h3>
-      Sie könnnen neue Abfuhrtermine auf die \"Müll-Erinnerung\" laden, falls sich Änderungen ergeben haben oder um diese für ein neues Jahr zu definieren.
-      Hierbei werden die bestehenden Daten <b>überschrieben</b>! 
-      Die Abfuhrdaten werden üblicherweise durch das Abfuhrunternehmen auf einer Webseite im ICS oder ICAL Format angeboten und müssen zuerst heruntergeladen werden.
-      Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
-      Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können
+      <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/download.svg?raw=true'> Neue Abfuhrtermine (ICS/ICAL)</div></h3>
+      <p>Falls sich Änderungen an den Abfuhrterminen ergeben haben oder Termine für das nächste Jahr gespeichert werden sollen, könnnen neue Abfuhrtermine auf die "Müll-Erinnerung" geladen werden. Hierbei werden die bestehenden Daten <b>überschrieben</b>!</p>
+      <p>Die Abfuhrdaten werden üblicherweise durch das Entsorgungsunternehmen auf einer Webseite im ICS oder ICAL Format
+      angeboten und müssen zuerst heruntergeladen werden.</p>
+      <p>Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können
       <ul>
-        <li><a href='https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/'>https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/</a>
-        <li><a href='https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html'>https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html</a>
+          <li><a href='https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/' target='_blank'>https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/</a></li>
+          <li><a href='https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html'  target='_blank'>https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html</a></li>
       </ul>
-
+      </p>
+      <p>Sobald sie die ICS oder ICAL Datei auf Ihr Handy oder ihren Computer heruntergeladen haben, können Sie diese über den untenstehenden Button "Durchsuchen..." auswählen und auf die "Müll-Erinnerung" laden. 
+          Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.</p>
+      <hr>
       <table>
-        <tr><td><label for="start">W&auml;hlen Sie eine oder mehrere bereits heruntergeladene ICS oder ICAL Dateien ihres Entsorgungsunternehmens aus:</label></td></tr>
-        <tr><td><input type="file" name="files" id="files" accept=".ics" onchange="processFiles()" multiple></td></tr>
-        <tr><td><div id='tasks'></div></td></tr>
-        <tr><td><div id='message'></div></td></tr>          
+          <tr>
+              <td><label for="start">Wählen Sie eine oder mehrere bereits heruntergeladene ICS oder ICAL Dateien
+                      ihres Entsorgungsunternehmens aus:</label><br><br></td>
+          </tr>
+          <tr>
+              <td><input type="file" name="files" id="files" accept=".ics" onchange="processFiles()" multiple></td>
+          </tr>
+          <tr>
+              <td>
+                  <div id='tasks'></div>
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  <div id='message'></div>
+              </td>
+          </tr>
       </table>
       <br>
-    </div>    
-  <br>
-  <div id='settings'></div>
-  <div>
-    <button class="button" onclick="closeConfig()">Beenden</button>
-    <button class="button" onclick="requestTasks()">Lesen</button>
-    <button class="button" onclick="deleteTasks()">L&ouml;schen</button>
-    <button class="button" onclick="send(0)">Erinnerung einschalten</button>
-    <button class="button" onclick="fireworks()">Feuerwerk</button>
-  </div>
-</body>
+      </div>
+      <br>
+      <div class=frame>
+          <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/github.svg?raw=true'> Bedienungsanleitung</div></h2>
+          Mehr Infos zur "Müll-Erinnerung gibt es unter <a href='https://tobiwern.github.io/TrashReminder/' target='_blank'>https://tobiwern.github.io/TrashReminder/</a>
+          <br><br>
+      </div>
+      <div id='settings'></div>
+      <br>
+      <div>
+        <button class="button" onclick="closeConfig()">Beenden</button>
+        <button class="button" onclick="requestTasks()">Lesen</button>
+        <button class="button" onclick="deleteTasks()">L&ouml;schen</button>
+        <button class="button" onclick="send(0)">Erinnerung einschalten</button>
+        <button class="button" onclick="fireworks()">Feuerwerk</button>
+      </div>
+    </body>
   </html>
 )=====";
