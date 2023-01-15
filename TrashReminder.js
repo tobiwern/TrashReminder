@@ -195,7 +195,7 @@ function sendCurrentDataToESP() { //send currently set data to ESP
         showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
         return;
     }
-    sendTasksToESP(jsonText);
+    sendTasksToESP(jsonText, true);
 }
 
 function refreshTaskTypesAndDates(response) {
