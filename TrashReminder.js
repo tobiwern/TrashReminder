@@ -105,7 +105,6 @@ function refreshTaskTypes() {
     }
     text += "</table>";
     document.getElementById("taskTypes").innerHTML = text + "<br>";
-    sendValidTaskTypes();
 }
 
 function sendValidTaskTypes() {

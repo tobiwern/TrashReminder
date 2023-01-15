@@ -37,6 +37,7 @@ const char webpage[] PROGMEM = R"=====(
     </form>
     <div class=frame>
       <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/truck.svg?raw=true'> Abfuhrtermine</div></h2>
+      In den folgenden zwei Untergruppen kann ausgewählt werden, an welche Abfallart sie erinnert werden wollen und es werden die abgespeicherten Termine angezeigt.
       <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/trash.svg?raw=true'> Abfallarten</div></h3>
       <div id='taskTypes'></div>
       <div id='messageTaskTypes'></div>
