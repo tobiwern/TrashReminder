@@ -83,11 +83,12 @@ const char webpage[] PROGMEM = R"=====(
           Mehr Infos zur "Müll-Erinnerung gibt es unter <a href='https://tobiwern.github.io/TrashReminder/' target='_blank'>https://tobiwern.github.io/TrashReminder/</a>
           <br><br>
       </div>
+      <br>
       <div id='buttonMessage'></div>
       <br>
       <div>
         <button class="button" onclick="closeConfig()">Beenden</button>
-        <button class="button" onclick="requestTasks()">Lesen</button>
+        <button class="button" onclick="requestTasksFromESP()">Lesen</button>
         <button class="button" onclick="deleteTasks()">L&ouml;schen</button>
         <button class="button" onclick="send(0)">Erinnerung einschalten</button>
         <button class="button" onclick="fireworks()">Feuerwerk</button>

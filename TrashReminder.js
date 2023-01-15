@@ -6,7 +6,7 @@ function fireworks() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
-            showMessage("I", "FEUERWERK!", "buttonMessage", true);
+            showMessage("I", "FEUERWERK!", "buttonMessage", 2);
         }
     };
     xhttp.open("GET", "fireworks", true);
@@ -54,10 +54,10 @@ function sendTasksToESP(jsonText) { //send the jsonText to the ESP to be stored 
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
             if (this.status == 200) {
-                showMessage("I", "Übertragen der Daten war erfolgreich und Abfuhrtermine werden oben angezeigt.", "message", true);
+                showMessage("I", "Übertragen der Daten war erfolgreich und Abfuhrtermine werden oben angezeigt.", "message", 5);
                 requestTasksFromESP(); //if storing the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
-                showMessage("E", "ERROR: Übertragen der Daten fehlgeschlagen!", "message", true);
+                showMessage("E", "ERROR: Übertragen der Daten fehlgeschlagen!", "message", 2);
             }
         }
     };
@@ -119,9 +119,9 @@ function refreshTaskTypes() {
         if (this.readyState == 4) {
             response = this.responseText;
             if (this.status == 200) {
-//                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "message", true);
+//                showMessage("I", "Geänderte Auswahl für Abfallart erfolgreich übertragen.", "message", 2);
             } else { //500
-//                showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "message", true);
+//                showMessage("E", "ERROR: Geänderte Auswahl für Abfallart fehlgeschlagen.", "message", 2);
             }
         }
     };
@@ -187,17 +187,17 @@ function initDataFromJson(jsonObject) {
 function deleteTasks() {
     const response = confirm("Wollen Sie wirklich alle Abfuhrtermine von der \"Müll-Erinnerung\" löschen?");
     if (!response) {
-        showMessage("I", "Löschen der Daten abgebrochen!", "buttonMessage", true);
+        showMessage("I", "Löschen der Daten abgebrochen!", "buttonMessage", 2);
         return;
     }
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4) {
             if (this.status == 200) {
-                showMessage("I", "Löschen der Daten war erfolgreich!");
+                showMessage("I", "Löschen der Daten war erfolgreich!", "buttonMessage", 2);
                 requestTasksFromESP(); //if deleting the values on the ESP was successful => refresh the "current values" on the webpage
             } else { //500
-                showMessage("E", "ERROR: Löschen der Daten fehlgeschlagen!");
+                showMessage("E", "ERROR: Löschen der Daten fehlgeschlagen!", "buttonMessage", 2);
             }
         }
     };
@@ -205,7 +205,7 @@ function deleteTasks() {
     xhttp.send();
 }
 
-function showMessage(msgType, message, receiver = "buttonMessage", temporary = false) {
+function showMessage(msgType, message, receiver = "buttonMessage", hideDelayInSec = 0) {
     document.getElementById(receiver).innerHTML = message;
     switch (msgType) {
         case "D":
@@ -223,8 +223,8 @@ function showMessage(msgType, message, receiver = "buttonMessage", temporary = f
         default:
             document.getElementById(receiver).style.color = "black";
     }
-    if(temporary){
-        setTimeout(function () { document.getElementById(receiver).innerHTML = ""; }, 2000);
+    if(hideDelayInSec != 0){
+        setTimeout(function () { document.getElementById(receiver).innerHTML = ""; }, hideDelayInSec*1000);
     }
 }
 
@@ -241,7 +241,7 @@ function sendUpdate(dropdown) {
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             response = this.responseText;
-            showMessage("I", "<br>" + response,"messageTime", true);
+            showMessage("I", "<br>" + response,"messageTime", 2);
         }
     };
     if (dropdown == "start") {
