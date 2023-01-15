@@ -41,7 +41,7 @@ function requestSettingsFromESP() {
             tokens = value.split(",");
             document.getElementById("start").value = tokens[0];
             document.getElementById("end").value = tokens[1];
-            maxNumberOfEpochs = 20 //tokens[2];
+            maxNumberOfEpochs = tokens[2];
             maxNumberOfTasksPerDay = tokens[3];
             maxNumberOfTaskIds = tokens[4];
         }
