@@ -116,7 +116,7 @@ function sendValidTaskTypes() {
             validTaskIds.push(i);
         }
     }
-    if(validDataIds.length == 0){
+    if(validTaskIds.length == 0){
         showMessage("W", "Sie müssen mindestens eine Abfallart auswählen!", "messageTaskTypes", 2);
         return;
     }
