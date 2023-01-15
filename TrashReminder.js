@@ -297,8 +297,7 @@ function processFiles() {
         reader.onload = function (progressEvent) {
             const text = this.result; //entire file
             var lines = text.split('\n');
-            for (var i = 0; i < lines.length; i++) {
-                line = lines[i];
+            for (const line of lines) {
                 if (line.search("DTSTART") != -1) {
                     var date = line.split(":")[1];
                     dateString = date.substring(0, 4) + "-" + date.substring(4, 6) + "-" + date.substring(6, 8);
@@ -346,27 +345,24 @@ function getTaskIds(tasks) {
 
 function getColors() {
     var colors = [];
-    for (var i = 0; i < gTasks.length; i++) {
-        var item = gTasks[i];
-        var color = getMatchingColor(item);
+    for (const task of gTasks) {
+        var color = getMatchingColor(task);
         if (color) {
             colors.push(color);
         } else {
-            alert("Failed to auto-assign color for entry " + item + ".<br>Assigning default color (pink).");
+            alert("Failed to auto-assign color for entry " + task + ".<br>Assigning default color (pink).");
             colors.push(gColorDefault);
         }
     }
     return (colors);
 }
 
-function getMatchingColor(item) {
+function getMatchingColor(task) {
     var keys = Object.keys(gColorDict).sort();
-    for (var i = 0; i < keys.length; i++) {
-        var key = keys[i];
+    for (const key of keys) {
         var entries = key.split(",");
-        for (var j = 0; j < entries.length; j++) {
-            var entry = entries[j];
-            if (item.toUpperCase().search(entry) != -1) {
+        for (entry of entries) {
+            if (task.toUpperCase().search(entry) != -1) {
                 return (gColorDict[key]);
             }
         }
@@ -378,9 +374,8 @@ function genJson() {
     validTaskIds = getValidTaskIds();
     console.log(validTaskIds);
     var entries = [];
-    var keys = Object.keys(gEpochTaskDict);
-    for (var i = 0; i < keys.length; i++) {
-        var epoch = keys[i];
+    var epochs = Object.keys(gEpochTaskDict);
+    for (epoch of epochs) {
         var tasks = gEpochTaskDict[epoch]["tasks"];
         var taskIds = getTaskIds(tasks);
         var date = gEpochTaskDict[epoch]["date"];
@@ -440,13 +435,13 @@ function showCheckBoxes(items) {
     document.getElementById("message").innerHTML = "";
 }
 
-function genCheckBoxes(items, colors, validTaskIds = []) {
+function genCheckBoxes(tasks, colors, validTaskIds = []) {
     var text = "<table>";
-    for (let i = 0; i < items.length; i++) {
+    for (let i = 0; i < tasks.length; i++) {
         checked = (validTaskIds.length == 0 || validTaskIds.includes(i)) ? "checked" : "";
         text += "<tr>"
         text += "<td class=value><div><input type='checkbox' id='task" + i + "' name=task" + i + "' " + checked + ">";
-        text += "<label for='task" + i + "' id='taskl" + i + "'> " + items[i] + "</label><div></td>";
+        text += "<label for='task" + i + "' id='taskl" + i + "'> " + tasks[i] + "</label><div></td>";
         text += "<td><button style='background-color: " + colors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
         text += "</tr>";
     }
