@@ -32,8 +32,8 @@ const char webpage[] PROGMEM = R"=====(
                     <td class=value><select id="end" name="end"></select></td>
                 </tr>
             </table>
-            <div id='messageTime'></div>
             <br>
+            <div id='messageTime'></div>
         </div>
         <br>
     </form>
@@ -85,7 +85,6 @@ const char webpage[] PROGMEM = R"=====(
       </div>
       <br>
       <div id='buttonMessage'></div>
-      <br>
       <div>
         <button class="button" onclick="closeConfig()">Beenden</button>
         <button class="button" onclick="requestTasksFromESP()">Lesen</button>

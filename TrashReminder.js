@@ -206,7 +206,7 @@ function deleteTasks() {
 }
 
 function showMessage(msgType, message, receiver = "buttonMessage", hideDelayInSec = 0) {
-    document.getElementById(receiver).innerHTML = message;
+    document.getElementById(receiver).innerHTML = message + "<br>";
     switch (msgType) {
         case "D":
             document.getElementById(receiver).style.color = "orange";
@@ -241,7 +241,7 @@ function sendUpdate(dropdown) {
     xhttp.onreadystatechange = function () {
         if (this.readyState == 4 && this.status == 200) {
             response = this.responseText;
-            showMessage("I", "<br>" + response,"messageTime", 2);
+            showMessage("I", response,"messageTime", 2);
         }
     };
     if (dropdown == "start") {
