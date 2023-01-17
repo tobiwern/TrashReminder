@@ -86,12 +86,12 @@ const char* settingsFile = "/settings.json";
 int numberOfValidTaskIds = 0;  //global counter
 int numberOfTaskIds = 0;       //global counter
 int numberOfEpochs = 0;        //global counter
-const int maxNumberOfEpochs = 200;
+const int maxNumberOfEpochs = 2; //200; ToDo1
 const int maxNumberOfTaskIds = 20;
 
-String task[20];
-int color[20];
-int validTaskId[20];
+String task[maxNumberOfTaskIds];
+int color[maxNumberOfTaskIds];
+int validTaskId[maxNumberOfTaskIds];
 
 typedef struct epochTask {
   unsigned int epoch;
@@ -283,6 +283,29 @@ void addGlitter(fract8 chanceOfGlitter) {
 
 #include "webserver.h"  //separate file for webserver functions
 
+boolean initDataFromFile() {
+  numberOfValidTaskIds = 4;
+  validTaskId[0] = 0;
+  validTaskId[1] = 1;
+  validTaskId[2] = 2;
+  validTaskId[3] = 3;
+  numberOfTaskIds = 4;
+  task[0] = "Biomüll";
+  task[1] = "Papier";
+  task[2] = "Restmüll";
+  task[3] = "Wertstoffe";
+  color[0] = 0x00FF00;
+  color[1] = 0x0000FF;
+  color[2] = 0xFFFFFF;
+  color[3] = 0xFFFF00;
+  numberOfEpochs = 2;
+  epochTask entry0 = {.epoch = 1674000000, .taskIds = {2,1,-1,-1} };
+  epochTaskDict[0] = entry0;
+  epochTask entry1 = {.epoch = 1674518400, .taskIds = {0,-1,-1,-1} };
+  epochTaskDict[1] = entry1;
+  return (true);
+}
+
 void handleState() {
   unsigned long millisNow = millis();
   STATE_NEXT = -1;
@@ -297,8 +320,8 @@ void handleState() {
       acknowledge = 0;
       memset(colorIds, -1, sizeof(colorIds));
       memset(colorIdsLast, -1, sizeof(colorIdsLast));
-      listDir("/");
-      initStartEndTimes();  //initializes startHour and endHour
+//      listDir("/"); //ToDo1
+//      initStartEndTimes();  //initializes startHour and endHour
       initDataFromFile();
       STATE_NEXT = STATE_SHOW;
       break;

@@ -8,7 +8,7 @@
 
 #include <ESP8266WebServer.h>
 ESP8266WebServer server(80);
-#define JSON_MEMORY 1024 * 30
+//#define JSON_MEMORY 1024 * 30
 // Server Functions
 
 void printTaskIds(int taskIds[]) {  //debug
@@ -19,7 +19,8 @@ void printTaskIds(int taskIds[]) {  //debug
   Serial.println("");
 }
 
-boolean initDataFromFile() {
+/*
+boolean initDataFromFileOld() {
   if (!startLittleFS()) { return (""); }
   Serial.printf("INFO: Reading file: %s\n", dataFile);
   File file = LittleFS.open(dataFile, "r");
@@ -74,7 +75,7 @@ boolean initDataFromFile() {
         }
       }
       //JsonArray taskIdArray = p.value();                      // is a JsonVariant
-      copyArray(taskIdArray, taskIds);
+      //copyArray(taskIdArray, taskIds);
       epochTask entry;
       entry.epoch = epoch;
       memcpy(entry.taskIds, taskIds, sizeof(entry.taskIds));
@@ -91,6 +92,7 @@ boolean initDataFromFile() {
   endLittleFS();
   return (true);
 }
+*/
 
 //settings
 void initStartEndTimes() {
@@ -178,6 +180,7 @@ void receiveFromWebpage_Tasks() {
   }
 }
 
+/*
 boolean receiveFromWebpage_ValidTaskIds() {
   String jsonText = server.arg("value");
   Serial.println("Receiving settings in JSON format: " + jsonText);
@@ -226,6 +229,7 @@ boolean receiveFromWebpage_ValidTaskIds() {
   server.send(200, "text/plane", "OK");
   return (true);
 }
+*/
 
 void closeSettings() {
   Serial.println("Closing Settings.");
@@ -260,7 +264,7 @@ void startWebServer() {
   server.on("/delete_tasks", deleteTasks);
   server.on("/close", closeSettings);
   server.on("/fireworks", fireworks);
-  server.on("/send_ValidTaskIds", receiveFromWebpage_ValidTaskIds);
+//  server.on("/send_ValidTaskIds", receiveFromWebpage_ValidTaskIds);
   server.onNotFound(notFound);
   server.begin();
   Serial.print("IP address: ");
