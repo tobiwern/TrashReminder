@@ -86,7 +86,7 @@ const char* settingsFile = "/settings.json";
 int numberOfValidTaskIds = 0;  //global counter
 int numberOfTaskIds = 0;       //global counter
 int numberOfEpochs = 0;        //global counter
-const int maxNumberOfEpochs = 2; //200; ToDo1
+const int maxNumberOfEpochs = 200; 
 const int maxNumberOfTaskIds = 20;
 
 String task[maxNumberOfTaskIds];
@@ -117,7 +117,7 @@ void setup() {
   //Time Client
   timeClient.begin();
   timeClient.setTimeOffset(3600);  //GMT+1
-  deleteFile(dataFile);
+//  deleteFile(dataFile);
 }
 
 void loop() {
@@ -283,6 +283,7 @@ void addGlitter(fract8 chanceOfGlitter) {
 
 #include "webserver.h"  //separate file for webserver functions
 
+/* //DEBUG
 boolean initDataFromFile() {
   numberOfValidTaskIds = 4;
   validTaskId[0] = 0;
@@ -305,6 +306,7 @@ boolean initDataFromFile() {
   epochTaskDict[1] = entry1;
   return (true);
 }
+*/
 
 void handleState() {
   unsigned long millisNow = millis();
@@ -321,7 +323,7 @@ void handleState() {
       memset(colorIds, -1, sizeof(colorIds));
       memset(colorIdsLast, -1, sizeof(colorIdsLast));
 //      listDir("/"); //ToDo1
-//      initStartEndTimes();  //initializes startHour and endHour
+      initStartEndTimes();  //initializes startHour and endHour
       initDataFromFile();
       STATE_NEXT = STATE_SHOW;
       break;

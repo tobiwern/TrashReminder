@@ -8,8 +8,7 @@
 
 #include <ESP8266WebServer.h>
 ESP8266WebServer server(80);
-//#define JSON_MEMORY 1024 * 30
-// Server Functions
+#define JSON_MEMORY 1024 * 30
 
 void printTaskIds(int taskIds[]) {  //debug
   Serial.print("taskIds[] = ");
@@ -19,8 +18,7 @@ void printTaskIds(int taskIds[]) {  //debug
   Serial.println("");
 }
 
-/*
-boolean initDataFromFileOld() {
+boolean initDataFromFile() {
   if (!startLittleFS()) { return (""); }
   Serial.printf("INFO: Reading file: %s\n", dataFile);
   File file = LittleFS.open(dataFile, "r");
@@ -57,7 +55,6 @@ boolean initDataFromFileOld() {
     color[numberOfTaskIds++] = color1;
     Serial.println("Color: " + colorText + ", value = " + String(color1));
   }
-
   JsonArray epochTasks = doc["epochTasks"];  //Implicit cast
   numberOfEpochs = 0;
   for (JsonObject obj : epochTasks) {
@@ -92,18 +89,19 @@ boolean initDataFromFileOld() {
   endLittleFS();
   return (true);
 }
-*/
+
 
 //settings
 void initStartEndTimes() {
-  String jsonText = readFile(settingsFile);
-  if (jsonText == "") {
-    Serial.println("ERROR: Lesen der Daten fehlgeschlagen.");
+  if (!startLittleFS()) { return; }
+  Serial.printf("INFO: Reading file: %s\n", settingsFile);
+  File file = LittleFS.open(settingsFile, "r");
+  if (!file) {
+    Serial.println("INFO: Failed to open file " + String(settingsFile) + " for reading!");
     return;
   }
-  Serial.println("Read settings: " + jsonText);
   StaticJsonDocument<512> doc;
-  DeserializationError error = deserializeJson(doc, jsonText);
+  DeserializationError error = deserializeJson(doc, file);
   if (error) {
     Serial.print(F("deserializeJson() failed: "));
     Serial.println(error.f_str());
@@ -111,7 +109,8 @@ void initStartEndTimes() {
   }
   startHour = doc["startHour"];
   endHour = doc["endHour"];
-  //  Serial.println("Read startHour = " + String(startHour) + ", endHour = " + String(endHour));
+  file.close();
+  endLittleFS();
 }
 
 void sendTasksToWebpage() {  //transfering ESP data to the Webpage
@@ -180,57 +179,6 @@ void receiveFromWebpage_Tasks() {
   }
 }
 
-/*
-boolean receiveFromWebpage_ValidTaskIds() {
-  String jsonText = server.arg("value");
-  Serial.println("Receiving settings in JSON format: " + jsonText);
-  //First translate validTaskIds into JsonArray
-  StaticJsonDocument<128> doc1;
-  DeserializationError error1 = deserializeJson(doc1, jsonText);
-  if (error1) {
-    Serial.print(F("A: deserializeJson() failed: "));
-    Serial.println(error1.f_str());
-    server.send(500, "text/plane", "ERROR");
-    return (false);
-  }
-  JsonArray validTaskIds = doc1["validTaskIds"];
-
-  //Open old document
-  if (!startLittleFS()) { return (false); }
-  Serial.printf("INFO: Reading file: %s\n", dataFile);
-  File file = LittleFS.open(dataFile, "r");  
-  if (!file) {
-    Serial.println("INFO: Failed to open file " + String(dataFile) + " for reading!");
-    server.send(500, "text/plane", "ERROR");
-    return (false);
-  }
-  DynamicJsonDocument doc(JSON_MEMORY);  //on heap for large amount of data
-  DeserializationError error = deserializeJson(doc, file);
-  if (error) {
-    Serial.print(F("B: deserializeJson() failed: "));
-    Serial.println(error.f_str());
-    server.send(500, "text/plane", "ERROR");
-    return (false);
-  }
-  doc["validTaskIds"] = validTaskIds; //update with new data
-  file.close();
-  
-  file = LittleFS.open(dataFile, "w");  
-  if (!file) {
-    Serial.println("INFO: Failed to open file " + String(dataFile) + " for writing!");
-    server.send(500, "text/plane", "ERROR");
-    return (false);
-  }
-
-  serializeJson(doc, file); //save back to data.json
-  file.close();
-  endLittleFS();
-
-  server.send(200, "text/plane", "OK");
-  return (true);
-}
-*/
-
 void closeSettings() {
   Serial.println("Closing Settings.");
   STATE_NEXT = STATE_INIT;
@@ -264,7 +212,7 @@ void startWebServer() {
   server.on("/delete_tasks", deleteTasks);
   server.on("/close", closeSettings);
   server.on("/fireworks", fireworks);
-//  server.on("/send_ValidTaskIds", receiveFromWebpage_ValidTaskIds);
+  //  server.on("/send_ValidTaskIds", receiveFromWebpage_ValidTaskIds);
   server.onNotFound(notFound);
   server.begin();
   Serial.print("IP address: ");
