@@ -1,7 +1,7 @@
 //https://www.lrabb.de/start/Service+_+Verwaltung/Abfuhrtermine.html 
 //C:/Users/tobiw/Downloads/allestrassenweilimschoenbuch.ics
 #include <unordered_map>
-std::unordered_map<int,String>epochTaskDict1 = {
+std::unordered_map<int,String>epochTaskDict = {
 {1672704000,"2"}, //03.01.2023 ['Restmüll']
 {1673308800,"0"}, //10.01.2023 ['Biomüll']
 {1673395200,"3"}, //11.01.2023 ['Wertstoffe']
@@ -80,6 +80,6 @@ std::unordered_map<int,String>epochTaskDict1 = {
 {1703721600,"0"}, //28.12.2023 ['Biomüll']
 {1672531200,"1,3"}, //DUMMY 01.01.2023 ['Papier', 'Wertstoffe']
 };
-const String task1[] = {"Biomüll", "Papier", "Restmüll", "Wertstoffe"};
-const int color2[] = {0x00FF00,0x0000FF,0xFFFFFF,0xFFFF00};
-const int validIndex1[] = {0,1,2,3};
+const String task[] = {"Biomüll", "Papier", "Restmüll", "Wertstoffe"};
+const int color[] = {0x00FF00,0x0000FF,0xFFFFFF,0xFFFF00};
+const int validIndex[] = {0,1,2,3};
