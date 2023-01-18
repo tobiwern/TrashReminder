@@ -1,0 +1,119 @@
+        .button {
+            background-color: #4CAF50;
+            /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            margin: 2px 0px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+
+        .button:hover:active {
+            background-color: #4caf4f87;
+            border: 1px solid #4caf4fb0;
+            color: white;
+        }
+
+        .button:hover {
+            background-color: #4caf4fb4;
+        }
+
+
+        body {
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        table {
+            width: 80%;
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        div.frame {
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 5px;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+
+        }
+
+        div.output {
+            width: 350px;
+            margin: auto;
+        }
+
+        div.centeredHeight {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2px;
+            gap: 6px;
+        }
+
+        div.taskType {
+            display: flex;
+            justify-content: left;
+            align-items: center;
+            padding: 2px;
+            gap: 4px;
+        }
+
+        td.value {
+            white-space: nowrap;
+            vertical-align: center;
+            text-align: left;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        td.description {
+            vertical-align: center;
+            text-align: right;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        #epochTasks {
+            font-family: Arial, Helvetica, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        #epochTasks td,
+        #epochTasks th {
+            border: 1px solid #ddd;
+            padding: 4px;
+        }
+
+        #epochTasks tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #epochTasks tr:hover {
+            background-color: #ddd;
+        }
+
+        #epochTasks th {
+            padding-top: 12px;
+            padding-bottom: 12px;
+            text-align: center;
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        hr {
+            border: 2px solid #4CAF50;
+            border-radius: 1px;
+        }
+
+        p {
+            font-style: italic;
+            text-align: center;
+        }
