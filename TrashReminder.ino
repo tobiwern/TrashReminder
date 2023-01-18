@@ -13,6 +13,7 @@ DONE: store default values to EEPROM (start/endHour)
 - Add magnets to trashcan so it snapps in place
 - reset STATE_CONFIG after a timeout of inactivity
 - uptime reporting (to detect crashes)
+- Webpage: Color-Picker
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
 JSON Validator: https://jsonformatter.curiousconcept.com/#
