@@ -7,9 +7,12 @@ DONE: Touch button to acknowledge
 DONE: Wifi App to configure start and end time (15:00-8:00), what events to show
 DONE: option to have parallel events (e.g. Paper & Bio on the same day => alternate between the different colors sequentially) => https://stackoverflow.com/questions/42701688/using-an-unordered-map-with-arrays-as-keys
 - query API directly instead of hard-coded list
-- Add magnets to trash can so it snapps in place
-- javascript: Translate dateDict filtering with TrashType => writing to LittleFS
-- store default values to EEPROM (start/endHour)
+DONE: javascript: Translate dateDict filtering with TrashType => writing to LittleFS
+DONE: store default values to EEPROM (start/endHour)
+- check if there are more tasksPerDay then allowed
+- Add magnets to trashcan so it snapps in place
+- reset STATE_CONFIG after a timeout of inactivity
+- uptime reporting (to detect crashes)
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
 JSON Validator: https://jsonformatter.curiousconcept.com/#
@@ -22,15 +25,13 @@ JSON Validator: https://jsonformatter.curiousconcept.com/#
 
 #include "filesystem.h"
 #include "webpage.h"
-#include "data_neuweiler.h"
 
 //forward function prototypes (so function order does not matter)
 //void setColor(int color, boolean fade, int blinkSpeed);
 
-
-int colorIds[] = { -1, -1, -1 };  //allow max three tasks on the same day
-int colorIdsLast[] = { -1, -1, -1 };
-int numberOfColorIds = sizeof(colorIds) / sizeof(colorIds[0]);
+const int maxNumberOfTasksPerDay = 4;
+int colorIds[maxNumberOfTasksPerDay];
+int colorIdsLast[maxNumberOfTasksPerDay];
 int colorIndex = 0;  //used to toggle between multiple colors for same day tasks
 
 int startHour = 15;       //am Vortag
@@ -76,9 +77,29 @@ int initialized = 0;   //in order to prevent acknowledge to be triggered at the 
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org");
-int nowEpoch = 0;            //global since only querying every minute
+unsigned int nowEpoch = 0;   //global since only querying every minute
 int queryIntervall = 60000;  //ms => every minute (could be less, however to really turn on LED at intended time...)
 unsigned long lastQueryMillis = 0;
+
+//data
+const char* dataFile = "/data.json";
+const char* settingsFile = "/settings.json";
+int numberOfValidTaskIds = 0;  //global counter
+int numberOfTaskIds = 0;       //global counter
+int numberOfEpochs = 0;        //global counter
+const int maxNumberOfEpochs = 200; 
+const int maxNumberOfTaskIds = 20;
+
+String task[maxNumberOfTaskIds];
+int color[maxNumberOfTaskIds];
+int validTaskId[maxNumberOfTaskIds];
+
+typedef struct epochTask {
+  unsigned int epoch;
+  int taskIds[maxNumberOfTasksPerDay];
+} epochTask;
+
+epochTask epochTaskDict[maxNumberOfEpochs];
 
 void setup() {
   Serial.begin(115200);
@@ -97,7 +118,7 @@ void setup() {
   //Time Client
   timeClient.begin();
   timeClient.setTimeOffset(3600);  //GMT+1
-  //  deleteFile("/data.json");
+//  deleteFile(dataFile);
 }
 
 void loop() {
@@ -117,23 +138,20 @@ int getCurrentTimeEpoch() {
   return (timeClient.getEpochTime());
 }
 
-void resetColorIds() {
-  memset(colorIds, -1, sizeof(colorIds));
-}
-
-void printColorIds() {
-  for (int i = 0; i < sizeof colorIds / sizeof colorIds[0]; i++) {
+void printColorIds() {  //debug
+  for (int i = 0; i < maxNumberOfTasksPerDay; i++) {
     Serial.println("colorIds[" + String(i) + "] = " + String(colorIds[i]));
   }
 }
-void handleLed(int nowEpoch) {
+
+void handleLed(unsigned int nowEpoch) {
   int dictEpoch;
-  resetColorIds();
+  memset(colorIds, -1, sizeof(colorIds));
   //  printColorIds();
-  for (auto entry : epochTaskDict) {
-    dictEpoch = entry.first;
+  for (int i = 0; i < numberOfEpochs; i++) {
+    dictEpoch = epochTaskDict[i].epoch;
     if ((nowEpoch > dictEpoch + (startHour - 24) * 60 * 60) && (nowEpoch < dictEpoch + endHour * 60 * 60)) {
-//      Serial.println("nowEpoch: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch + (startHour - 24) * 60 * 60) + ", dictEpoch+endTime = " + String(dictEpoch + endHour * 60 * 60));
+      //      Serial.println("nowEpoch: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch + (startHour - 24) * 60 * 60) + ", dictEpoch+endTime = " + String(dictEpoch + endHour * 60 * 60));
       if (dictEpoch != triggerEpoch) {
         acknowledge = 0;  //acknowledge only valid for same triggerEpoch
         colorIndex = 0;
@@ -141,31 +159,31 @@ void handleLed(int nowEpoch) {
       }
       triggerEpoch = dictEpoch;
       if (!acknowledge) {
-        setColorIds(entry.second);
+        setColorIds(epochTaskDict[i].taskIds);
       }
     }
   }
-  //  printColorIds();
+  //printColorIds();
   setTaskColor();
   FastLED.show();
 }
 
 boolean isValidTask(int taskId) {
-  for (int i = 0; i < sizeof(validIndex) / sizeof(validIndex[0]); i++) {
-    if (taskId == validIndex[i]) { return (true); }
+  for (int i = 0; i < numberOfValidTaskIds; i++) {
+    if (taskId == validTaskId[i]) { return (true); }
   }
   return (false);
 }
 
-void setColorIds(String taskIds) {
-  int start = 0, index = 0, indexFound, taskId;
-  do {
-    indexFound = taskIds.indexOf(",", start);
-    taskId = taskIds.substring(start, indexFound).toInt();
-    if (isValidTask(taskId)) { colorIds[index++] = taskId; }
-    //    Serial.println("taskId = " + String(taskId) + ", start = " + String(start) + ", indexFound = " + String(indexFound) + ", validTask = " + String(isValidTask(taskId)));
-    start = indexFound + 1;
-  } while (indexFound != -1);
+void setColorIds(int taskIds[]) {
+  int index = 0;
+  //Serial.println("==================");
+  for (int i = 0; i < maxNumberOfTasksPerDay; i++) {
+    //Serial.println("taskId[" + String(i) + "] = " + String(int(taskIds[i])) + ", valid = " + String(isValidTask(taskIds[i])));
+    if (taskIds[i] != -1) {
+      if (isValidTask(taskIds[i])) { colorIds[index++] = int(taskIds[i]); }
+    }
+  }
 }
 
 void handleReed() {
@@ -176,7 +194,7 @@ void handleReed() {
 void setAcknowledge() {
   unsigned long now = millis();
   if (initialized) {
-    //    Serial.println("OFF - Acknowedge!");
+    Serial.println("OFF - Acknowedge!");
     acknowledge = 1;
     //Multi-click detection
     switchCounter++;
@@ -200,12 +218,12 @@ void doNothing() {
 
 void incrementColorId() {
   int numberOfTasks = 0;
-  for (int i = 0; i < numberOfColorIds; i++) {
+  for (int i = 0; i < maxNumberOfTasksPerDay; i++) {  //detect how many tasks
     if (colorIds[i] != -1) { numberOfTasks++; }
   }
   colorIndex++;
   if (colorIndex >= numberOfTasks) { colorIndex = 0; }
-  //  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", numberOfColorIds = " + String(numberOfColorIds));
+  //  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", maxNumberOfTasksPerDay = " + String(maxNumberOfTasksPerDay));
 }
 
 void setBrightness(int blinkSpeed = 20, boolean reset = false) {
@@ -266,10 +284,35 @@ void addGlitter(fract8 chanceOfGlitter) {
 
 #include "webserver.h"  //separate file for webserver functions
 
+/* //DEBUG
+boolean initDataFromFile() {
+  numberOfValidTaskIds = 4;
+  validTaskId[0] = 0;
+  validTaskId[1] = 1;
+  validTaskId[2] = 2;
+  validTaskId[3] = 3;
+  numberOfTaskIds = 4;
+  task[0] = "Biomüll";
+  task[1] = "Papier";
+  task[2] = "Restmüll";
+  task[3] = "Wertstoffe";
+  color[0] = 0x00FF00;
+  color[1] = 0x0000FF;
+  color[2] = 0xFFFFFF;
+  color[3] = 0xFFFF00;
+  numberOfEpochs = 2;
+  epochTask entry0 = {.epoch = 1674000000, .taskIds = {2,1,-1,-1} };
+  epochTaskDict[0] = entry0;
+  epochTask entry1 = {.epoch = 1674518400, .taskIds = {0,-1,-1,-1} };
+  epochTaskDict[1] = entry1;
+  return (true);
+}
+*/
+
 void handleState() {
   unsigned long millisNow = millis();
   STATE_NEXT = -1;
-  //  Serial.println("STATE = " + stateTbl[STATE] + ", STATE_PREVIOUS = " + stateTbl[STATE_PREVIOUS]);
+ // Serial.println("STATE = " + stateTbl[STATE] + ", STATE_PREVIOUS = " + stateTbl[STATE_PREVIOUS]);
   if (STATE != STATE_PREVIOUS) { Serial.println("STATE = " + stateTbl[STATE]); }
   switch (STATE) {
     case STATE_INIT:  //***********************************************************
@@ -278,9 +321,11 @@ void handleState() {
       brightness = 255;
       colorIndex = 0;
       acknowledge = 0;
-      resetColorIds();
-      listDir("/");
-      readStartEndTimes();  //initializes startHour and endHour
+      memset(colorIds, -1, sizeof(colorIds));
+      memset(colorIdsLast, -1, sizeof(colorIdsLast));
+//      listDir("/"); //ToDo1
+      initStartEndTimes();  //initializes startHour and endHour
+      initDataFromFile();
       STATE_NEXT = STATE_SHOW;
       break;
     case STATE_SHOW:  //***********************************************************
@@ -316,7 +361,9 @@ void handleState() {
       handleConnection();
       break;
     case STATE_CONFIGURE:
-      if (STATE_PREVIOUS == STATE_QUERY) { startWebServer(); }
+      if (STATE_PREVIOUS == STATE_QUERY) {
+        startWebServer();
+      }
       setColor(CRGB::Purple, false);
       server.handleClient();
       handleReed();
