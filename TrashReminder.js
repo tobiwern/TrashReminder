@@ -240,6 +240,7 @@ function refreshTaskDates() { //show TaskDates on Webpage
     for (checkBox of taskTypeCheckBoxes) {
         taskIdEnableValue.push(checkBox.checked);
     }
+    var now = Date.now();
     for (const epoch of epochs) {
         var dateTime = new Date(epoch * 1000);
         var taskIds = gDataEpochTaskDict[epoch];
@@ -249,10 +250,11 @@ function refreshTaskDates() { //show TaskDates on Webpage
                 selectedTaskIds.push(taskId);
             }
         }
+        if(dateTime >= now){textColor = "black";} else {textColor = "lightgrey";}
         if (selectedTaskIds.length >= 1) {
             text += "<tr>"
-            text += "<td class=description nowrap>" + epochToDateString(epoch) + "</td>";
-            text += "<td>";
+            text += "<td class=description nowrap style='color: " + textColor + ";'>" + epochToDateString(epoch) + "</td>";
+            text += "<td style='color: " + textColor + ";'>";
             for (const taskId of selectedTaskIds) {
                 text += "<div class=taskType><button style='background-color: " + gDataColors[taskId].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button>";
                 text += " " + gDataTasks[taskId] + "</div>";
