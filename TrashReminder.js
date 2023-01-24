@@ -69,7 +69,7 @@ function requestTasksFromESP(show = true) { //send the ESP data to the webpage
 }
 
 function sendTasksToESP(jsonText, currentData = false) { //send the jsonText to the ESP to be stored in LittleFS
-    if(currentData){
+    if (currentData) {
         receiver = "messageTaskTypes";
         message = "Neue Auswahl gespeichert.";
         hideDelay = 2;
@@ -456,6 +456,7 @@ function epochToDateString(epoch, dateType = "long") {
     return (timeStamp);
 }
 
+let timeoutID;
 function showMessage(msgType, message, receiver = "buttonMessage", hideDelayInSec = 0) {
     document.getElementById(receiver).innerHTML = message + "<br><br>";
     switch (msgType) {
@@ -475,6 +476,8 @@ function showMessage(msgType, message, receiver = "buttonMessage", hideDelayInSe
             document.getElementById(receiver).style.color = "black";
     }
     if (hideDelayInSec != 0) {
-        setTimeout(function () { document.getElementById(receiver).innerHTML = ""; }, hideDelayInSec * 1000);
+        timeoutId = setTimeout(function () { document.getElementById(receiver).innerHTML = ""; }, hideDelayInSec * 1000);
+    } else {
+        clearTimeout(timeoutID);
     }
 }
