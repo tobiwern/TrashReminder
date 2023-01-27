@@ -19,7 +19,7 @@ Wird also zum Beispiel `Restmüll` abgeholt, blinkt das Mülleimermodell `weiß`
 Sollten am selben Tag **zwei** unterschiedliche Müllarten abgeholt werden, wechselt das Licht zwischen den entsprechenden Farben hin und her. Also zum Beispiel zwischen `weiß` und `grün`, wenn sowohl `Restmüll` als auch `Biomüll` am selben Tag abgeholt werden.
 
 ## Zeitpunkt der Erinnerung
-Die Erinnerung erfolgt am **Vortag von 15 Uhr bis 8 Uhr morgens**. 
+Die Erinnerung erfolgt standardmäßig am **Vortag von 15 Uhr bis 9 Uhr morgens**. Diese Einstellung kann wie unter `Konfigurationsmodus` beschrieben angepaßt werden.
 
 ## Ausschalten der Erinnerung
 Wenn der Müll rausgestellt wurde, kann die Erinnerung ausgeschaltet werden indem das **Mülleimermodell kurz angehoben** wird. Damit erlischt das Licht bis zum nächsten Abholungstermin.
@@ -42,15 +42,48 @@ Diese Einrichtung muss nur einmalig durchgeführt werden - von nun an holt sich 
 ## Unterbrechung der WLAN Verbindung
 Sollte es zu einer Verbindungsstörung zum Internet kommen, signalisiert die `Müll-Erinnerung` dies durch ein schnelles rotes Blinken. Sie müssen nichts weiter unternehmen - sobald die Verbindung wieder hergestellt werden kann wechselt die `Müll-Erinnerung` in den regulären Modus.
 
-## Gültigkeit der Abholtermine
-Die eingespeicherten Termine gelten nur für das Jahr 2023 und sind für einen bestimmten Ort (z.B. Hirrlingen) vorprogrammiert.
-Ob die Termine auch für das Jahr 2024 bereitgestellt werden steht noch in den Sternen, aber man braucht ja auch nächstes Jahr wieder ein Weihnachtsgeschenk ;-)
+## Konfigurationsmodus
+Um in den Konfigurationsmodus zu wechseln, muss das Mülleimermodell `dreimal angehoben` werden bis die LED dauerhaft `pink` leuchtet.
+Jetzt kann über ein Smartphone oder einen Computer im Browser der Link `http://TrashReminder` aufgerufen werden.
+(In seltenen Fällen dauert es ein wenig, bis die Seite aufgerufen werden kann - in diesem Fall einfach die Seite erneut laden.)
 
-Schöne Weihnachten und viel Spaß mit der `Müll-Erinnerung`!
+Im Konfigurationsmodus können die folgenden Einstellungen für die `Müll-Erinnerung` vorgenommen werden:
+- Start- und End-Uhrzeit der Erinnerung
+- Abfallarten an die erinnert werden soll
+- neue Abholtermine auf die `Müll-Erinnerung` laden
+Außerdem werden die derzeit gültigen Abholtermine mit ihrer zugehörigen LED-Farbe angezeigt. Bereits verstrichene Termine werden ausgegraut dargestellt.
 
-## Easter-Egg
-Findest Du die versteckte Funktion?
+### Start- und End-Uhrzeit
+Standardmäßig ist
+- der Start der Erinnerung auf **15 Uhr** am Vortag der Abholung
+- das Ende der Erinnerung auf **9 Uhr** am Tag der Abholung 
+gesetzt.
+Der jeweilige Zeitpunkt kann über das Auswahlfeld eingestellt werden und wird sofort auf die `Müll-Erinnerung` übertragen.
+
+### Auswahl der Abfallarten
+Für die abgespeicherten Abholtermine kann eingestellt werden an **welche Abfallarte**n erinnert werden soll.
+Jede Änderung der Auswahl wird sofort auf die `Müll-Erinnerung` geladen und die jeweils ausgewählten Einzeltermine entsprechend angezeigt.  
+
+### Neue Abholtermine speichern
+Falls sich Änderungen an den Abfuhrterminen ergeben haben oder Termine für das nächste Jahr gespeichert werden sollen, könnnen neue Abfuhrtermine auf die `Müll-Erinnerung` geladen werden. Hierbei werden die bestehenden Daten überschrieben!
+
+Die Abfuhrdaten werden üblicherweise durch das Entsorgungsunternehmen auf einer Webseite im ICS oder ICAL Format angeboten und müssen zuerst heruntergeladen werden.
+
+#### Beispiele für Müllentsorger
+Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können:
+
+- `Hirrlingen`: https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/
+- `Hirrlingen (Bogenschütz)`: https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html
+- `Neuweiler/Böblingen`: https://www.lrabb.de/start/Service+_+Verwaltung/Abfuhrtermine.html
+- `Stuggart`: https://service.stuttgart.de/lhs-services/aws/abfallkalender
+- `Ebhausen`: https://www.awg-info.de/privatkunden/abfuhrtermine
+
+#### Übertragen neuer Termine
+Sobald sie die ICS oder ICAL Datei auf Ihr Handy oder ihren Computer heruntergeladen haben, können Sie diese über den untenstehenden Button "Durchsuchen..." auswählen und auf die "Müll-Erinnerung" laden. Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
+
+
+### Beenden des Konfigurationsmodus
+Durch erneutes dreimaliges Anheben des Mülleimermodells kann der Konfigurationsmodus wieder verlassen werden. Dies wird durch ein Feuerwerk im Mülleimermodell bestätigt.
 
 ## Autor
-
 Tobias Werner, Erfindungen aller Art
