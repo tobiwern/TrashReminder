@@ -51,6 +51,7 @@ Im Konfigurationsmodus können die folgenden Einstellungen für die `Müll-Erinn
 - Start- und End-Uhrzeit der Erinnerung
 - Abfallarten an die erinnert werden soll
 - neue Abholtermine auf die `Müll-Erinnerung` laden
+
 Außerdem werden die derzeit gültigen Abholtermine mit ihrer zugehörigen LED-Farbe angezeigt. Bereits verstrichene Termine werden ausgegraut dargestellt.
 
 ### Start- und End-Uhrzeit
