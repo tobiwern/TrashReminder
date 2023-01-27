@@ -87,7 +87,6 @@ const char webpage[] PROGMEM = R"=====(
         <button class="button" onclick="closeConfig()">Beenden</button>
         <button class="button" onclick="requestTasksFromESP()">Lesen</button>
         <button class="button" onclick="deleteTasksOnESP()">L&ouml;schen</button>
-        <button class="button" onclick="send(0)">Erinnerung einschalten</button>
         <button class="button" onclick="fireworks()">Feuerwerk</button>
       </div>
     </body>
