@@ -2,17 +2,17 @@
 //setInterval(function(){getData();}, 2000);
 function require(script) {
     $.ajax({
-      url: script,
-      dataType: "script",
-      async: false,           // <-- This is the key
-      success: function () {
-        // all good...
-      },
-      error: function () {
-        throw new Error("Could not load script " + script);
-      }
+        url: script,
+        dataType: "script",
+        async: false,           // <-- This is the key
+        success: function () {
+            // all good...
+        },
+        error: function () {
+            throw new Error("Could not load script " + script);
+        }
     });
-  }
+}
 //require("./colorPicker/colorPick.js");
 var gMaxNumberOfEpochs;
 var gMaxNumberOfTasksPerDay;
@@ -221,20 +221,19 @@ function sendCurrentDataToESP() { //send currently set data to ESP
 }
 
 function refreshTaskTypesAndDates(response) {
-    const jsonObject = JSON.parse(response);
-    /*    try {
-            let jsonObject = JSON.parse(response);
-        } catch (e) {
-            showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>GitHub Issue</a>.<br>ERROR: " + e, "messageTaskTypes");
-            document.getElementById("taskDates").innerHTML = response;
-            return;
-        }
-    */
-    document.getElementById("taskDates").style.color = "black";
-    gDataEpochTaskDict = {}; //reset
-    initDataFromJson(jsonObject);
-    refreshTaskTypes();
-    refreshTaskDates();
+    //    const jsonObject = JSON.parse(response);
+    try {
+        const jsonObject = JSON.parse(response);
+        document.getElementById("taskDates").style.color = "black";
+        gDataEpochTaskDict = {}; //reset
+        initDataFromJson(jsonObject);
+        refreshTaskTypes();
+        refreshTaskDates();
+    } catch (e) {
+        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>GitHub Issue</a>.<br>ERROR: " + e, "messageTaskTypes");
+        document.getElementById("taskDates").innerHTML = response;
+        return;
+    }
 }
 
 function refreshTaskTypes() {
@@ -476,7 +475,7 @@ function refreshColorPickers() {
         'onColorSelected': function () {
             this.element.css({ 'backgroundColor': this.color, 'color': this.color });
             var id = this.element.attr("id");
-            var index = id.match(/(\d+)/)[0];
+            var index = id.match(/(\d+)/)[0]; //get the number from the string (since ID name is different)
             if (id.search("colorPickerTask") != -1) {
                 gDataColors[index] = this.color.replace("#", "0x");
                 refreshTaskDates();
