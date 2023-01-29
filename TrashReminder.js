@@ -1,4 +1,19 @@
+//todo: Button for Demo mode
 //setInterval(function(){getData();}, 2000);
+function require(script) {
+    $.ajax({
+      url: script,
+      dataType: "script",
+      async: false,           // <-- This is the key
+      success: function () {
+        // all good...
+      },
+      error: function () {
+        throw new Error("Could not load script " + script);
+      }
+    });
+  }
+//require("./colorPicker/colorPick.js");
 var gMaxNumberOfEpochs;
 var gMaxNumberOfTasksPerDay;
 var gMaxNumberOfTaskIds;
@@ -41,6 +56,13 @@ function requestSettingsFromESP() {
             tokens = value.split(",");
             document.getElementById("start").value = tokens[0];
             document.getElementById("end").value = tokens[1];
+            // document.addEventListener('DOMContentLoaded', function () {
+            //     enableEventListener('start');
+            //     enableEventListener('end');
+            // });
+            // function enableEventListener(dropdown) {
+            //     document.getElementById(dropdown).addEventListener('change', function () { sendDropDownStateToESP(dropdown); });
+            // }
             gMaxNumberOfEpochs = tokens[2];
             gMaxNumberOfTasksPerDay = tokens[3]; //tasks per day
             gMaxNumberOfTaskIds = tokens[4]; //different tasks
@@ -223,11 +245,13 @@ function refreshTaskTypes() {
         text += "<tr>"
         text += "<td class='value'><div><input type='checkbox' class='taskType' onChange='refreshTaskDates();sendValidTaskTypesToESP();' id='taskType" + i + "' name=task" + i + "' " + checked + ">";
         text += "<label for='taskType" + i + "' id='taskTypel" + i + "'> " + gDataTasks[i] + "</label><div></td>";
-        text += "<td><button style='background-color: " + gDataColors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
+        text += "<td><div class='colorPickSelector' id='colorPickerTask" + i + "'></div></td>";
         text += "</tr>";
     }
     text += "</table>";
+    text += "<br>(Sie können Abfallart und Farbe des Warnlichts ändern.)";
     document.getElementById("taskTypes").innerHTML = text + "<br>";
+    refreshColorPickerColors("colorPickerTask");
 }
 
 function refreshTaskDates() { //show TaskDates on Webpage
@@ -250,13 +274,13 @@ function refreshTaskDates() { //show TaskDates on Webpage
                 selectedTaskIds.push(taskId);
             }
         }
-        if(dateTime >= now){textColor = "black";} else {textColor = "lightgrey";}
+        if (dateTime >= now) { textColor = "black"; } else { textColor = "lightgrey"; }
         if (selectedTaskIds.length >= 1) {
             text += "<tr>"
             text += "<td class=description nowrap style='color: " + textColor + ";'>" + epochToDateString(epoch) + "</td>";
             text += "<td style='color: " + textColor + ";'>";
             for (const taskId of selectedTaskIds) {
-                text += "<div class=taskType><button style='background-color: " + gDataColors[taskId].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button>";
+                text += "<div class=taskType><div style='background-color: " + gDataColors[taskId].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></div>";
                 text += " " + gDataTasks[taskId] + "</div>";
             }
             text += "</td>";
@@ -267,20 +291,13 @@ function refreshTaskDates() { //show TaskDates on Webpage
     document.getElementById("taskDates").innerHTML = text + "<br>";
 }
 
-document.addEventListener('DOMContentLoaded', function () {
-    enableEventListener('start');
-    enableEventListener('end');
-});
-function enableEventListener(dropdown) {
-    document.getElementById(dropdown).addEventListener('change', function () { sendDropDownStateToESP(dropdown); });
-}
 /// ICS/iCAL Processing ////////////////////////////////////////////////////////////////////
 var gDebug = false;
 var gTasks = [];
 var gEpochTaskDict = {};                       //HÄCKSEL
 var gColorDict = { 'PAPIER': '0x0000FF', 'BIO,CKSEL': '0x00FF00', 'GELB,WERT': '0xFFFF00', 'REST': '0xFFFFFF' }
 var gColorDefault = '0xFFC0CB';
-var gColors = [];
+var gColors = []
 function processFiles() {
     gTasks = [];
     gEpochTaskDict = {};
@@ -311,7 +328,7 @@ function processFiles() {
                     }
                 }
             }
-            showCheckBoxes(gTasks); //executed multiple times, however ok
+            showCheckBoxes(gTasks); //executed multiple times per loaded file, however ok
             checkMaxNumberOfEntries();
         }; //on load
         reader.readAsText(file);
@@ -426,6 +443,7 @@ function showCheckBoxes(items) {
     text += genCheckBoxes(items, gColors);
     text += "<br><button onclick='genJson()'>Abfuhrtermine speichern</button><br><br>";
     document.getElementById("tasks").innerHTML = text;
+    refreshColorPickerColors("colorPickerIcs");
     document.getElementById("message").innerHTML = "";
 }
 
@@ -436,7 +454,8 @@ function genCheckBoxes(tasks, colors, validTaskIds = []) {
         text += "<tr>"
         text += "<td class=value><div><input type='checkbox' id='task" + i + "' name=task" + i + "' " + checked + ">";
         text += "<label for='task" + i + "' id='taskl" + i + "'> " + tasks[i] + "</label><div></td>";
-        text += "<td><button style='background-color: " + colors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></button></td>";
+        text += "<td><div class='colorPickSelector' id='colorPickerIcs" + i + "'></div></td>";
+        //        text += "<td><div style='background-color: " + colors[i].replace("0x", "#") + ";border: 2px solid grey;padding: 10px 10px;display: inline-block;'></div></td>";
         text += "</tr>";
     }
     text += "</table>";
@@ -445,6 +464,46 @@ function genCheckBoxes(tasks, colors, validTaskIds = []) {
 
 function send(number) {//debug
     showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
+}
+
+/// ColorPicker          green      blue       yellow     white      orange     pink       purple    iceblue    icegreen
+var colorPickPalette = ["#00ff00", "#0000ff", "#ffff00", "#ffffff", "#ba4500", "#d5002d", "#82007e", "#5a00a6", "#00ba45"]
+
+function refreshColorPickers() {
+    $(".colorPickSelector").colorPick({
+        'initialColor': '',
+        'palette': colorPickPalette,
+        'onColorSelected': function () {
+            this.element.css({ 'backgroundColor': this.color, 'color': this.color });
+            var id = this.element.attr("id");
+            var index = id.match(/(\d+)/)[0];
+            if (id.search("colorPickerTask") != -1) {
+                gDataColors[index] = this.color;
+                refreshTaskDates();
+                sendCurrentDataToESP();
+            } else {
+                gColors[index] = this.color;
+            }
+        }
+    });
+}
+
+$(document).ready(function () {
+    refreshColorPickers();
+});
+
+function refreshColorPickerColors(idName) {
+    refreshColorPickers();
+    var color;
+    var colorPickers = document.getElementsByClassName('colorPickSelector');
+    for (var i = 0; i < colorPickers.length; i++) {
+        if (idName == "colorPickerTask") {
+            color = gDataColors[i];
+        } else {
+            color = gColors[i];
+        }
+        if (color) { $("#" + idName + i).css("background", color.replace("0x", "#")); }
+    }
 }
 
 /// Utility Functions
@@ -482,4 +541,89 @@ function showMessage(msgType, message, receiver = "buttonMessage", hideDelayInSe
     } else {
         clearTimeout(timeoutID);
     }
+}
+
+function createWebpage() {
+    var innerHTML = `
+    <img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/TrashReminder.jpg?raw=true'
+        alt='Trash Reminder' width='400' height='185'>
+    <h1>M&uuml;ll-Erinnerung Einstellungen</h1>
+    <form name='config'>
+        <div class=frame>
+            <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/clock.svg?raw=true'> Zeitpunkt der Erinnerung</div></h2>
+            <table>
+                <tr>
+                    <td class=description><label for="start">Start der Erinnerung<br>(am Vortag der Abholung):</label></td>
+                    <td class=value><select id="start" name="start"></select></td>
+                </tr>
+                <tr>
+                    <td class=description><label class='fancy-input' for="end">Ende der Erinnerung<br>(am Tag der Abholung):</label></td>
+                    <td class=value><select id="end" name="end"></select></td>
+                </tr>
+            </table>
+            <br>
+            <div id='messageTime'></div>
+        </div>
+        <br>
+    </form>
+    <div class=frame>
+      <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/truck.svg?raw=true'> Abfuhrtermine</div></h2>
+      In den folgenden zwei Untergruppen kann ausgewählt werden, an welche <b>Abfallart</b> sie erinnert werden wollen und es werden die <b>abgespeicherten Termine</b> angezeigt.
+      <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/trash.svg?raw=true'> Abfallarten</div></h3>
+      <div id='taskTypes'></div>
+      <div id='messageTaskTypes'></div>
+      <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/watch.svg?raw=true'> Termine</div></h3>
+      <div id='taskDates'></div>
+      <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/download.svg?raw=true'> Neue Abfuhrtermine (ICS/ICAL)</div></h3>
+      <p>Falls sich Änderungen an den Abfuhrterminen ergeben haben oder Termine für das nächste Jahr gespeichert werden sollen, könnnen neue Abfuhrtermine auf die "Müll-Erinnerung" geladen werden. Hierbei werden die bestehenden Daten <b>überschrieben</b>!</p>
+      <p>Die Abfuhrdaten werden üblicherweise durch das Entsorgungsunternehmen auf einer Webseite im ICS oder ICAL Format
+      angeboten und müssen zuerst heruntergeladen werden.</p>
+      <p>Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können:
+      <ul>
+          <li><a href='https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/' target='_blank'>https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/</a></li>
+          <li><a href='https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html'  target='_blank'>https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html</a></li>
+      </ul>
+      </p>
+      <p>Sobald sie die ICS oder ICAL Datei auf Ihr Handy oder ihren Computer heruntergeladen haben, können Sie diese über den untenstehenden Button "Durchsuchen..." auswählen und auf die "Müll-Erinnerung" laden. 
+          Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.</p>
+      <hr>
+      <table>
+          <tr>
+              <td><label for="start">Wählen Sie eine oder mehrere bereits heruntergeladene ICS oder ICAL Dateien ihres Entsorgungsunternehmens aus:</label><br><br></td>
+          </tr>
+          <tr>
+              <td><input type="file" name="files" id="files" accept=".ics" onchange="processFiles()" multiple><br><br></td>
+          </tr>
+          <tr>
+              <td>
+                  <div id='tasks'></div>
+              </td>
+          </tr>
+          <tr>
+              <td>
+                  <div id='message'></div>
+              </td>
+          </tr>
+      </table>
+      </div>
+      <br>
+      <div class=frame>
+          <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/github.svg?raw=true'> Bedienungsanleitung</div></h2>
+          Mehr Infos zur "Müll-Erinnerung gibt es unter <a href='https://tobiwern.github.io/TrashReminder/' target='_blank'>https://tobiwern.github.io/TrashReminder/</a>
+          <br><br>
+      </div>
+      <br>
+      <div id='buttonMessage'></div>
+      <div>
+        <button class="button" onclick="closeConfig()">Beenden</button>
+        <button class="button" onclick="requestTasksFromESP()">Lesen</button>
+        <button class="button" onclick="deleteTasksOnESP()">L&ouml;schen</button>
+        <button class="button" onclick="fireworks()">Feuerwerk</button>
+      </div>`;
+    document.getElementById("body").innerHTML = innerHTML;
+    // var colorPickerSetup = `
+    // <link rel="stylesheet" href="colorPicker/colorPick.css">
+    // <script src="colorPicker/colorPick.js"></script>
+    // `
+    // $('head').append(colorPickerSetup);
 }
