@@ -478,7 +478,7 @@ function refreshColorPickers() {
             var id = this.element.attr("id");
             var index = id.match(/(\d+)/)[0];
             if (id.search("colorPickerTask") != -1) {
-                gDataColors[index] = this.color;
+                gDataColors[index] = this.color.replace("#", "0x");
                 refreshTaskDates();
                 sendCurrentDataToESP();
             } else {
