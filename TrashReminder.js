@@ -213,11 +213,11 @@ function sendCurrentDataToESP() { //send currently set data to ESP
     console.log(jsonText);
     try {
         const obj = JSON.parse(jsonText); //just to check if valid JSON, ToDo: Show if there is an error!
+        sendTasksToESP(jsonText, true);
     } catch (e) {
-        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
+        showMessage("E", "<em>Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>GitHub Issue</a></em>", "message");
         return;
     }
-    sendTasksToESP(jsonText, true);
 }
 
 function refreshTaskTypesAndDates(response) {
@@ -402,7 +402,7 @@ function genJson() {
     try {
         const obj = JSON.parse(jsonText); //just to check if valid JSON, ToDo: Show if there is an error!
     } catch (e) {
-        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein GitHub Issue unter <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>https://github.com/tobiwern/TrashReminder/issues</a>", "message");
+        showMessage("E", "Die Daten sind nicht korrekt als JSON formatiert. Bitte öffnen Sie ein <a href='https://github.com/tobiwern/TrashReminder/issues' target='_blank'>GitHub Issue</a>", "message");
         return;
     }
     sendTasksToESP(jsonText);
