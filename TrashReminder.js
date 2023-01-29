@@ -554,11 +554,11 @@ function createWebpage() {
             <table>
                 <tr>
                     <td class=description><label for="start">Start der Erinnerung<br>(am Vortag der Abholung):</label></td>
-                    <td class=value><select id="start" name="start"></select></td>
+                    <td class=value><select id="start" name="start" onchange='sendDropDownStateToESP("start")'></select></td>
                 </tr>
                 <tr>
                     <td class=description><label class='fancy-input' for="end">Ende der Erinnerung<br>(am Tag der Abholung):</label></td>
-                    <td class=value><select id="end" name="end"></select></td>
+                    <td class=value><select id="end" name="end" onchange='sendDropDownStateToESP("end")'></select></td>
                 </tr>
             </table>
             <br>
