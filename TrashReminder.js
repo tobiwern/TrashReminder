@@ -249,7 +249,7 @@ function refreshTaskTypes() {
         text += "</tr>";
     }
     text += "</table>";
-    text += "<br>(Sie können Abfallart und Farbe des Warnlichts ändern.)";
+    text += "<br><em>(Sie können Abfallart und Farbe des Warnlichts ändern.)</em>";
     document.getElementById("taskTypes").innerHTML = text + "<br>";
     refreshColorPickerColors("colorPickerTask");
 }
