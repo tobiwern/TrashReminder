@@ -102,6 +102,7 @@ epochTask epochTaskDict[maxNumberOfEpochs];
 
 void setup() {
   Serial.begin(115200);
+  while (!Serial) { ; }
   reed.attachEdgeDetect(doNothing, setAcknowledge);
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is typical
   leds[0] = CRGB::Red;                                      //in case no successful WiFi connection
