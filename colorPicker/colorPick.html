@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en" class="no-js">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>ColorPick.js - HTML5 Color Picker Demo</title>
+  <link rel="stylesheet" href="colorPick.css">
+  <link href="https://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+  <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+  <script src="colorPick.js"></script>
+  <style>
+    .container {
+      margin: 150px auto;
+      max-width: 640px;
+    }
+  </style>
+  <script>
+    var colors = ["#00ff00", "#0000ff"];
+    //                       green      blue       yellow     white      orange     pink       purple    iceblue    icegreen
+    var colorPickPalette = ["#00ff00", "#0000ff", "#ffff00", "#ffffff", "#ba4500", "#d5002d", "#82007e", "#5a00a6", "#00ba45"]
+  
+    $(document).ready(function () {
+      //        alert("Hello World!");
+      $(".colorPickSelector").colorPick({
+        'initialColor': '',
+        'palette': colorPickPalette,
+        'onColorSelected': function () {
+          this.element.css({ 'backgroundColor': this.color, 'color': this.color });
+          var id = this.element.attr("id");
+          var index = parseInt(id);
+          colors[index] = this.color;
+          console.log(colors);
+        }
+      });
+      $("#0").css("background", colors[0]);
+      $("#1").css("background", colors[1]);
+    });
+    function require(script) {
+      $.ajax({
+        url: script,
+        dataType: "script",
+        async: false,           // <-- This is the key
+        success: function () {
+          // all good...
+        },
+        error: function () {
+          throw new Error("Could not load script " + script);
+        }
+      });
+    }
+  </script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>ColorPick.js - HTML5 Color Picker Demo</h1>
+    <div class="colorPickSelector" id="0"></div>
+    <br>
+    <div class="colorPickSelector" id="1"></div>
+  </div>
+
+</body>
+
+</html>
