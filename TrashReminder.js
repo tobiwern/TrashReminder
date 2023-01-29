@@ -482,7 +482,7 @@ function refreshColorPickers() {
                 refreshTaskDates();
                 sendCurrentDataToESP();
             } else {
-                gColors[index] = this.color;
+                gColors[index] = this.color.replace("#", "0x");
             }
         }
     });
