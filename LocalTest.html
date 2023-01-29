@@ -3,98 +3,25 @@
 <head>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Müll Erinnerung</title>
+    <title>Müll-Erinnerung</title>
     <meta name="robots" content="noindex">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="./colorPicker/colorPick.css">
+    <script src="./colorPicker/colorPick.js"></script>
     <link rel="stylesheet" href="TrashReminder.css">
     <script src="TrashReminder.js"></script>
+    <script>
+        function setDummyData() {
+            response = '{"tasks":["Restmüll 02-wöchentl.","Biomüll 01-wöchentl.","Altpapier 03-wöchentl.","Gelber Sack 03-wöchentl."],"colors":["0xFFFFFF","0x00FF00","0x0000FF","0xFFFF00"],"validTaskIds":[0,2,3],"epochTasks":[{"1673222400":[1,2]},{"1673308800":[3]},{"1673568000":[0]},{"1673654400":[1]},{"1674172800":[1]},{"1674691200":[0]},{"1674777600":[1,2]},{"1675123200":[3]},{"1675382400":[1]},{"1675900800":[0]},{"1675987200":[1]},{"1676592000":[1,2]},{"1676937600":[3]},{"1677110400":[0]},{"1677196800":[1]},{"1677801600":[1]},{"1678320000":[0]},{"1678406400":[1,2]},{"1678752000":[3]},{"1679011200":[1]},{"1679529600":[0]},{"1679616000":[1]},{"1680220800":[1,2]},{"1680566400":[3]},{"1680652800":[0]},{"1680739200":[1]},{"1681516800":[1]},{"1681948800":[0]},{"1682035200":[1,2]},{"1682380800":[3]},{"1682640000":[1]},{"1683244800":[0]},{"1683331200":[1]},{"1683849600":[1,2]},{"1684195200":[3]},{"1684454400":[0]},{"1684540800":[1]},{"1685059200":[1]},{"1685664000":[0]},{"1685750400":[1,2]},{"1686009600":[3]},{"1686355200":[1]},{"1686787200":[0]},{"1686873600":[1]},{"1687478400":[1,2]},{"1687824000":[3]},{"1687996800":[0]},{"1688083200":[1]},{"1688688000":[1]},{"1689206400":[0]},{"1689292800":[1,2]},{"1689638400":[3]},{"1689897600":[1]},{"1690416000":[0]},{"1690502400":[1]},{"1691107200":[1,2]},{"1691452800":[3]},{"1691625600":[0]},{"1691712000":[1]},{"1692316800":[1]},{"1692835200":[0]},{"1692921600":[1,2]},{"1693267200":[3]},{"1693526400":[1]},{"1694044800":[0]},{"1694131200":[1]},{"1694736000":[1,2]},{"1695081600":[3]},{"1695254400":[0]},{"1695340800":[1]},{"1695945600":[1]},{"1696550400":[0]},{"1696636800":[1,2]},{"1696896000":[3]},{"1697155200":[1]},{"1697673600":[0]},{"1697760000":[1]},{"1698451200":[1,2]},{"1698710400":[3]},{"1698969600":[0]},{"1699056000":[1]},{"1699574400":[1]},{"1700092800":[0]},{"1700179200":[1,2]},{"1700524800":[3]},{"1700784000":[1]},{"1701302400":[0]},{"1701388800":[1]},{"1701993600":[1,2]},{"1702339200":[3]},{"1702512000":[0]},{"1702598400":[1]},{"1703203200":[1]},{"1703808000":[0]},{"1703894400":[1,2]}]}'
+            refreshTaskTypesAndDates(response);
+        }
+    </script>
 </head>
 
-<body id='body'>
-    <img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/TrashReminder.jpg?raw=true'
-        alt='Trash Reminder' width='400' height='185'>
-    <h1>M&uuml;ll-Erinnerung Einstellungen</h1>
-    <form name='config'>
-        <div class=frame>
-            <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/clock.svg?raw=true'> Zeitpunkt der Erinnerung</div></h2>
-            <table>
-                <tr>
-                    <td class=description><label for="start">Start der Erinnerung<br>(am Vortag der Abholung):</label>
-                    </td>
-                    <td class=value><select id="start" name="start"></select></td>
-                </tr>
-                <tr>
-                    <td class=description><label class='fancy-input' for="end">Ende der Erinnerung<br>(am Tag der
-                            Abholung):</label></td>
-                    <td class=value><select id="end" name="end"></select></td>
-                </tr>
-            </table>
-            <div id='messageTime'></div>
-            <br>
-        </div>
-        <br>
-    </form>
-    <div class=frame>
-        <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/truck.svg?raw=true'> Abfuhrtermine</div></h2>
-        <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/trash.svg?raw=true'> Abfallarten</div></h3>
-        <div id='taskTypes'></div>
-        <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/watch.svg?raw=true'> Termine</div></h3>
-        <div id='taskDates'></div>
-        <h3><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/download.svg?raw=true'> Neue Abfuhrtermine (ICS/ICAL)</div></h3>
-        <p>Falls sich Änderungen an den Abfuhrterminen ergeben haben oder Termine für das nächste Jahr gespeichert werden sollen, könnnen neue Abfuhrtermine auf die "Müll-Erinnerung" geladen werden. Hierbei werden die bestehenden Daten <b>überschrieben</b>!</p>
-        <p>Die Abfuhrdaten werden üblicherweise durch das Entsorgungsunternehmen auf einer Webseite im ICS oder ICAL Format
-        angeboten und müssen zuerst heruntergeladen werden.</p>
-        <p>Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können
-        <ul>
-            <li><a href='https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/' target='_blank'>https://www.abfall-kreis-tuebingen.de/online-abfuhrtermine/</a></li>
-            <li><a href='https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html'  target='_blank'>https://www.bogenschuetz-entsorgung.de/blaue-tonne-tuebingen/abfuhrtermine.html</a></li>
-        </ul>
-        </p>
-        <p>Sobald sie die ICS oder ICAL Datei auf Ihr Handy oder ihren Computer heruntergeladen haben, können Sie diese über den untenstehenden Button "Durchsuchen..." auswählen und auf die "Müll-Erinnerung" laden. 
-            Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.</p>
-        <hr>
-        <table>
-            <tr>
-                <td><label for="start">Wählen Sie eine oder mehrere bereits heruntergeladene ICS oder ICAL Dateien
-                        ihres Entsorgungsunternehmens aus:</label><br><br></td>
-            </tr>
-            <tr>
-                <td><input type="file" name="files" id="files" accept=".ics" onchange="processFiles()" multiple></td>
-            </tr>
-            <tr>
-                <td>
-                    <div id='tasks'></div>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div id='message'></div>
-                </td>
-            </tr>
-        </table>
-        <br>
-    </div>
-    <br>
-    <div class=frame>
-        <h2><div class='centeredHeight'><img src='https://github.com/tobiwern/TrashReminder/blob/main/pictures/github.svg?raw=true'> Bedienungsanleitung</div></h2>
-        Mehr Infos zur "Müll-Erinnerung gibt es unter <a href='https://tobiwern.github.io/TrashReminder/' target='_blank'>https://tobiwern.github.io/TrashReminder/</a>
-        <br><br>
-    </div>
-    <div id='settings'></div>
-    <br>
-    <div>
-        <button class="button" onclick="closeConfig()">Beenden</button>
-        <button class="button" onclick="requestTasks()">Lesen</button>
-        <button class="button" onclick="deleteTasks()">L&ouml;schen</button>
-        <button class="button" onclick="send(0)">Erinnerung einschalten</button>
-        <button class="button" onclick="fireworks()">Feuerwerk</button>
-    </div>
-    <script>
-        response = '{"tasks":["Restmüll 02-wöchentl.","Biomüll 01-wöchentl.","Altpapier 03-wöchentl.","Gelber Sack 03-wöchentl."],"colors":["0xFFFFFF","0x00FF00","0x0000FF","0xFFFF00"],"validTaskIds":[0,2,3],"epochTasks":[{"1673222400":[1,2]},{"1673308800":[3]},{"1673568000":[0]},{"1673654400":[1]},{"1674172800":[1]},{"1674691200":[0]},{"1674777600":[1,2]},{"1675123200":[3]},{"1675382400":[1]},{"1675900800":[0]},{"1675987200":[1]},{"1676592000":[1,2]},{"1676937600":[3]},{"1677110400":[0]},{"1677196800":[1]},{"1677801600":[1]},{"1678320000":[0]},{"1678406400":[1,2]},{"1678752000":[3]},{"1679011200":[1]},{"1679529600":[0]},{"1679616000":[1]},{"1680220800":[1,2]},{"1680566400":[3]},{"1680652800":[0]},{"1680739200":[1]},{"1681516800":[1]},{"1681948800":[0]},{"1682035200":[1,2]},{"1682380800":[3]},{"1682640000":[1]},{"1683244800":[0]},{"1683331200":[1]},{"1683849600":[1,2]},{"1684195200":[3]},{"1684454400":[0]},{"1684540800":[1]},{"1685059200":[1]},{"1685664000":[0]},{"1685750400":[1,2]},{"1686009600":[3]},{"1686355200":[1]},{"1686787200":[0]},{"1686873600":[1]},{"1687478400":[1,2]},{"1687824000":[3]},{"1687996800":[0]},{"1688083200":[1]},{"1688688000":[1]},{"1689206400":[0]},{"1689292800":[1,2]},{"1689638400":[3]},{"1689897600":[1]},{"1690416000":[0]},{"1690502400":[1]},{"1691107200":[1,2]},{"1691452800":[3]},{"1691625600":[0]},{"1691712000":[1]},{"1692316800":[1]},{"1692835200":[0]},{"1692921600":[1,2]},{"1693267200":[3]},{"1693526400":[1]},{"1694044800":[0]},{"1694131200":[1]},{"1694736000":[1,2]},{"1695081600":[3]},{"1695254400":[0]},{"1695340800":[1]},{"1695945600":[1]},{"1696550400":[0]},{"1696636800":[1,2]},{"1696896000":[3]},{"1697155200":[1]},{"1697673600":[0]},{"1697760000":[1]},{"1698451200":[1,2]},{"1698710400":[3]},{"1698969600":[0]},{"1699056000":[1]},{"1699574400":[1]},{"1700092800":[0]},{"1700179200":[1,2]},{"1700524800":[3]},{"1700784000":[1]},{"1701302400":[0]},{"1701388800":[1]},{"1701993600":[1,2]},{"1702339200":[3]},{"1702512000":[0]},{"1702598400":[1]},{"1703203200":[1]},{"1703808000":[0]},{"1703894400":[1,2]}]}'
-        refreshTaskTypesAndDates(response);
-    </script>
+<body id='body' onload="createWebpage();setDummyData();">
 </body>
 
 </html>
