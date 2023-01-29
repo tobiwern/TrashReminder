@@ -72,7 +72,7 @@
                 var offset = $(self.element).offset();
 
                 event.preventDefault();
-                self.show(self.element, event.pageX - offset.left, event.pageY - offset.top);
+                self.show(self.element, event.pageX - offset.left -50, event.pageY - offset.top -50);
 
                 $('.customColorHash').val(self.color);
 
