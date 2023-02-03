@@ -78,6 +78,7 @@ Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können
 - `Neuweiler/Böblingen`: https://www.lrabb.de/start/Service+_+Verwaltung/Abfuhrtermine.html
 - `Stuggart`: https://service.stuttgart.de/lhs-services/aws/abfallkalender
 - `Ebhausen`: https://www.awg-info.de/privatkunden/abfuhrtermine
+- `Rheinbach`: https://www.rsag.de/abfallkalender/abfuhrtermine
 
 #### Übertragen neuer Termine
 Sobald sie die ICS oder ICAL Datei auf Ihr Handy oder ihren Computer heruntergeladen haben, können Sie diese über den untenstehenden Button "Durchsuchen..." auswählen und auf die "Müll-Erinnerung" laden. Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
