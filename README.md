@@ -19,10 +19,10 @@ Wird also zum Beispiel `Restmüll` abgeholt, blinkt das Mülleimermodell `weiß`
 Sollten am selben Tag **zwei** unterschiedliche Müllarten abgeholt werden, wechselt das Licht zwischen den entsprechenden Farben hin und her. Also zum Beispiel zwischen `weiß` und `grün`, wenn sowohl `Restmüll` als auch `Biomüll` am selben Tag abgeholt werden.
 
 ## Zeitpunkt der Erinnerung
-Die Erinnerung erfolgt standardmäßig am **Vortag von 15 Uhr bis 9 Uhr morgens**. Diese Einstellung kann wie unter `Konfigurationsmodus` beschrieben angepaßt werden.
+Die Erinnerung erfolgt standardmäßig am **Vortag von 15 Uhr bis 9 Uhr morgens**. Diese Einstellung kann wie unter [Konfigurationsmodus](#konfigurationsmodus) beschrieben angepaßt werden.
 
 ## Ausschalten der Erinnerung
-Wenn der Müll rausgestellt wurde, kann die Erinnerung ausgeschaltet werden indem das **Mülleimermodell kurz angehoben** wird. Damit erlischt das Licht bis zum nächsten Abholungstermin.
+Wenn der Müll rausgestellt wurde, kann die Erinnerung ausgeschaltet werden indem das **Mülleimermodell kurz angehoben** wird. Damit erlischt das Licht bis zur nächsten Abholerinnerung.
 
 Wurde das Mülleimermodell versehentlich angehoben (aber der Müll nicht rausgestellt) kann man den Stecker der Stromversorgung einfach kurz aus- und wieder einstecken. Liegt eine Erinnerung vor und ist man im Erinnerungszeitraum (15 - 8 Uhr) blinkt das Mülleimermodell wieder wie zuvor.  
 
