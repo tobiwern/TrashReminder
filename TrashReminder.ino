@@ -12,6 +12,7 @@ DONE: store default values to EEPROM (start/endHour)
 - check if there are more tasksPerDay then allowed
 - Add magnets to trashcan so it snapps in place
 - reset STATE_CONFIG after a timeout of inactivity
+- leave config mode after a timeout (20min?)
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
 JSON Validator: https://jsonformatter.curiousconcept.com/#
