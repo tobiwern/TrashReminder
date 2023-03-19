@@ -47,12 +47,14 @@ unsigned long millisLast = 0;
 #define STATE_DISCONNECTED 2
 #define STATE_QUERY 3
 #define STATE_CONFIGURE 4
+#define STATE_DEMO 5
+
 
 int STATE = STATE_INIT;
 int STATE_PREVIOUS = -1;
 int STATE_NEXT = -1;
 int STATE_FOLLOWING = -1;
-String stateTbl[] = { "STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY", "STATE_CONFIGURE" };
+String stateTbl[] = { "STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY", "STATE_CONFIGURE", "STATE_DEMO" };
 
 #include <FastLED.h>
 #define NUM_LEDS 1
@@ -87,7 +89,7 @@ const char* settingsFile = "/settings.json";
 int numberOfValidTaskIds = 0;  //global counter
 int numberOfTaskIds = 0;       //global counter
 int numberOfEpochs = 0;        //global counter
-const int maxNumberOfEpochs = 200; 
+const int maxNumberOfEpochs = 200;
 const int maxNumberOfTaskIds = 20;
 
 String task[maxNumberOfTaskIds];
@@ -100,6 +102,11 @@ typedef struct epochTask {
 } epochTask;
 
 epochTask epochTaskDict[maxNumberOfEpochs];
+
+// DEMO
+int demoCurrTask = 0;
+int demoNumberOfTasks = 5;
+epochTask demoTaskDict[demoNumberOfTasks];
 
 void setup() {
   Serial.begin(115200);
@@ -119,7 +126,7 @@ void setup() {
   //Time Client
   timeClient.begin();
   timeClient.setTimeOffset(3600);  //GMT+1
-//  deleteFile(dataFile);
+  //  deleteFile(dataFile);
 }
 
 void loop() {
@@ -208,6 +215,11 @@ void setAcknowledge() {
       } else {
         STATE_NEXT = STATE_CONFIGURE;
       }
+    };
+    //Demo mode handling
+    if (STATE == STATE_DEMO) {
+      demoCurrTask++;
+      if (demoCurrTask > demoNumberOfTasks) { demoCurrTask = 0; }
     }
   }
 }
@@ -309,11 +321,34 @@ boolean initDataFromFile() {
   return (true);
 }
 */
+void setDemoConfig() {
+  acknowledge = 0;  //acknowledge only valid for same triggerEpoch
+  colorIndex = 0;
+  numberOfValidTaskIds = 4;
+  validTaskId[0] = 0;
+  validTaskId[1] = 1;
+  validTaskId[2] = 2;
+  validTaskId[3] = 3;
+  numberOfTaskIds = 4;
+  task[0] = "Restmüll";
+  task[1] = "Wertstoffe";
+  task[2] = "Biomüll";
+  task[3] = "Papier";
+  color[0] = 0xFFFFFF;
+  color[1] = 0xFFFF00;
+  color[2] = 0x00FF00;
+  color[3] = 0x0000FF;
+  demoTaskDict[0] = { .epoch = 0, .taskIds = { 0, -1, -1, -1 } };  //Rest
+  demoTaskDict[1] = { .epoch = 1, .taskIds = { 1, -1, -1, -1 } };  //Gelber Sack
+  demoTaskDict[2] = { .epoch = 2, .taskIds = { 2, -1, -1, -1 } };  //Bio
+  demoTaskDict[3] = { .epoch = 3, .taskIds = { 3, -1, -1, -1 } };  //Papier
+  demoTaskDict[4] = { .epoch = 4, .taskIds = { 2, 3, -1, -1 } };   //Papier, Bio
+}
 
 void handleState() {
   unsigned long millisNow = millis();
   STATE_NEXT = -1;
- // Serial.println("STATE = " + stateTbl[STATE] + ", STATE_PREVIOUS = " + stateTbl[STATE_PREVIOUS]);
+  // Serial.println("STATE = " + stateTbl[STATE] + ", STATE_PREVIOUS = " + stateTbl[STATE_PREVIOUS]);
   if (STATE != STATE_PREVIOUS) { Serial.println("STATE = " + stateTbl[STATE]); }
   switch (STATE) {
     case STATE_INIT:  //***********************************************************
@@ -324,7 +359,7 @@ void handleState() {
       acknowledge = 0;
       memset(colorIds, -1, sizeof(colorIds));
       memset(colorIdsLast, -1, sizeof(colorIdsLast));
-//      listDir("/"); //ToDo1
+      //      listDir("/"); //ToDo1
       initStartEndTimes();  //initializes startHour and endHour
       initDataFromFile();
       STATE_NEXT = STATE_SHOW;
@@ -366,6 +401,20 @@ void handleState() {
         startWebServer();
       }
       setColor(CRGB::Purple, false);
+      server.handleClient();
+      handleReed();
+      break;
+    case STATE_DEMO:
+      if (STATE_PREVIOUS != STATE_DEMO) {
+        setDemoConfig();
+      }
+      if (!acknowledge) {
+        setColorIds(demoTaskDict[demoCurrTask].taskIds);
+      }
+      //printColorIds();
+      setTaskColor();
+      FastLED.show();
+
       server.handleClient();
       handleReed();
       break;
