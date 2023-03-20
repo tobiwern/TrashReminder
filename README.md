@@ -16,7 +16,8 @@ Je nach Müllart blinkt das Mülleimermodell in einer unterschiedlichen Farbe:
 
 Wird also zum Beispiel `Restmüll` abgeholt, blinkt das Mülleimermodell `weiß`.
 
-Sollten am selben Tag **zwei** unterschiedliche Müllarten abgeholt werden, wechselt das Licht zwischen den entsprechenden Farben hin und her. Also zum Beispiel zwischen `weiß` und `grün`, wenn sowohl `Restmüll` als auch `Biomüll` am selben Tag abgeholt werden.
+Sollten am selben Tag **zwei** unterschiedliche Müllarten abgeholt werden, wechselt das Licht zwischen den entsprechenden Farben hin und her. Also zum Beispiel zwischen `weiß` und `grün`, wenn sowohl `Restmüll` als auch `Biomüll` am selben Tag abgeholt werden.![Abfuhrtermine](https://user-images.githubusercontent.com/5352249/226476038-30e4ea5e-225a-45b8-af8c-31213169f47b.jpg)
+
 
 ## Zeitpunkt der Erinnerung
 Die Erinnerung erfolgt standardmäßig am **Vortag von 15 Uhr bis 9 Uhr morgens**. Diese Einstellung kann wie unter [Konfigurationsmodus](#konfigurationsmodus) beschrieben angepaßt werden.
@@ -55,6 +56,7 @@ Im Konfigurationsmodus können die folgenden Einstellungen für die `Müll-Erinn
 Außerdem werden die derzeit gültigen Abholtermine mit ihrer zugehörigen LED-Farbe angezeigt. Bereits verstrichene Termine werden ausgegraut dargestellt.
 
 ### Start- und End-Uhrzeit
+<img src="./pictures/ZeitpunktErinnerung.jpg" width="400">
 Standardmäßig ist
 - der Start der Erinnerung auf **15 Uhr** am Vortag der Abholung
 - das Ende der Erinnerung auf **9 Uhr** am Tag der Abholung 
