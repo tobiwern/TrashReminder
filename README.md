@@ -56,6 +56,7 @@ Außerdem werden die derzeit gültigen Abholtermine mit ihrer zugehörigen LED-F
 
 ### Start- und End-Uhrzeit
 <img src="./pictures/ZeitpunktErinnerung.jpg" width="400">
+
 Standardmäßig ist
 - der Start der Erinnerung auf **15 Uhr** am Vortag der Abholung
 - das Ende der Erinnerung auf **9 Uhr** am Tag der Abholung 
@@ -64,7 +65,9 @@ Der jeweilige Zeitpunkt kann über das Auswahlfeld eingestellt werden und wird s
 
 ### Auswahl der Abfallarten
 <img src="./pictures/Abfuhrtermine.jpg" width="400">
-Für die abgespeicherten Abholtermine kann eingestellt werden an **welche Abfallarte**n erinnert werden soll.
+
+Für die abgespeicherten Abholtermine kann eingestellt werden an **welche Abfallarten** erinnert werden soll. Ebenso kann hier auch die Farbe des Warnlichts eingestellt werden.
+
 Jede Änderung der Auswahl wird sofort auf die `Müll-Erinnerung` geladen und die jeweils ausgewählten Einzeltermine entsprechend angezeigt.  
 
 ### Neue Abholtermine speichern
@@ -85,7 +88,9 @@ Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können
 - `Hannover`: https://www.aha-region.de/abholtermine/abfuhrkalender
 
 #### Übertragen neuer Termine
-Sobald sie die ICS oder ICAL Datei auf Ihr Handy oder ihren Computer heruntergeladen haben, können Sie diese über den untenstehenden Button "Durchsuchen..." auswählen und auf die "Müll-Erinnerung" laden. Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
+<img src="./pictures/DateienAuswählen.jpg" width="400">
+
+Sobald sie die ICS oder ICAL Datei auf Ihr Handy oder ihren Computer heruntergeladen haben, können Sie diese über den untenstehenden Button "Durchsuchen..." oder "Dateien auswählen" selektieren und auf die "Müll-Erinnerung" laden. Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
 
 
 ### Beenden des Konfigurationsmodus
