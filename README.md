@@ -90,8 +90,13 @@ Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können
 #### Übertragen neuer Termine
 <img src="./pictures/DateienAuswählen.jpg" width="400">
 
-Sobald sie die ICS oder ICAL Datei auf Ihr Handy oder ihren Computer heruntergeladen haben, können Sie diese über den untenstehenden Button "Durchsuchen..." oder "Dateien auswählen" selektieren und auf die "Müll-Erinnerung" laden. Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
+Sobald sie die ICS oder ICAL Datei auf Ihr Handy oder ihren Computer heruntergeladen haben, können Sie diese über den untenstehenden Button "Durchsuchen..." oder "Dateien auswählen" selektieren und auf die `Müll-Erinnerung` laden. Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
 
+<img src="./pictures/DateienAusgewählt.jpg" width="400">
+
+Nach der Auswahl der Dateien werden die gefundenen Abfuhrarten mit der standardmäßigen Farbe des Warnlichts angezeigt. An welche Abfallarten erinnert werden soll sowie die Farbe des Warnlichst kann hier angepaßt werden.
+
+Über den Button "Abfuhrttermine speichern" können nun die Termine auf die `Müll-Erinnerung` geladen werden. 
 
 ### Beenden des Konfigurationsmodus
 Durch erneutes dreimaliges Anheben des Mülleimermodells kann der Konfigurationsmodus wieder verlassen werden. Dies wird durch ein Feuerwerk im Mülleimermodell bestätigt.
