@@ -207,6 +207,9 @@ void resetWifiSettings() {
   WiFiManager wm; //Is this fine to have another instance?
   wm.resetSettings();
   server.send(200, "text/plane", "OK");
+//  leds[0] = CRGB::Red;                                      //in case no successful WiFi connection
+//  FastLED.show();
+  ESP.restart();
 }
 
 void startWebServer() {

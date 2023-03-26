@@ -202,6 +202,7 @@ function resetWifiSettingsOnESP() {
     };
     xhttp.open("GET", "reset_wifi_settings", true);
     xhttp.send();
+    closeConfig();
 }
 
 /// WebPage Refresh Functions for CURRENT Data on ESP

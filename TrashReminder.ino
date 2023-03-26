@@ -106,6 +106,7 @@ void setup() {
   while (!Serial) { ; }
   reed.attachEdgeDetect(doNothing, setAcknowledge);
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is typical
+  delay(200);  
   leds[0] = CRGB::Red;                                      //in case no successful WiFi connection
   FastLED.show();
   WiFiManager wm;
