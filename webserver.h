@@ -1,3 +1,4 @@
+//#include "wiring_private.h" //don't know what this is?
 //https://arduinojson.org/v6/api/jsondocument/
 //https://arduinojson.org/v6/doc/deserialization/
 //https://arduinojson.org/v6/assistant/#/step1
@@ -201,6 +202,13 @@ void deleteTasks() {
   }
 }
 
+void resetWifiSettings() {
+  Serial.println("Reset Wifi Settings.");
+  WiFiManager wm; //Is this fine to have another instance?
+  wm.resetSettings();
+  server.send(200, "text/plane", "OK");
+}
+
 void startWebServer() {
   Serial.println("Starting WebServer...");
   server.on("/", handleRoot);
@@ -212,6 +220,7 @@ void startWebServer() {
   server.on("/delete_tasks", deleteTasks);
   server.on("/close", closeSettings);
   server.on("/fireworks", fireworks);
+  server.on("/reset_wifi_settings", resetWifiSettings);
   //  server.on("/send_ValidTaskIds", receiveFromWebpage_ValidTaskIds);
   server.onNotFound(notFound);
   server.begin();
