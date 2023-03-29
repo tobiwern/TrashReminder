@@ -47,12 +47,15 @@ unsigned long millisLast = 0;
 #define STATE_DISCONNECTED 2
 #define STATE_QUERY 3
 #define STATE_CONFIGURE 4
+#define STATE_DEMO 5
+
 
 int STATE = STATE_INIT;
+//int STATE = STATE_DEMO;
 int STATE_PREVIOUS = -1;
 int STATE_NEXT = -1;
 int STATE_FOLLOWING = -1;
-String stateTbl[] = { "STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY", "STATE_CONFIGURE" };
+String stateTbl[] = { "STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY", "STATE_CONFIGURE", "STATE_DEMO" };
 
 #include <FastLED.h>
 #define NUM_LEDS 1
@@ -87,7 +90,7 @@ const char* settingsFile = "/settings.json";
 int numberOfValidTaskIds = 0;  //global counter
 int numberOfTaskIds = 0;       //global counter
 int numberOfEpochs = 0;        //global counter
-const int maxNumberOfEpochs = 200; 
+const int maxNumberOfEpochs = 200;
 const int maxNumberOfTaskIds = 20;
 
 String task[maxNumberOfTaskIds];
@@ -100,6 +103,12 @@ typedef struct epochTask {
 } epochTask;
 
 epochTask epochTaskDict[maxNumberOfEpochs];
+
+// DEMO
+int demoCurrTask = 0;
+const int demoNumberOfTasks = 5;
+epochTask demoTaskDict[demoNumberOfTasks];
+int offDuration = 5 * 1000;  // 5 sec after trashcan was lifted the blinking starts again
 
 void setup() {
   Serial.begin(115200);
@@ -120,7 +129,7 @@ void setup() {
   //Time Client
   timeClient.begin();
   timeClient.setTimeOffset(3600);  //GMT+1
-//  deleteFile(dataFile);
+  //  deleteFile(dataFile);
 }
 
 void loop() {
@@ -179,10 +188,11 @@ boolean isValidTask(int taskId) {
 
 void setColorIds(int taskIds[]) {
   int index = 0;
-  //Serial.println("==================");
+//  Serial.println("==================");
   for (int i = 0; i < maxNumberOfTasksPerDay; i++) {
-    //Serial.println("taskId[" + String(i) + "] = " + String(int(taskIds[i])) + ", valid = " + String(isValidTask(taskIds[i])));
+//    Serial.println("taskId[" + String(i) + "] = " + String(int(taskIds[i])) + ", valid = " + String(isValidTask(taskIds[i])));
     if (taskIds[i] != -1) {
+//Serial.println("taskId = " + String(taskIds[i]));      
       if (isValidTask(taskIds[i])) { colorIds[index++] = int(taskIds[i]); }
     }
   }
@@ -203,11 +213,13 @@ void setAcknowledge() {
     if (((now - lastSwitchMillis) > multiClickTimeout) || (lastSwitchMillis == 0)) { switchCounter = 0; }
     //    Serial.println("Counter = " + String(switchCounter));
     lastSwitchMillis = now;
-    if (switchCounter == 2) {
-      if (STATE == STATE_CONFIGURE) {
-        STATE_NEXT = STATE_INIT;  //reset
-      } else {
-        STATE_NEXT = STATE_CONFIGURE;
+    if (STATE != STATE_DEMO) {
+      if (switchCounter == 2) {
+        if (STATE == STATE_CONFIGURE) {
+          STATE_NEXT = STATE_INIT;  //reset
+        } else {
+          STATE_NEXT = STATE_CONFIGURE;
+        }
       }
     }
   }
@@ -225,7 +237,7 @@ void incrementColorId() {
   }
   colorIndex++;
   if (colorIndex >= numberOfTasks) { colorIndex = 0; }
-  //  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", maxNumberOfTasksPerDay = " + String(maxNumberOfTasksPerDay));
+//  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", maxNumberOfTasksPerDay = " + String(maxNumberOfTasksPerDay));
 }
 
 void setBrightness(int blinkSpeed = 20, boolean reset = false) {
@@ -310,11 +322,36 @@ boolean initDataFromFile() {
   return (true);
 }
 */
+void setDemoConfig() {
+  acknowledge = 0;  //acknowledge only valid for same triggerEpoch
+  colorIndex = 0;
+  demoCurrTask = 0;
+  numberOfValidTaskIds = 4;
+  validTaskId[0] = 0;
+  validTaskId[1] = 1;
+  validTaskId[2] = 2;
+  validTaskId[3] = 3;
+  numberOfTaskIds = 4;
+  task[0] = "Restmüll";
+  task[1] = "Wertstoffe";
+  task[2] = "Biomüll";
+  task[3] = "Papier";
+  color[0] = 0xFFFFFF;
+  color[1] = 0xFFFF00;
+  color[2] = 0x00FF00;
+  color[3] = 0x0000FF;
+  demoTaskDict[0] = { .epoch = 0, .taskIds = { 0, -1, -1, -1 } };  //Rest
+  demoTaskDict[1] = { .epoch = 1, .taskIds = { 1, -1, -1, -1 } };  //Gelber Sack
+  demoTaskDict[2] = { .epoch = 2, .taskIds = { 2, -1, -1, -1 } };  //Bio
+  demoTaskDict[3] = { .epoch = 3, .taskIds = { 3, -1, -1, -1 } };  //Papier
+  demoTaskDict[4] = { .epoch = 4, .taskIds = { 2,  3, -1, -1 } };   //Papier, Bio
+  setColorIds(demoTaskDict[demoCurrTask].taskIds);
+}
 
 void handleState() {
   unsigned long millisNow = millis();
   STATE_NEXT = -1;
- // Serial.println("STATE = " + stateTbl[STATE] + ", STATE_PREVIOUS = " + stateTbl[STATE_PREVIOUS]);
+  // Serial.println("STATE = " + stateTbl[STATE] + ", STATE_PREVIOUS = " + stateTbl[STATE_PREVIOUS]);
   if (STATE != STATE_PREVIOUS) { Serial.println("STATE = " + stateTbl[STATE]); }
   switch (STATE) {
     case STATE_INIT:  //***********************************************************
@@ -325,7 +362,7 @@ void handleState() {
       acknowledge = 0;
       memset(colorIds, -1, sizeof(colorIds));
       memset(colorIdsLast, -1, sizeof(colorIdsLast));
-//      listDir("/"); //ToDo1
+      //      listDir("/"); //ToDo1
       initStartEndTimes();  //initializes startHour and endHour
       initDataFromFile();
       STATE_NEXT = STATE_SHOW;
@@ -368,6 +405,29 @@ void handleState() {
       }
       setColor(CRGB::Purple, false);
       server.handleClient();
+      handleReed();
+      break;
+    case STATE_DEMO:
+      if (STATE_PREVIOUS != STATE_DEMO) {
+        Serial.println("Setting Demo Config");
+        acknowledge = 0;
+        setDemoConfig();
+      }
+      if (!acknowledge) {
+        setTaskColor();
+      } else {
+        setColor(CRGB::Black, false);
+      }
+      FastLED.show();
+      if (acknowledge && ((millisNow - lastSwitchMillis) > offDuration)) {
+        demoCurrTask++;
+        colorIndex = maxNumberOfTasksPerDay;
+        if (demoCurrTask >= demoNumberOfTasks) { demoCurrTask = 0; }
+        Serial.println("Setting demoCurrTask = " + String(demoCurrTask));
+        memset(colorIds, -1, sizeof(colorIds));
+        setColorIds(demoTaskDict[demoCurrTask].taskIds);
+        acknowledge = 0;
+      }
       handleReed();
       break;
     default:
