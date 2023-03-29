@@ -191,6 +191,28 @@ function deleteTasksOnESP() {
     xhttp.send();
 }
 
+function resetWifiSettingsOnESP() {
+    const response = confirm("Wollen Sie wirklich die WLAN Einstellungen löschen?");
+    if (!response) {
+        showMessage("I", "Löschen der WLAN Einstellungen abgebrochen.", "buttonMessage", gHideDelayDefault);
+        return;
+    }
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function () {
+        if (this.readyState == 4) {
+            if (this.status == 200) {
+                showMessage("I", "Löschen der WLAN Einstellungen war erfolgreich!", "buttonMessage", gHideDelayDefault);
+                requestTasksFromESP(false); //if deleting the values on the ESP was successful => refresh the "current values" on the webpage
+            } else { //500
+                showMessage("E", "ERROR: Löschen der WLAN Einstellungen fehlgeschlagen!", "buttonMessage", gHideDelayDefault);
+            }
+        }
+    };
+    xhttp.open("GET", "reset_wifi_settings", true);
+    xhttp.send();
+    closeConfig();
+}
+
 /// WebPage Refresh Functions for CURRENT Data on ESP
 //globally defined for form field callbacks
 var gDataEpochTaskDict = {};
@@ -628,6 +650,7 @@ function createWebpage() {
         <button class="button" onclick="deleteTasksOnESP()">L&ouml;schen</button>
         <button class="button" onclick="fireworks()">Feuerwerk</button>
         <button class="button" onclick="demo()">Demo</button>
+        <button class="button" onclick="resetWifiSettingsOnESP()">Reset WLAN</button>
       </div>`;
     document.getElementById("body").innerHTML = innerHTML;
     // var colorPickerSetup = `
