@@ -29,6 +29,14 @@ function fireworks() {
     xhttp.send();
 }
 
+function demo() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "demo", true);
+    xhttp.send();
+    document.getElementById("body").innerHTML = "<h1>Demo Mode!</h1>";
+    window.scrollTo(0, 0);
+}
+
 function closeConfig() {
     var xhttp = new XMLHttpRequest();
     xhttp.open("GET", "close", true);
@@ -619,6 +627,7 @@ function createWebpage() {
         <button class="button" onclick="requestTasksFromESP()">Lesen</button>
         <button class="button" onclick="deleteTasksOnESP()">L&ouml;schen</button>
         <button class="button" onclick="fireworks()">Feuerwerk</button>
+        <button class="button" onclick="demo()">Demo</button>
       </div>`;
     document.getElementById("body").innerHTML = innerHTML;
     // var colorPickerSetup = `

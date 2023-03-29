@@ -51,6 +51,7 @@ unsigned long millisLast = 0;
 
 
 int STATE = STATE_INIT;
+//int STATE = STATE_DEMO;
 int STATE_PREVIOUS = -1;
 int STATE_NEXT = -1;
 int STATE_FOLLOWING = -1;
@@ -105,8 +106,9 @@ epochTask epochTaskDict[maxNumberOfEpochs];
 
 // DEMO
 int demoCurrTask = 0;
-int demoNumberOfTasks = 5;
+const int demoNumberOfTasks = 5;
 epochTask demoTaskDict[demoNumberOfTasks];
+int offDuration = 5 * 1000;  // 5 sec after trashcan was lifted the blinking starts again
 
 void setup() {
   Serial.begin(115200);
@@ -209,17 +211,14 @@ void setAcknowledge() {
     if (((now - lastSwitchMillis) > multiClickTimeout) || (lastSwitchMillis == 0)) { switchCounter = 0; }
     //    Serial.println("Counter = " + String(switchCounter));
     lastSwitchMillis = now;
-    if (switchCounter == 2) {
-      if (STATE == STATE_CONFIGURE) {
-        STATE_NEXT = STATE_INIT;  //reset
-      } else {
-        STATE_NEXT = STATE_CONFIGURE;
+    if (STATE != STATE_DEMO) {
+      if (switchCounter == 2) {
+        if (STATE == STATE_CONFIGURE) {
+          STATE_NEXT = STATE_INIT;  //reset
+        } else {
+          STATE_NEXT = STATE_CONFIGURE;
+        }
       }
-    };
-    //Demo mode handling
-    if (STATE == STATE_DEMO) {
-      demoCurrTask++;
-      if (demoCurrTask > demoNumberOfTasks) { demoCurrTask = 0; }
     }
   }
 }
@@ -324,6 +323,7 @@ boolean initDataFromFile() {
 void setDemoConfig() {
   acknowledge = 0;  //acknowledge only valid for same triggerEpoch
   colorIndex = 0;
+  demoCurrTask = 0;
   numberOfValidTaskIds = 4;
   validTaskId[0] = 0;
   validTaskId[1] = 1;
@@ -343,6 +343,7 @@ void setDemoConfig() {
   demoTaskDict[2] = { .epoch = 2, .taskIds = { 2, -1, -1, -1 } };  //Bio
   demoTaskDict[3] = { .epoch = 3, .taskIds = { 3, -1, -1, -1 } };  //Papier
   demoTaskDict[4] = { .epoch = 4, .taskIds = { 2, 3, -1, -1 } };   //Papier, Bio
+  setColorIds(demoTaskDict[demoCurrTask].taskIds);
 }
 
 void handleState() {
@@ -406,16 +407,23 @@ void handleState() {
       break;
     case STATE_DEMO:
       if (STATE_PREVIOUS != STATE_DEMO) {
+        Serial.println("Setting Demo Config");
+        acknowledge = 0;
         setDemoConfig();
       }
       if (!acknowledge) {
-        setColorIds(demoTaskDict[demoCurrTask].taskIds);
+        setTaskColor();
+      } else {
+        setColor(CRGB::Black, false);
       }
-      //printColorIds();
-      setTaskColor();
       FastLED.show();
-
-      server.handleClient();
+      if (acknowledge && ((millisNow - lastSwitchMillis) > offDuration)) {
+        demoCurrTask++;
+        if (demoCurrTask >= demoNumberOfTasks) { demoCurrTask = 0; }
+        Serial.println("Setting demoCurrTask = " + String(demoCurrTask));
+        setColorIds(demoTaskDict[demoCurrTask].taskIds);
+        acknowledge = 0;
+      }
       handleReed();
       break;
     default:

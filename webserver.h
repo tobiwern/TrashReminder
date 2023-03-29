@@ -192,6 +192,13 @@ void fireworks() {
   server.send(200, "text/plane", "OK");  //should always respond to prevent resend (10x)
 }
 
+void demo() {
+  Serial.println("Demo...");
+  STATE_NEXT = STATE_DEMO;
+  millisLast = millis();                 //to reset show timer
+  server.send(200, "text/plane", "OK");  //should always respond to prevent resend (10x)
+}
+
 void deleteTasks() {
   Serial.println("Delete Settings.");
   if (deleteFile(dataFile)) {
@@ -212,6 +219,7 @@ void startWebServer() {
   server.on("/delete_tasks", deleteTasks);
   server.on("/close", closeSettings);
   server.on("/fireworks", fireworks);
+  server.on("/demo", demo);
   //  server.on("/send_ValidTaskIds", receiveFromWebpage_ValidTaskIds);
   server.onNotFound(notFound);
   server.begin();
