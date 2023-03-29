@@ -187,10 +187,11 @@ boolean isValidTask(int taskId) {
 
 void setColorIds(int taskIds[]) {
   int index = 0;
-  //Serial.println("==================");
+//  Serial.println("==================");
   for (int i = 0; i < maxNumberOfTasksPerDay; i++) {
-    //Serial.println("taskId[" + String(i) + "] = " + String(int(taskIds[i])) + ", valid = " + String(isValidTask(taskIds[i])));
+//    Serial.println("taskId[" + String(i) + "] = " + String(int(taskIds[i])) + ", valid = " + String(isValidTask(taskIds[i])));
     if (taskIds[i] != -1) {
+//Serial.println("taskId = " + String(taskIds[i]));      
       if (isValidTask(taskIds[i])) { colorIds[index++] = int(taskIds[i]); }
     }
   }
@@ -235,7 +236,7 @@ void incrementColorId() {
   }
   colorIndex++;
   if (colorIndex >= numberOfTasks) { colorIndex = 0; }
-  //  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", maxNumberOfTasksPerDay = " + String(maxNumberOfTasksPerDay));
+//  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", maxNumberOfTasksPerDay = " + String(maxNumberOfTasksPerDay));
 }
 
 void setBrightness(int blinkSpeed = 20, boolean reset = false) {
@@ -342,7 +343,7 @@ void setDemoConfig() {
   demoTaskDict[1] = { .epoch = 1, .taskIds = { 1, -1, -1, -1 } };  //Gelber Sack
   demoTaskDict[2] = { .epoch = 2, .taskIds = { 2, -1, -1, -1 } };  //Bio
   demoTaskDict[3] = { .epoch = 3, .taskIds = { 3, -1, -1, -1 } };  //Papier
-  demoTaskDict[4] = { .epoch = 4, .taskIds = { 2, 3, -1, -1 } };   //Papier, Bio
+  demoTaskDict[4] = { .epoch = 4, .taskIds = { 2,  3, -1, -1 } };   //Papier, Bio
   setColorIds(demoTaskDict[demoCurrTask].taskIds);
 }
 
@@ -419,8 +420,10 @@ void handleState() {
       FastLED.show();
       if (acknowledge && ((millisNow - lastSwitchMillis) > offDuration)) {
         demoCurrTask++;
+        colorIndex = maxNumberOfTasksPerDay;
         if (demoCurrTask >= demoNumberOfTasks) { demoCurrTask = 0; }
         Serial.println("Setting demoCurrTask = " + String(demoCurrTask));
+        memset(colorIds, -1, sizeof(colorIds));
         setColorIds(demoTaskDict[demoCurrTask].taskIds);
         acknowledge = 0;
       }
