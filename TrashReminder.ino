@@ -1,5 +1,6 @@
 /*
 Todo:
+Firmware Version shown in Webpage!
 DONE: Touch button to acknowledge
 - Sleep when there are no events in the next days
 - Contact time server less often and maintain time internally (possible? => can we detect if the device returns from sleep or gets replugged?)
