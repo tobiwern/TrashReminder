@@ -44,7 +44,7 @@ Sollte es zu einer Verbindungsstörung zum Internet kommen, signalisiert die `M�
 
 ## Konfigurationsmodus
 Um in den Konfigurationsmodus zu wechseln, muss das Mülleimermodell `dreimal angehoben` werden bis die LED dauerhaft `pink` leuchtet.
-Jetzt kann über ein Smartphone oder einen Computer im Browser der Link `http://TrashReminder` aufgerufen werden.
+Jetzt kann über ein Smartphone oder einen Computer im Browser der Link [http://TrashReminder](http://TrashReminder) aufgerufen werden.
 (In seltenen Fällen dauert es ein wenig, bis die Seite aufgerufen werden kann - in diesem Fall einfach die Seite erneut laden.)
 
 Im Konfigurationsmodus können die folgenden Einstellungen für die `Müll-Erinnerung` vorgenommen werden:
