@@ -105,8 +105,9 @@ Liegen keine zukünftigen Termine mehr vor, signalisiert die `Müll-Erinnerung` 
 Durch erneutes dreimaliges Anheben des Mülleimermodells kann der Konfigurationsmodus wieder verlassen werden. Dies wird durch ein Feuerwerk im Mülleimermodell bestätigt.
 Nach 10 Minuten wird der Konfiguratonsmodus automatisch beendet.
 
-## Problem Behebung
+## Problem Behandlung
 - [http://TrashReminder](http://TrashReminder) wird nicht gefunden:
+  - Du bist nicht im [Konfigurationsmodus](#konfigurationsmodus).
   - Versuche den Link über den Laptop oder ein anderes Smartphone aufzurufen.
   - Versuche einen anderen Browser (manche Browser lassen Verbindungen nicht über `http://` zu)
   - Ermittle die IP-Adresse (192.168.178.x oder ähnlich) der `Müll-Erinnerung` und gib sie  in das Browser-Suchfeld ein.
