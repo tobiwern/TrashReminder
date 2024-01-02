@@ -32,7 +32,7 @@ Jetzt verbindet sich die `Müll-Erinnerung` mit dem ausgewählten Netzwerk und q
 Diese Einrichtung muss nur einmalig durchgeführt werden - von nun an holt sich die `Müll-Erinnerung` die aktuelle Uhrzeit aus dem Internet und gleicht diese mit eventuell vorliegenden Müllterminen ab, welche dann durch farbiges Blinken des Mülleimermodells mitgeteilt wird.
 
 ## Zeitpunkt der Erinnerung
-Die Erinnerung erfolgt standardmäßig am **Vortag von 15 Uhr bis 9 Uhr morgens**. Diese Einstellung kann wie unter [Konfigurationsmodus](#konfigurationsmodus) beschrieben angepaßt werden.
+Die Erinnerung erfolgt standardmäßig am **Vortag von 15 Uhr bis 9 Uhr morgens**. Diese Einstellung kann wie unter [Konfigurationsmodus](#konfigurationsmodus) beschrieben angepasst werden.
 
 ## Ausschalten der Erinnerung
 Wenn der Müll rausgestellt wurde, kann die Erinnerung ausgeschaltet werden indem das **Mülleimermodell kurz angehoben** wird. Damit erlischt das Licht bis zur nächsten Abholerinnerung.
