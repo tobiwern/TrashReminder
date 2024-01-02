@@ -14,6 +14,7 @@ DONE: store default values to EEPROM (start/endHour)
 - Add magnets to trashcan so it snapps in place
 - reset STATE_CONFIG after a timeout of inactivity
 - leave config mode after a timeout (20min?)
+- warn if no future dates defined
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
 JSON Validator: https://jsonformatter.curiousconcept.com/#
@@ -129,7 +130,7 @@ void setup() {
   WiFi.hostname("TrashReminder");
   //Time Client
   timeClient.begin();
-  timeClient.setTimeOffset(3600);  //GMT+1
+  timeClient.setTimeOffset(3600);  //in seconds GMT+2 Berlin, GMT-4 NY => -3600*4
   //  deleteFile(dataFile);
 }
 
