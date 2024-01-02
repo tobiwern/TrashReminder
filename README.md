@@ -40,7 +40,7 @@ Wenn der Müll rausgestellt wurde, kann die Erinnerung ausgeschaltet werden inde
 Wurde das Mülleimermodell versehentlich angehoben (aber der Müll nicht rausgestellt) kann man den Stecker der Stromversorgung einfach kurz aus- und wieder einstecken. Liegt eine Erinnerung vor und ist man im Erinnerungszeitraum (15 - 9 Uhr) blinkt das Mülleimermodell wieder wie zuvor.  
 
 ## Unterbrechung der WLAN Verbindung
-Sollte es zu einer Verbindungsstörung zum Internet kommen, signalisiert die `Müll-Erinnerung` dies durch ein schnelles rotes Blinken. Sie müssen nichts weiter unternehmen - sobald die Verbindung wieder hergestellt werden kann wechselt die `Müll-Erinnerung` in den regulären Modus.
+Sollte es zu einer Verbindungsstörung zum Internet kommen, signalisiert die `Müll-Erinnerung` dies durch ein schnelles rotes Blinken. Man muss nichts weiter unternehmen - sobald die Verbindung wieder hergestellt werden kann wechselt die `Müll-Erinnerung` in den regulären Modus.
 
 ## Konfigurationsmodus
 Um in den Konfigurationsmodus zu wechseln, muss das Mülleimermodell `dreimal angehoben` werden bis die LED dauerhaft `pink` leuchtet.
@@ -71,9 +71,9 @@ Für die abgespeicherten Abholtermine kann eingestellt werden an **welche Abfall
 Jede Änderung der Auswahl wird sofort auf die `Müll-Erinnerung` geladen und die jeweils ausgewählten Einzeltermine entsprechend angezeigt.  
 
 ### Neue Abholtermine speichern
-Falls sich Änderungen an den Abfuhrterminen ergeben haben oder Termine für das nächste Jahr gespeichert werden sollen, könnnen neue Abfuhrtermine auf die `Müll-Erinnerung` geladen werden. Hierbei werden die bestehenden Daten überschrieben!
+Falls sich Änderungen an den Abfuhrterminen ergeben haben oder Termine für das nächste Jahr gespeichert werden sollen, könnnen im [Konfigurationsmodus](#konfigurationsmodus) neue Abfuhrtermine auf die `Müll-Erinnerung` geladen werden. Hierbei werden die bestehenden Daten überschrieben!
 
-Die Abfuhrdaten werden üblicherweise durch das Entsorgungsunternehmen auf einer Webseite im ICS oder ICAL Format angeboten und müssen zuerst heruntergeladen werden.
+Die Abfuhrdaten werden üblicherweise durch das Entsorgungsunternehmen auf einer Webseite im ICS Format angeboten und müssen zuerst heruntergeladen werden.
 
 #### Beispiele für Müllentsorger
 Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können:
@@ -90,7 +90,7 @@ Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können
 #### Übertragen neuer Termine
 <img src="./pictures/DateienAuswählen.jpg" width="400">
 
-Sobald sie die ICS oder ICAL Datei auf Ihr Handy oder ihren Computer heruntergeladen haben, können Sie diese über den untenstehenden Button "Durchsuchen..." oder "Dateien auswählen" selektieren und auf die `Müll-Erinnerung` laden. Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
+Sobald die ICS Datei auf das Handy oder den Computer heruntergeladen wurde, kann diese über den untenstehenden Button "Durchsuchen..." oder "Dateien auswählen" selektieren und auf die `Müll-Erinnerung` geladen werden. Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
 
 <img src="./pictures/DateienAusgewählt.jpg" width="400">
 
