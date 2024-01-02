@@ -1,20 +1,12 @@
 /*
 Todo:
-Firmware Version shown in Webpage!
-DONE: Touch button to acknowledge
+- Show Firmware Version in Webpage!
 - Sleep when there are no events in the next days
 - Contact time server less often and maintain time internally (possible? => can we detect if the device returns from sleep or gets replugged?)
 - Start Wifi only when required, not on start-up
-DONE: Wifi App to configure start and end time (15:00-8:00), what events to show
-DONE: option to have parallel events (e.g. Paper & Bio on the same day => alternate between the different colors sequentially) => https://stackoverflow.com/questions/42701688/using-an-unordered-map-with-arrays-as-keys
 - query API directly instead of hard-coded list
-DONE: javascript: Translate dateDict filtering with TrashType => writing to LittleFS
-DONE: store default values to EEPROM (start/endHour)
 - check if there are more tasksPerDay then allowed
 - Add magnets to trashcan so it snapps in place
-- reset STATE_CONFIG after a timeout of inactivity
-- leave config mode after a timeout (20min?)
-- warn if no future dates defined
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
 JSON Validator: https://jsonformatter.curiousconcept.com/#
@@ -36,11 +28,12 @@ int colorIds[maxNumberOfTasksPerDay];
 int colorIdsLast[maxNumberOfTasksPerDay];
 int colorIndex = 0;  //used to toggle between multiple colors for same day tasks
 
-int startHour = 15;       //am Vortag
-int endHour = 8;          //am Abholugstag
-int brightness = 255;     //highest value since used to fadeBy...
-int fadeAmount = 5;       // Set the amount to fade to 5, 10, 15, 20, 25 etc even up to 255.
-int showDuration = 5000;  //ms Splash screen
+int startHour = 15;                 //am Vortag
+int endHour = 8;                    //am Abholugstag
+int brightness = 255;               //highest value since used to fadeBy...
+int fadeAmount = 5;                 // Set the amount to fade to 5, 10, 15, 20, 25 etc even up to 255.
+int showDuration = 5000;            //ms Splash screen
+int configTimeout = 10 * 60 * 1000;  //10 minutes
 unsigned long millisLast = 0;
 
 /// STATE MACHINE
@@ -50,14 +43,14 @@ unsigned long millisLast = 0;
 #define STATE_QUERY 3
 #define STATE_CONFIGURE 4
 #define STATE_DEMO 5
-
+#define STATE_NODATES 6
 
 int STATE = STATE_INIT;
 //int STATE = STATE_DEMO;
 int STATE_PREVIOUS = -1;
 int STATE_NEXT = -1;
 int STATE_FOLLOWING = -1;
-String stateTbl[] = { "STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY", "STATE_CONFIGURE", "STATE_DEMO" };
+String stateTbl[] = { "STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY", "STATE_CONFIGURE", "STATE_DEMO", "STATE_NODATES" };
 
 #include <FastLED.h>
 #define NUM_LEDS 1
@@ -117,8 +110,8 @@ void setup() {
   while (!Serial) { ; }
   reed.attachEdgeDetect(doNothing, setAcknowledge);
   FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);  // GRB ordering is typical
-  delay(200);  
-  leds[0] = CRGB::Red;                                      //in case no successful WiFi connection
+  delay(200);
+  leds[0] = CRGB::Red;  //in case no successful WiFi connection
   FastLED.show();
   WiFiManager wm;
   //  wm.resetSettings();
@@ -159,9 +152,10 @@ void printColorIds() {  //debug
 
 void handleLed(unsigned int nowEpoch) {
   int dictEpoch;
+  boolean futureDatesExist = false;
   memset(colorIds, -1, sizeof(colorIds));
   //  printColorIds();
-  for (int i = 0; i < numberOfEpochs; i++) {
+  for (int i = 0; i < numberOfEpochs; i++) {  //numberOfEpochs is initialized in function initDateFromFile()
     dictEpoch = epochTaskDict[i].epoch;
     if ((nowEpoch > dictEpoch + (startHour - 24) * 60 * 60) && (nowEpoch < dictEpoch + endHour * 60 * 60)) {
       //      Serial.println("nowEpoch: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch + (startHour - 24) * 60 * 60) + ", dictEpoch+endTime = " + String(dictEpoch + endHour * 60 * 60));
@@ -174,6 +168,14 @@ void handleLed(unsigned int nowEpoch) {
       if (!acknowledge) {
         setColorIds(epochTaskDict[i].taskIds);
       }
+    }
+    if (nowEpoch <= dictEpoch) { futureDatesExist = true; }
+  }
+  if (!futureDatesExist) {
+    if (numberOfEpochs > 0) {  //if no more dates exists
+      STATE_NEXT = STATE_NODATES;
+    } else {  //initial setup
+      STATE_NEXT = STATE_CONFIGURE;
     }
   }
   //printColorIds();
@@ -190,11 +192,11 @@ boolean isValidTask(int taskId) {
 
 void setColorIds(int taskIds[]) {
   int index = 0;
-//  Serial.println("==================");
+  //  Serial.println("==================");
   for (int i = 0; i < maxNumberOfTasksPerDay; i++) {
-//    Serial.println("taskId[" + String(i) + "] = " + String(int(taskIds[i])) + ", valid = " + String(isValidTask(taskIds[i])));
+    //    Serial.println("taskId[" + String(i) + "] = " + String(int(taskIds[i])) + ", valid = " + String(isValidTask(taskIds[i])));
     if (taskIds[i] != -1) {
-//Serial.println("taskId = " + String(taskIds[i]));      
+      //Serial.println("taskId = " + String(taskIds[i]));
       if (isValidTask(taskIds[i])) { colorIds[index++] = int(taskIds[i]); }
     }
   }
@@ -239,7 +241,7 @@ void incrementColorId() {
   }
   colorIndex++;
   if (colorIndex >= numberOfTasks) { colorIndex = 0; }
-//  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", maxNumberOfTasksPerDay = " + String(maxNumberOfTasksPerDay));
+  //  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", maxNumberOfTasksPerDay = " + String(maxNumberOfTasksPerDay));
 }
 
 void setBrightness(int blinkSpeed = 20, boolean reset = false) {
@@ -346,7 +348,7 @@ void setDemoConfig() {
   demoTaskDict[1] = { .epoch = 1, .taskIds = { 1, -1, -1, -1 } };  //Gelber Sack
   demoTaskDict[2] = { .epoch = 2, .taskIds = { 2, -1, -1, -1 } };  //Bio
   demoTaskDict[3] = { .epoch = 3, .taskIds = { 3, -1, -1, -1 } };  //Papier
-  demoTaskDict[4] = { .epoch = 4, .taskIds = { 2,  3, -1, -1 } };   //Papier, Bio
+  demoTaskDict[4] = { .epoch = 4, .taskIds = { 2, 3, -1, -1 } };   //Papier, Bio
   setColorIds(demoTaskDict[demoCurrTask].taskIds);
 }
 
@@ -401,13 +403,18 @@ void handleState() {
       handleReed();
       handleConnection();
       break;
+    case STATE_NODATES:  //***********************************************************
     case STATE_CONFIGURE:
-      if (STATE_PREVIOUS == STATE_QUERY) {
-        startWebServer();
+      if (STATE_PREVIOUS != STATE_CONFIGURE) { millisLast = millisNow; }
+      if (!serverRunning) { startWebServer(); }
+      if (STATE == STATE_NODATES) {
+        setColor(CRGB::Purple, true, 2);
+      } else {
+        setColor(CRGB::Purple, false);
       }
-      setColor(CRGB::Purple, false);
       server.handleClient();
       handleReed();
+      if (millisNow - millisLast > configTimeout) { STATE_NEXT = STATE_INIT; } //TimeOut
       break;
     case STATE_DEMO:
       if (STATE_PREVIOUS != STATE_DEMO) {

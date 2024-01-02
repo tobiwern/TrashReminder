@@ -9,6 +9,7 @@
 
 #include <ESP8266WebServer.h>
 ESP8266WebServer server(80);
+boolean serverRunning = false;
 #define JSON_MEMORY 1024 * 30
 
 void printTaskIds(int taskIds[]) {  //debug
@@ -211,37 +212,39 @@ void deleteTasks() {
 
 void resetWifiSettings() {
   Serial.println("Reset Wifi Settings.");
-  WiFiManager wm; //Is this fine to have another instance?
+  WiFiManager wm;  //Is this fine to have another instance?
   wm.resetSettings();
   server.send(200, "text/plane", "OK");
-//  leds[0] = CRGB::Red;                                      //in case no successful WiFi connection
-//  FastLED.show();
+  //  leds[0] = CRGB::Red;                                      //in case no successful WiFi connection
+  //  FastLED.show();
   ESP.restart();
 }
 
 void startWebServer() {
-  Serial.println("Starting WebServer...");
-  server.on("/", handleRoot);
-  server.on("/set_start", setStartHour);
-  server.on("/set_end", setEndHour);
-  server.on("/request_settings", sendSettingsToWebpage);
-  server.on("/request_tasks", sendTasksToWebpage);     //ESP => webpage
-  server.on("/send_tasks", receiveFromWebpage_Tasks);  //webpage => ESP name
-  server.on("/delete_tasks", deleteTasks);
-  server.on("/close", closeSettings);
-  server.on("/fireworks", fireworks);
-  server.on("/demo", demo);
-  server.on("/reset_wifi_settings", resetWifiSettings);
-  //  server.on("/send_ValidTaskIds", receiveFromWebpage_ValidTaskIds);
-  server.onNotFound(notFound);
-  server.begin();
-  Serial.print("IP address: ");
-  Serial.print(WiFi.localIP());
-  Serial.print(", hostName: http://");
-  Serial.println(WiFi.getHostname());
+    Serial.println("Starting WebServer...");
+    server.on("/", handleRoot);
+    server.on("/set_start", setStartHour);
+    server.on("/set_end", setEndHour);
+    server.on("/request_settings", sendSettingsToWebpage);
+    server.on("/request_tasks", sendTasksToWebpage);     //ESP => webpage
+    server.on("/send_tasks", receiveFromWebpage_Tasks);  //webpage => ESP name
+    server.on("/delete_tasks", deleteTasks);
+    server.on("/close", closeSettings);
+    server.on("/fireworks", fireworks);
+    server.on("/demo", demo);
+    server.on("/reset_wifi_settings", resetWifiSettings);
+    //  server.on("/send_ValidTaskIds", receiveFromWebpage_ValidTaskIds);
+    server.onNotFound(notFound);
+    server.begin();
+    Serial.print("IP address: ");
+    Serial.print(WiFi.localIP());
+    Serial.print(", hostName: http://");
+    Serial.println(WiFi.getHostname());
+    serverRunning = true;
 }
 
 void stopWebServer() {
   Serial.println("Stopping WebServer...");
   server.stop();
+  serverRunning = false;
 }
