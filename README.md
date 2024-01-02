@@ -71,7 +71,7 @@ Für die abgespeicherten Abholtermine kann eingestellt werden an **welche Abfall
 Jede Änderung der Auswahl wird sofort auf die `Müll-Erinnerung` geladen und die jeweils ausgewählten Einzeltermine entsprechend angezeigt.  
 
 ### Neue Abholtermine speichern
-Falls sich Änderungen an den Abfuhrterminen ergeben haben oder Termine für das nächste Jahr gespeichert werden sollen, könnnen im [Konfigurationsmodus](#konfigurationsmodus) neue Abfuhrtermine auf die `Müll-Erinnerung` geladen werden. Hierbei werden die bestehenden Daten überschrieben!
+Falls sich Änderungen an den Abfuhrterminen ergeben haben oder Termine für das nächste Jahr gespeichert werden sollen, könnnen im [Konfigurationsmodus](#konfigurationsmodus) neue Abfuhrtermine auf die `Müll-Erinnerung` geladen werden. Hierbei werden die bestehenden Daten überschrieben! Sollten noch keine Abfuhrtermine gespeichert sein oder keine zukünftigen Termine mehr anstehen geht die `Müll-Erinnerung` automatisch in den Konfigurationsmodus.
 
 Die Abfuhrdaten werden üblicherweise durch das Entsorgungsunternehmen auf einer Webseite im ICS Format angeboten und müssen zuerst heruntergeladen werden.
 
