@@ -32,7 +32,7 @@ Jetzt verbindet sich die `Müll-Erinnerung` mit dem ausgewählten Netzwerk und q
 Diese Einrichtung muss nur einmalig durchgeführt werden - von nun an holt sich die `Müll-Erinnerung` die aktuelle Uhrzeit aus dem Internet und gleicht diese mit eventuell vorliegenden Müllterminen ab, welche dann durch farbiges Blinken des Mülleimermodells mitgeteilt wird.
 
 ## Zeitpunkt der Erinnerung
-Die Erinnerung erfolgt standardmäßig am **Vortag von 15 Uhr bis 9 Uhr morgens**. Diese Einstellung kann wie unter [Konfigurationsmodus](#konfigurationsmodus) beschrieben angepaßt werden.
+Die Erinnerung erfolgt standardmäßig am **Vortag von 15 Uhr bis 9 Uhr morgens**. Diese Einstellung kann wie unter [Konfigurationsmodus](#konfigurationsmodus) beschrieben angepasst werden.
 
 ## Ausschalten der Erinnerung
 Wenn der Müll rausgestellt wurde, kann die Erinnerung ausgeschaltet werden indem das **Mülleimermodell kurz angehoben** wird. Damit erlischt das Licht bis zur nächsten Abholerinnerung.
@@ -40,11 +40,11 @@ Wenn der Müll rausgestellt wurde, kann die Erinnerung ausgeschaltet werden inde
 Wurde das Mülleimermodell versehentlich angehoben (aber der Müll nicht rausgestellt) kann man den Stecker der Stromversorgung einfach kurz aus- und wieder einstecken. Liegt eine Erinnerung vor und ist man im Erinnerungszeitraum (15 - 9 Uhr) blinkt das Mülleimermodell wieder wie zuvor.  
 
 ## Unterbrechung der WLAN Verbindung
-Sollte es zu einer Verbindungsstörung zum Internet kommen, signalisiert die `Müll-Erinnerung` dies durch ein schnelles rotes Blinken. Sie müssen nichts weiter unternehmen - sobald die Verbindung wieder hergestellt werden kann wechselt die `Müll-Erinnerung` in den regulären Modus.
+Sollte es zu einer Verbindungsstörung zum Internet kommen, signalisiert die `Müll-Erinnerung` dies durch ein `schnelles rotes Blinken`. Man muss nichts weiter unternehmen - sobald die Verbindung wieder hergestellt werden kann wechselt die `Müll-Erinnerung` in den regulären Modus.
 
 ## Konfigurationsmodus
 Um in den Konfigurationsmodus zu wechseln, muss das Mülleimermodell `dreimal angehoben` werden bis die LED dauerhaft `pink` leuchtet.
-Jetzt kann über ein Smartphone oder einen Computer im Browser der Link `http://TrashReminder` aufgerufen werden.
+Jetzt kann über ein Smartphone oder einen Computer im Browser der Link [http://TrashReminder](http://TrashReminder) aufgerufen werden.
 (In seltenen Fällen dauert es ein wenig, bis die Seite aufgerufen werden kann - in diesem Fall einfach die Seite erneut laden.)
 
 Im Konfigurationsmodus können die folgenden Einstellungen für die `Müll-Erinnerung` vorgenommen werden:
@@ -71,9 +71,9 @@ Für die abgespeicherten Abholtermine kann eingestellt werden an **welche Abfall
 Jede Änderung der Auswahl wird sofort auf die `Müll-Erinnerung` geladen und die jeweils ausgewählten Einzeltermine entsprechend angezeigt.  
 
 ### Neue Abholtermine speichern
-Falls sich Änderungen an den Abfuhrterminen ergeben haben oder Termine für das nächste Jahr gespeichert werden sollen, könnnen neue Abfuhrtermine auf die `Müll-Erinnerung` geladen werden. Hierbei werden die bestehenden Daten überschrieben!
+Falls sich Änderungen an den Abfuhrterminen ergeben haben oder Termine für das nächste Jahr gespeichert werden sollen, könnnen im [Konfigurationsmodus](#konfigurationsmodus) neue Abfuhrtermine auf die `Müll-Erinnerung` geladen werden. Hierbei werden die bestehenden Daten überschrieben! Sollten noch keine Abfuhrtermine gespeichert sein oder keine zukünftigen Termine mehr anstehen, wechselt die `Müll-Erinnerung` (ab Version 2024) automatisch in den Konfigurationsmodus.
 
-Die Abfuhrdaten werden üblicherweise durch das Entsorgungsunternehmen auf einer Webseite im ICS oder ICAL Format angeboten und müssen zuerst heruntergeladen werden.
+Die Abfuhrdaten werden üblicherweise durch das Entsorgungsunternehmen auf einer Webseite im ICS Format angeboten und müssen zuerst heruntergeladen werden.
 
 #### Beispiele für Müllentsorger
 Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können:
@@ -90,7 +90,7 @@ Beispiele für Unternehmen, bei denen ICS Dateien heruntergeladen werden können
 #### Übertragen neuer Termine
 <img src="./pictures/DateienAuswählen.jpg" width="400">
 
-Sobald sie die ICS oder ICAL Datei auf Ihr Handy oder ihren Computer heruntergeladen haben, können Sie diese über den untenstehenden Button "Durchsuchen..." oder "Dateien auswählen" selektieren und auf die `Müll-Erinnerung` laden. Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
+Sobald die ICS Datei auf das Handy oder den Computer heruntergeladen wurde, kann diese über den untenstehenden Button "Durchsuchen..." oder "Dateien auswählen" selektieren und auf die `Müll-Erinnerung` geladen werden. Es können auch mehrere Dateien ausgewählt werden, falls mehrere Unternehmen die Abfuhr übernehmen.
 
 <img src="./pictures/DateienAusgewählt.jpg" width="400">
 
@@ -98,8 +98,21 @@ Nach der Auswahl der Dateien werden die gefundenen Abfuhrarten mit der standardm
 
 Über den Button "Abfuhrttermine speichern" können nun die Termine auf die `Müll-Erinnerung` geladen werden. 
 
+#### Keine zukünftigen Termine vorhanden
+Liegen keine zukünftigen Termine mehr vor, signalisiert die `Müll-Erinnerung` dies durch ein `schnelles pinkes Blinken` und geht automatisch in den Konfigurationsmodus.
+
 ### Beenden des Konfigurationsmodus
 Durch erneutes dreimaliges Anheben des Mülleimermodells kann der Konfigurationsmodus wieder verlassen werden. Dies wird durch ein Feuerwerk im Mülleimermodell bestätigt.
+Nach 10 Minuten wird der Konfiguratonsmodus automatisch beendet.
+
+## Problem Behandlung
+- [http://TrashReminder](http://TrashReminder) wird nicht gefunden:
+  - Du bist nicht im [Konfigurationsmodus](#konfigurationsmodus).
+  - Versuche den Link über den Laptop oder ein anderes Smartphone aufzurufen.
+  - Versuche einen anderen Browser (manche Browser lassen Verbindungen nicht über `http://` zu)
+  - Ermittle die IP-Adresse (192.168.178.x oder ähnlich) der `Müll-Erinnerung` und gib sie  in das Browser-Suchfeld ein.
+    - Rufe deine Router-Konfiguration (z.B. [http://fritz.box](http://fritz.box)) auf und suche die IP eines Gerätes mit Namen `ESP...`. 
+    - Benutze eine Smartphone App wie [Fing](https://play.google.com/store/apps/details?id=com.overlook.android.fing) und suche die IP eines Gerätes mit Namen `ESP...`.  
 
 ## Autor
 Tobias Werner, Erfindungen aller Art
