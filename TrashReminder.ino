@@ -2,11 +2,16 @@
 Todo:
 - Show Firmware Version in Webpage!
 - Sleep when there are no events in the next days
-- Contact time server less often and maintain time internally (possible? => can we detect if the device returns from sleep or gets replugged?)
-- Start Wifi only when required, not on start-up
+- Contact time server less often and maintain time internally (possible? => can we detect if the device returns from sleep or gets replugged? yes)
 - query API directly instead of hard-coded list
 - check if there are more tasksPerDay then allowed
 - Add magnets to trashcan so it snapps in place
+- Allow in settings to define a different time zone
+- Always start the server, detect when a device is connected => purple
+- Selecting a color in the config should be shown directly on the model
+- Ending configuration mode via model closes the website
+- Acknowledge via model OR website
+-  
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
 JSON Validator: https://jsonformatter.curiousconcept.com/#
