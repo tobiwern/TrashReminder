@@ -10,33 +10,33 @@
 
 boolean startLittleFS() {
   if (!LittleFS.begin()) {
-    Serial.println("ERROR: Failed to mount LittleFS.");
+    DEBUG_SERIAL.println("ERROR: Failed to mount LittleFS.");
     return (false);
   }
-  Serial.println("INFO: Successfully mounted LittleFS.");
+  DEBUG_SERIAL.println("INFO: Successfully mounted LittleFS.");
   return (true);
 }
 
 void endLittleFS() {
   LittleFS.end();
-  Serial.println("INFO: Successfully un-mounted LittleFS.");
+  DEBUG_SERIAL.println("INFO: Successfully un-mounted LittleFS.");
 }
 
 boolean writeFile(const char* fileName, const char* message) {
   if (!startLittleFS()) { return (false); }
   File file = LittleFS.open(fileName, "w");
   if (!file) {
-    Serial.println("ERROR: Failed to open file " + String(fileName) + " for writing!");
+    DEBUG_SERIAL.println("ERROR: Failed to open file " + String(fileName) + " for writing!");
     return (false);
   }
   if (file.print(message)) {
-    Serial.println("INFO: Successfully wrote file " + String(fileName) + "!");
+    DEBUG_SERIAL.println("INFO: Successfully wrote file " + String(fileName) + "!");
   } else {
-    Serial.println("ERROR: Failed to write file " + String(fileName) + "!");
+    DEBUG_SERIAL.println("ERROR: Failed to write file " + String(fileName) + "!");
     return (false);
   }
   size_t size = file.size();
-  Serial.println("INFO: File size is " + String(size) + ".");
+  DEBUG_SERIAL.println("INFO: File size is " + String(size) + ".");
   file.close();
   endLittleFS();
   return (true);
@@ -48,17 +48,18 @@ boolean listDir(const char* dirname) {
   Dir root = LittleFS.openDir(dirname);
   while (root.next()) {
     File file = root.openFile("r");
-    Serial.print(" FILE: ");
-    Serial.print(root.fileName());
-    Serial.print(" SIZE: ");
-    Serial.print(file.size());
+//    DEBUG_SERIAL.printf(" FILE: %s, SIZE: %d", String(root.fileName()), file.size());  //tried to compact, however sometimes file name is not correctly resolved!
+    DEBUG_SERIAL.print(" FILE: "); 
+    DEBUG_SERIAL.print(root.fileName());
+    DEBUG_SERIAL.print(", SIZE: ");
+    DEBUG_SERIAL.print(file.size());
     time_t cr = file.getCreationTime();
     time_t lw = file.getLastWrite();
     file.close();
     struct tm* tmstruct = localtime(&cr);
-    Serial.printf(", CREATION: %d-%02d-%02d %02d:%02d:%02d, ", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
+    DEBUG_SERIAL.printf(", CREATION: %d-%02d-%02d %02d:%02d:%02d, ", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
     tmstruct = localtime(&lw);
-    Serial.printf(", LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
+    DEBUG_SERIAL.printf(", LAST WRITE: %d-%02d-%02d %02d:%02d:%02d\n", (tmstruct->tm_year) + 1900, (tmstruct->tm_mon) + 1, tmstruct->tm_mday, tmstruct->tm_hour, tmstruct->tm_min, tmstruct->tm_sec);
   }
   endLittleFS();
   return (true);
@@ -68,12 +69,12 @@ boolean showFSInfo() {
   if (!startLittleFS()) { return (false); }
   FSInfo info;
   LittleFS.info(info);
-  Serial.println("totalBytes: " + String(info.totalBytes));
-  Serial.println("usedBytes: " + String(info.usedBytes));
-  Serial.println("blockSize: " + String(info.blockSize));
-  Serial.println("pageSize: " + String(info.pageSize));
-  Serial.println("maxOpenFiles: " + String(info.maxOpenFiles));
-  Serial.println("maxPathLength: " + String(info.maxPathLength));
+  DEBUG_SERIAL.println("totalBytes: " + String(info.totalBytes));
+  DEBUG_SERIAL.println("usedBytes: " + String(info.usedBytes));
+  DEBUG_SERIAL.println("blockSize: " + String(info.blockSize));
+  DEBUG_SERIAL.println("pageSize: " + String(info.pageSize));
+  DEBUG_SERIAL.println("maxOpenFiles: " + String(info.maxOpenFiles));
+  DEBUG_SERIAL.println("maxPathLength: " + String(info.maxPathLength));
   listDir("/");
   endLittleFS();
   return (true);
@@ -82,10 +83,10 @@ boolean showFSInfo() {
 String readFile(const char* fileName) {
   //File System
   if (!startLittleFS()) { return (""); }
-  Serial.printf("INFO: Reading file: %s\n", fileName);
+  DEBUG_SERIAL.printf("INFO: Reading file: %s\n", fileName);
   File file = LittleFS.open(fileName, "r");
   if (!file) {
-    Serial.println("INFO: Failed to open file " + String(fileName) + " for reading!");
+    DEBUG_SERIAL.println("INFO: Failed to open file " + String(fileName) + " for reading!");
     return ("");
   }
   String jsonText = file.readString();
@@ -96,17 +97,17 @@ String readFile(const char* fileName) {
 
 boolean deleteFile(const char* fileName) {
   if (!startLittleFS()) { return (false); }
-  Serial.printf("Deleting file: %s\n", fileName);
+  DEBUG_SERIAL.printf("Deleting file: %s\n", fileName);
   File file = LittleFS.open(fileName, "r");
   if (!file) {
-    Serial.println("WARNING: There is no file " + String(fileName) + ". Nothing to delete!");
+    DEBUG_SERIAL.println("WARNING: There is no file " + String(fileName) + ". Nothing to delete!");
     showFSInfo();
     return (false);
   }
   if (LittleFS.remove(fileName)) {
-    Serial.println("INFO: Sucessfully deleted file " + String(fileName) + ".");
+    DEBUG_SERIAL.println("INFO: Sucessfully deleted file " + String(fileName) + ".");
   } else {
-    Serial.println("ERROR: Failed to delete file " + String(fileName) + ".");
+    DEBUG_SERIAL.println("ERROR: Failed to delete file " + String(fileName) + ".");
     return (false);
   }
   endLittleFS();
@@ -115,11 +116,11 @@ boolean deleteFile(const char* fileName) {
 
 boolean renameFile(const char* fileName1, const char* fileName2) {
   if (!startLittleFS()) { return (false); }
-  Serial.printf("Renaming file %s to %s\n", fileName1, fileName2);
+  DEBUG_SERIAL.printf("Renaming file %s to %s\n", fileName1, fileName2);
   if (LittleFS.rename(fileName1, fileName2)) {
-    Serial.println("INFO: File renamed.");
+    DEBUG_SERIAL.println("INFO: File renamed.");
   } else {
-    Serial.println("ERROR: Rename failed.");
+    DEBUG_SERIAL.println("ERROR: Rename failed.");
     return (false);
   }
   endLittleFS();
