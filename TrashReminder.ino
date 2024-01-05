@@ -1,5 +1,6 @@
 /*
 Todo:
+- Does it make sense to go to an AsyncWebserver (or WebSocket) => will this show a faster response time?
 - Show Firmware Version in Webpage!
 - Sleep when there are no events in the next days
 - Contact time server less often and maintain time internally (possible? => can we detect if the device returns from sleep or gets replugged? yes)
@@ -7,11 +8,9 @@ Todo:
 - check if there are more tasksPerDay then allowed
 - Add magnets to trashcan so it snapps in place
 - Allow in settings to define a different time zone
-- Always start the server, detect when a device is connected => purple
 - Selecting a color in the config should be shown directly on the model
-- Ending configuration mode via model closes the website
 - Acknowledge via model OR website
--  
+- JavaScript: Date should only be shown as outdated AFTER the date (currently todays date is shown in grey)
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
 JSON Validator: https://jsonformatter.curiousconcept.com/#
@@ -22,9 +21,13 @@ JSON Validator: https://jsonformatter.curiousconcept.com/#
 #include <WiFiUdp.h>
 #include <WiFiManager.h>  // https://github.com/tzapu/WiFiManager
 
+#define DEBUG true  //set to true for debug output, false for no debug output
+#define DEBUG_SERIAL \
+  if (DEBUG) Serial
+
 #include "filesystem.h"
 #include "webpage.h"
-
+  
 //forward function prototypes (so function order does not matter)
 //void setColor(int color, boolean fade, int blinkSpeed);
 
@@ -33,11 +36,11 @@ int colorIds[maxNumberOfTasksPerDay];
 int colorIdsLast[maxNumberOfTasksPerDay];
 int colorIndex = 0;  //used to toggle between multiple colors for same day tasks
 
-int startHour = 15;                 //am Vortag
-int endHour = 8;                    //am Abholugstag
-int brightness = 255;               //highest value since used to fadeBy...
-int fadeAmount = 5;                 // Set the amount to fade to 5, 10, 15, 20, 25 etc even up to 255.
-int showDuration = 5000;            //ms Splash screen
+int startHour = 15;                  //am Vortag
+int endHour = 8;                     //am Abholugstag
+int brightness = 255;                //highest value since used to fadeBy...
+int fadeAmount = 5;                  // Set the amount to fade to 5, 10, 15, 20, 25 etc even up to 255.
+int showDuration = 5000;             //ms Splash screen
 int configTimeout = 10 * 60 * 1000;  //10 minutes
 unsigned long millisLast = 0;
 
@@ -46,16 +49,14 @@ unsigned long millisLast = 0;
 #define STATE_SHOW 1
 #define STATE_DISCONNECTED 2
 #define STATE_QUERY 3
-#define STATE_CONFIGURE 4
-#define STATE_DEMO 5
-#define STATE_NODATES 6
+#define STATE_DEMO 4
 
 int STATE = STATE_INIT;
 //int STATE = STATE_DEMO;
 int STATE_PREVIOUS = -1;
 int STATE_NEXT = -1;
 int STATE_FOLLOWING = -1;
-String stateTbl[] = { "STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY", "STATE_CONFIGURE", "STATE_DEMO", "STATE_NODATES" };
+String stateTbl[] = { "STATE_INIT", "STATE_SHOW", "STATE_DISCONNECTED", "STATE_QUERY", "STATE_DEMO" };
 
 #include <FastLED.h>
 #define NUM_LEDS 1
@@ -119,11 +120,10 @@ void setup() {
   leds[0] = CRGB::Red;  //in case no successful WiFi connection
   FastLED.show();
   WiFiManager wm;
-  //  wm.resetSettings();
   if (wm.autoConnect("TrashReminder")) {
-    Serial.println("Successfully connected.");
+    DEBUG_SERIAL.println("Successfully connected.");
   } else {
-    Serial.println("Failed to connect.");
+    DEBUG_SERIAL.println("Failed to connect.");
   }
   WiFi.hostname("TrashReminder");
   //Time Client
@@ -139,7 +139,7 @@ void loop() {
 // ESP Functions
 void handleConnection() {
   if (!WiFi.isConnected()) {
-    Serial.println("Connection lost!");
+    DEBUG_SERIAL.println("Connection lost!");
     STATE_NEXT = STATE_DISCONNECTED;
   }
 }
@@ -151,92 +151,8 @@ int getCurrentTimeEpoch() {
 
 void printColorIds() {  //debug
   for (int i = 0; i < maxNumberOfTasksPerDay; i++) {
-    Serial.println("colorIds[" + String(i) + "] = " + String(colorIds[i]));
+    DEBUG_SERIAL.println("colorIds[" + String(i) + "] = " + String(colorIds[i]));
   }
-}
-
-void handleLed(unsigned int nowEpoch) {
-  int dictEpoch;
-  boolean futureDatesExist = false;
-  memset(colorIds, -1, sizeof(colorIds));
-  //  printColorIds();
-  for (int i = 0; i < numberOfEpochs; i++) {  //numberOfEpochs is initialized in function initDateFromFile()
-    dictEpoch = epochTaskDict[i].epoch;
-    if ((nowEpoch > dictEpoch + (startHour - 24) * 60 * 60) && (nowEpoch < dictEpoch + endHour * 60 * 60)) {
-      //      Serial.println("nowEpoch: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch + (startHour - 24) * 60 * 60) + ", dictEpoch+endTime = " + String(dictEpoch + endHour * 60 * 60));
-      if (dictEpoch != triggerEpoch) {
-        acknowledge = 0;  //acknowledge only valid for same triggerEpoch
-        colorIndex = 0;
-        Serial.println("Resetting since new trigger!");
-      }
-      triggerEpoch = dictEpoch;
-      if (!acknowledge) {
-        setColorIds(epochTaskDict[i].taskIds);
-      }
-    }
-    if (nowEpoch <= dictEpoch) { futureDatesExist = true; }
-  }
-  if (!futureDatesExist) {
-    if (numberOfEpochs > 0) {  //if no more dates exists
-      STATE_NEXT = STATE_NODATES;
-    } else {  //initial setup
-      STATE_NEXT = STATE_CONFIGURE;
-    }
-  }
-  //printColorIds();
-  setTaskColor();
-  FastLED.show();
-}
-
-boolean isValidTask(int taskId) {
-  for (int i = 0; i < numberOfValidTaskIds; i++) {
-    if (taskId == validTaskId[i]) { return (true); }
-  }
-  return (false);
-}
-
-void setColorIds(int taskIds[]) {
-  int index = 0;
-  //  Serial.println("==================");
-  for (int i = 0; i < maxNumberOfTasksPerDay; i++) {
-    //    Serial.println("taskId[" + String(i) + "] = " + String(int(taskIds[i])) + ", valid = " + String(isValidTask(taskIds[i])));
-    if (taskIds[i] != -1) {
-      //Serial.println("taskId = " + String(taskIds[i]));
-      if (isValidTask(taskIds[i])) { colorIds[index++] = int(taskIds[i]); }
-    }
-  }
-}
-
-void handleReed() {
-  reed.update();
-  initialized = true;
-}
-
-void setAcknowledge() {
-  unsigned long now = millis();
-  if (initialized) {
-    Serial.println("OFF - Acknowedge!");
-    acknowledge = 1;
-    //Multi-click detection
-    switchCounter++;
-    if (((now - lastSwitchMillis) > multiClickTimeout) || (lastSwitchMillis == 0)) { switchCounter = 0; }
-    //    Serial.println("Counter = " + String(switchCounter));
-    lastSwitchMillis = now;
-    if (STATE != STATE_DEMO) {
-      if (switchCounter == 2) {
-        if (STATE == STATE_CONFIGURE) {
-          STATE_NEXT = STATE_INIT;  //reset
-        } else {
-          STATE_NEXT = STATE_CONFIGURE;
-        }
-      }
-    }
-  }
-}
-
-void doNothing() {
-  //  Serial.println("ON");
-  true;
 }
 
 void incrementColorId() {
@@ -246,7 +162,7 @@ void incrementColorId() {
   }
   colorIndex++;
   if (colorIndex >= numberOfTasks) { colorIndex = 0; }
-  //  Serial.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", maxNumberOfTasksPerDay = " + String(maxNumberOfTasksPerDay));
+  //  DEBUG_SERIAL.println("colorIndex = " + String(colorIndex) + ", numberOfTasks = " + String(numberOfTasks) + ", maxNumberOfTasksPerDay = " + String(maxNumberOfTasksPerDay));
 }
 
 void setBrightness(int blinkSpeed = 20, boolean reset = false) {
@@ -264,27 +180,110 @@ void setBrightness(int blinkSpeed = 20, boolean reset = false) {
     brightness = 255;
     incrementColorId();
   }
-  //    Serial.println("Brightness = " + String(brightness) + ", ColorIndex = " + String(taskId));
+  //    DEBUG_SERIAL.println("Brightness = " + String(brightness) + ", ColorIndex = " + String(taskId));
   if (brightness <= 0 || brightness >= 255) { fadeAmount = -fadeAmount; }
   delay(blinkSpeed);
 }
 
 void setTaskColor() {
   if (colorIds[0] == -1) {
-    //    Serial.println("No Event");
+    //    DEBUG_SERIAL.println("No Event");
     leds[0] = CRGB::Black;
   } else {
     // EVENT
-    //    Serial.println("Event: " + task[taskId] + " => LED = " + String(color[taskId],HEX));
+    //    DEBUG_SERIAL.println("Event: " + task[taskId] + " => LED = " + String(color[taskId],HEX));
     leds[0] = color[colorIds[colorIndex]];
     setBrightness();
   }
+  FastLED.show();
 }
 
 void setColor(int color, boolean fade = true, int blinkSpeed = 20) {
   leds[0] = color;
   if (fade) { setBrightness(blinkSpeed); }
   FastLED.show();
+}
+
+void handleLed(unsigned int nowEpoch) {
+  int dictEpoch;
+  boolean futureDatesExist = false;
+  memset(colorIds, -1, sizeof(colorIds));
+  //  printColorIds();
+  for (int i = 0; i < numberOfEpochs; i++) {  //numberOfEpochs is initialized in function initDateFromFile()
+    dictEpoch = epochTaskDict[i].epoch;
+    if ((nowEpoch > dictEpoch + (startHour - 24) * 60 * 60) && (nowEpoch < dictEpoch + endHour * 60 * 60)) {
+      //DEBUG_SERIAL.println("nowEpoch: " + String(nowEpoch) + ", dictEpoch = " + String(dictEpoch) + ", dictEpoch+startTime = " + String(dictEpoch + (startHour - 24) * 60 * 60) + ", dictEpoch+endTime = " + String(dictEpoch + endHour * 60 * 60) + ", acknowlegde = " + String(acknowledge));
+      if (dictEpoch != triggerEpoch) {
+        acknowledge = 0;  //acknowledge only valid for same triggerEpoch
+        colorIndex = 0;
+        DEBUG_SERIAL.println("Resetting since new trigger!");
+      }
+      triggerEpoch = dictEpoch;
+      if (!acknowledge) { setColorIds(epochTaskDict[i].taskIds); }
+    }
+    if (nowEpoch <= dictEpoch) { futureDatesExist = true; }
+  }
+  if (numberOfEpochs > 0) {
+    if (futureDatesExist) {
+      //printColorIds();
+      setTaskColor();
+    } else {  //no more future dates exists
+      setColor(CRGB::Purple, true, 2);
+    }
+  } else {
+    setColor(CRGB::Purple, false);  //no dates stored yet
+  }
+}
+
+boolean isValidTask(int taskId) {
+  for (int i = 0; i < numberOfValidTaskIds; i++) {
+    if (taskId == validTaskId[i]) { return (true); }
+  }
+  return (false);
+}
+
+void setColorIds(int taskIds[]) {
+  int index = 0;
+  //  DEBUG_SERIAL.println("==================");
+  for (int i = 0; i < maxNumberOfTasksPerDay; i++) {
+    //    DEBUG_SERIAL.println("taskId[" + String(i) + "] = " + String(int(taskIds[i])) + ", valid = " + String(isValidTask(taskIds[i])));
+    if (taskIds[i] != -1) {
+      //DEBUG_SERIAL.println("taskId = " + String(taskIds[i]));
+      if (isValidTask(taskIds[i])) { colorIds[index++] = int(taskIds[i]); }
+    }
+  }
+}
+
+void handleReed() {
+  reed.update();
+  initialized = true;
+}
+
+void setAcknowledge() {
+  unsigned long now = millis();
+  if (initialized) {
+    DEBUG_SERIAL.println("OFF - Acknowedge!");
+    acknowledge = 1;
+    //Multi-click detection
+    switchCounter++;
+    if (((now - lastSwitchMillis) > multiClickTimeout) || (lastSwitchMillis == 0)) { switchCounter = 0; }
+    //    DEBUG_SERIAL.println("Counter = " + String(switchCounter));
+    lastSwitchMillis = now;
+    if (switchCounter == 2) {
+      if (STATE == STATE_DEMO) {
+        STATE_NEXT = STATE_INIT;  //reset
+      } else {
+        STATE_NEXT = STATE_DEMO;
+      }
+      setColor(CRGB::Purple, false);
+      setColor(CRGB::Black, false);
+    }
+  }
+}
+
+void doNothing() {
+  //  DEBUG_SERIAL.println("ON");
+  true;
 }
 
 /// Splash Screen
@@ -360,11 +359,10 @@ void setDemoConfig() {
 void handleState() {
   unsigned long millisNow = millis();
   STATE_NEXT = -1;
-  // Serial.println("STATE = " + stateTbl[STATE] + ", STATE_PREVIOUS = " + stateTbl[STATE_PREVIOUS]);
-  if (STATE != STATE_PREVIOUS) { Serial.println("STATE = " + stateTbl[STATE]); }
+  // DEBUG_SERIAL.println("STATE = " + stateTbl[STATE] + ", STATE_PREVIOUS = " + stateTbl[STATE_PREVIOUS]);
+  if (STATE != STATE_PREVIOUS) { DEBUG_SERIAL.println("STATE = " + stateTbl[STATE]); }
   switch (STATE) {
     case STATE_INIT:  //***********************************************************
-      if (STATE_PREVIOUS == STATE_CONFIGURE) { stopWebServer(); }
       millisLast = millisNow;
       brightness = 255;
       colorIndex = 0;
@@ -401,29 +399,18 @@ void handleState() {
     case STATE_QUERY:  //***********************************************************
       if (((millisNow - lastQueryMillis) > queryIntervall) || (lastQueryMillis == 0)) {
         nowEpoch = getCurrentTimeEpoch();
-        Serial.println("Received current epoch time: " + String(nowEpoch));
+        DEBUG_SERIAL.println("Received current epoch time: " + String(nowEpoch));
         lastQueryMillis = millisNow;
       }
       handleLed(nowEpoch);
       handleReed();
       handleConnection();
-      break;
-    case STATE_NODATES:  //***********************************************************
-    case STATE_CONFIGURE:
-      if (STATE_PREVIOUS != STATE_CONFIGURE) { millisLast = millisNow; }
       if (!serverRunning) { startWebServer(); }
-      if (STATE == STATE_NODATES) {
-        setColor(CRGB::Purple, true, 2);
-      } else {
-        setColor(CRGB::Purple, false);
-      }
       server.handleClient();
-      handleReed();
-      if (millisNow - millisLast > configTimeout) { STATE_NEXT = STATE_INIT; } //TimeOut
       break;
     case STATE_DEMO:
       if (STATE_PREVIOUS != STATE_DEMO) {
-        Serial.println("Setting Demo Config");
+        DEBUG_SERIAL.println("Setting Demo Config");
         acknowledge = 0;
         setDemoConfig();
       }
@@ -432,12 +419,11 @@ void handleState() {
       } else {
         setColor(CRGB::Black, false);
       }
-      FastLED.show();
       if (acknowledge && ((millisNow - lastSwitchMillis) > offDuration)) {
         demoCurrTask++;
         colorIndex = maxNumberOfTasksPerDay;
         if (demoCurrTask >= demoNumberOfTasks) { demoCurrTask = 0; }
-        Serial.println("Setting demoCurrTask = " + String(demoCurrTask));
+        DEBUG_SERIAL.println("Setting demoCurrTask = " + String(demoCurrTask));
         memset(colorIds, -1, sizeof(colorIds));
         setColorIds(demoTaskDict[demoCurrTask].taskIds);
         acknowledge = 0;
