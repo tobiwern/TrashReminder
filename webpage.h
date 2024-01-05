@@ -1,4 +1,6 @@
 // don't add taskId if the number is already in the list (if usr selects two ics files with identical content)
+//How to reference a file from a branch https://raw.githubusercontent.com/tobiwern/TrashReminder/<Branch>/TrashReminder.ino
+//How to reference a md from a branch https://github.com/tobiwern/TrashReminder/blob/<Branch>/README.md (however this is viewed along with the code...)
 const char webpage[] PROGMEM = R"=====(
 <!DOCTYPE html>
   <html lang="de">

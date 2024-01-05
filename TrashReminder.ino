@@ -1,19 +1,24 @@
 /*
 Todo:
-- Does it make sense to go to an AsyncWebserver (or WebSocket) => will this show a faster response time?
-- Show Firmware Version in Webpage!
-- Sleep when there are no events in the next days
-- Contact time server less often and maintain time internally (possible? => can we detect if the device returns from sleep or gets replugged? yes)
-- query API directly instead of hard-coded list
-- check if there are more tasksPerDay then allowed
-- Add magnets to trashcan so it snapps in place
-- Allow in settings to define a different time zone
-- Selecting a color in the config should be shown directly on the model
-- Acknowledge via model OR website
-- JavaScript: Date should only be shown as outdated AFTER the date (currently todays date is shown in grey)
+ESP:
+  - Selecting a color in the config should be shown directly on the model
+  - Sleep when there are no events in the next days
+  - Contact time server less often and maintain time internally (possible? => can we detect if the device returns from sleep or gets replugged? yes)
+  - check if there are more tasksPerDay then allowed
+  - query API directly instead of hard-coded list (?)
+WebPage:
+  - Does it make sense to go to an AsyncWebserver (or WebSocket) => will this show a faster response time?
+  - Date should only be shown as outdated AFTER the date (currently todays date is shown in grey)
+  - Option to merge currently still available and new ICS so not everything is overwritten.
+  - Acknowledge via model OR website
+  - Allow in settings to define a different time zone
+  - Show Firmware Version in Webpage!
+3D-Model:
+  - Add magnets to trashcan so it snapps in place
 Helpful:
-Epoch Converter: https://www.epochconverter.com/
-JSON Validator: https://jsonformatter.curiousconcept.com/#
+  - Epoch Converter: https://www.epochconverter.com/
+  - JSON Validator: https://jsonformatter.curiousconcept.com/#
+  - ICS/ICAL: https://www.ionos.de/digitalguide/websites/web-entwicklung/icalendar/ or https://datatracker.ietf.org/doc/html/rfc5545
 */
 
 #include <ESP8266WiFi.h>
