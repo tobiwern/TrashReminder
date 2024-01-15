@@ -11,7 +11,7 @@ Todo:
 - Selecting a color in the config should be shown directly on the model
 - Ending configuration mode via model closes the website
 - Acknowledge via model OR website
--  
+- Should we have a logFile that is overwritten when running out of space? Could help debug - Or have a "Send/Delete Logfile" option in the GUI 
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
 JSON Validator: https://jsonformatter.curiousconcept.com/#
@@ -33,11 +33,11 @@ int colorIds[maxNumberOfTasksPerDay];
 int colorIdsLast[maxNumberOfTasksPerDay];
 int colorIndex = 0;  //used to toggle between multiple colors for same day tasks
 
-int startHour = 15;                 //am Vortag
-int endHour = 8;                    //am Abholugstag
-int brightness = 255;               //highest value since used to fadeBy...
-int fadeAmount = 5;                 // Set the amount to fade to 5, 10, 15, 20, 25 etc even up to 255.
-int showDuration = 5000;            //ms Splash screen
+int startHour = 15;                  //am Vortag
+int endHour = 8;                     //am Abholugstag
+int brightness = 255;                //highest value since used to fadeBy...
+int fadeAmount = 5;                  // Set the amount to fade to 5, 10, 15, 20, 25 etc even up to 255.
+int showDuration = 5000;             //ms Splash screen
 int configTimeout = 10 * 60 * 1000;  //10 minutes
 unsigned long millisLast = 0;
 
@@ -83,7 +83,8 @@ NTPClient timeClient(ntpUDP, "pool.ntp.org");
 unsigned int nowEpoch = 0;   //global since only querying every minute
 int queryIntervall = 60000;  //ms => every minute (could be less, however to really turn on LED at intended time...)
 unsigned long lastQueryMillis = 0;
-
+int timeEpochLast = -1;
+int maxTimeEpochDelta = 60 * 60;  //in seconds => 1 hour difference
 //data
 const char* dataFile = "/data.json";
 const char* settingsFile = "/settings.json";
@@ -144,9 +145,45 @@ void handleConnection() {
   }
 }
 
+int getDominantTimeEpoch(int repeat) {
+  int timeEpoch[repeat];
+  for (int i = 0; i < repeat; i++) {
+    timeEpoch[i] = getTimeEpoch();
+    Serial.println("timeEpoch" + String(i) + ": " + String(timeEpoch[i]));
+    delay(100);
+  }
+  int sum = 0;
+  for (int i = 0; i < repeat; i++) {
+    sum += timeEpoch[i];
+  }
+  int average = int(sum / float(repeat));
+  int minDeviation = abs(average - timeEpoch[0]);
+  int dominantTimeEpoch = timeEpoch[0];
+  for (int i = 1; i < repeat; i++) {
+    if (abs(average - timeEpoch[i]) < minDeviation) { dominantTimeEpoch = timeEpoch[i]; }  //pick timeEpoch with least deviation to the average of all timeEpochs
+  }
+  Serial.println("dominantTimeEpoch: " + String(dominantTimeEpoch));
+  timeEpochLast = dominantTimeEpoch; //since this is considered correct
+  return (dominantTimeEpoch);
+}
+
+int getTimeEpoch() {
+  int timeEpoch = 0;
+  while (timeEpoch < 1705261183) {  //an old time stamp is not possible
+    timeClient.update();
+    timeEpoch = timeClient.getEpochTime();
+  }
+  return (timeEpoch);
+}
+
 int getCurrentTimeEpoch() {
-  timeClient.update();
-  return (timeClient.getEpochTime());
+  int timeEpoch = getTimeEpoch();
+  if (abs(timeEpoch - timeEpochLast) > maxTimeEpochDelta) {
+    Serial.println("WARNING: There was a glitch on the NTP Time Server! Last time: " + String(timeEpochLast) + ", current time: " + String(timeEpoch) + ". Repeating query!");
+    timeEpoch = getDominantTimeEpoch(3);
+  }
+  timeEpochLast = timeEpoch;
+  return (timeEpoch);  //sometimes receives too large timestamp
 }
 
 void printColorIds() {  //debug
@@ -176,10 +213,11 @@ void handleLed(unsigned int nowEpoch) {
     }
     if (nowEpoch <= dictEpoch) { futureDatesExist = true; }
   }
-  if (!futureDatesExist) {
-    if (numberOfEpochs > 0) {  //if no more dates exists
-      STATE_NEXT = STATE_NODATES;
-    } else {  //initial setup
+  if (!futureDatesExist) {  //ToDo: We should count the occurances if the no futureDatesExist (once the lastEpochTime changes) - if this is higher than max => Go into the STATE_NODATES
+    millisLast = millis();
+    if (numberOfEpochs > 0) {      //if no more dates exists
+      STATE_NEXT = STATE_NODATES;  //to reach this state: a) really no more dates exist b) invalid date send (nowEpoch wrong)
+    } else {                       //initial setup
       STATE_NEXT = STATE_CONFIGURE;
     }
   }
@@ -374,6 +412,7 @@ void handleState() {
       //      listDir("/"); //ToDo1
       initStartEndTimes();  //initializes startHour and endHour
       initDataFromFile();
+      nowEpoch = getDominantTimeEpoch(3);  //making sure that the very first time stamp is correct
       STATE_NEXT = STATE_SHOW;
       break;
     case STATE_SHOW:  //***********************************************************
@@ -419,7 +458,7 @@ void handleState() {
       }
       server.handleClient();
       handleReed();
-      if (millisNow - millisLast > configTimeout) { STATE_NEXT = STATE_INIT; } //TimeOut
+      if (millisNow - millisLast > configTimeout) { STATE_NEXT = STATE_INIT; }  //TimeOut
       break;
     case STATE_DEMO:
       if (STATE_PREVIOUS != STATE_DEMO) {
