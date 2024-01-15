@@ -10,7 +10,6 @@
 #include <ESP8266WebServer.h>
 ESP8266WebServer server(80);
 boolean serverRunning = false;
-#define JSON_MEMORY 1024 * 30
 
 void printTaskIds(int taskIds[]) {  //debug
   Serial.print("taskIds[] = ");
@@ -28,7 +27,7 @@ boolean initDataFromFile() {
     Serial.println("INFO: Failed to open file " + String(dataFile) + " for reading!");
     return (false);
   }
-  DynamicJsonDocument doc(JSON_MEMORY);  //on heap for large amount of data
+  JsonDocument doc;  //on heap for large amount of data
   DeserializationError error = deserializeJson(doc, file);
   if (error) {
     Serial.print(F("deserializeJson() failed: "));
@@ -102,7 +101,7 @@ void initStartEndTimes() {
     Serial.println("INFO: Failed to open file " + String(settingsFile) + " for reading!");
     return;
   }
-  StaticJsonDocument<512> doc;
+  JsonDocument doc;
   DeserializationError error = deserializeJson(doc, file);
   if (error) {
     Serial.print(F("deserializeJson() failed: "));

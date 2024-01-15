@@ -12,6 +12,9 @@ Todo:
 - Ending configuration mode via model closes the website
 - Acknowledge via model OR website
 - Should we have a logFile that is overwritten when running out of space? Could help debug - Or have a "Send/Delete Logfile" option in the GUI 
+- NTP Time Server: What happens if it can not be reached? =>  isTimeSet(), https://github.com/arduino-libraries/NTPClient/blob/master/NTPClient.h
+  - Switch epochTime to unsigned long
+  - update() =>  @return true on success, false on failure
 Helpful:
 Epoch Converter: https://www.epochconverter.com/
 JSON Validator: https://jsonformatter.curiousconcept.com/#
@@ -172,6 +175,7 @@ int getTimeEpoch() {
   while (timeEpoch < 1705261183) {  //an old time stamp is not possible
     timeClient.update();
     timeEpoch = timeClient.getEpochTime();
+//    Serial.println("timeEpoch: " + String(timeEpoch));
   }
   return (timeEpoch);
 }
